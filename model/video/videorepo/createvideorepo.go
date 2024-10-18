@@ -21,7 +21,7 @@ type CreateVideoCourseStore interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Course, error)
+	) (*models.Service, error)
 }
 
 type CreateVideoStore interface {
@@ -75,9 +75,9 @@ func (repo *createVideoRepo) CreateNewVideo(
 	videoFile,
 	thumbnailFile *multipart.FileHeader,
 ) (*models.Video, error) {
-	uid, err := common.FromBase58(input.CourseID)
+	uid, err := common.FromBase58(input.ServiceID)
 	if err != nil {
-		logger.AppLogger.Error(ctx, "failed to parse CourseID", zap.Error(err))
+		logger.AppLogger.Error(ctx, "failed to parse ServiceID", zap.Error(err))
 		return nil, err
 	}
 
@@ -88,7 +88,7 @@ func (repo *createVideoRepo) CreateNewVideo(
 	}
 
 	newVideo := &models.Video{
-		CourseID:     course.Id,
+		ServiceID:    course.Id,
 		Title:        input.Title,
 		Description:  input.Description,
 		VideoURL:     input.VideoURL,

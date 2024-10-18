@@ -21,7 +21,7 @@ type EnrollmentRepo interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Course, error)
+	) (*models.Service, error)
 }
 
 type createEnrollmentBiz struct {
@@ -43,7 +43,7 @@ func (e *createEnrollmentBiz) CreateNewEnrollment(
 		return common.ErrInvalidRequest(err)
 	}
 
-	courseUID, err := common.FromBase58(input.CourseID)
+	courseUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return common.ErrInvalidRequest(err)
 	}
@@ -91,7 +91,7 @@ func (e *createEnrollmentBiz) validateInput(input *enrollmentmodel.CreateEnrollm
 		return errors.New("user ID is required")
 	}
 
-	if input.CourseID == "" {
+	if input.ServiceID == "" {
 		return errors.New("course ID is required")
 	}
 

@@ -11,7 +11,7 @@ type CreatePayment struct {
 	Currency        string   `json:"currency" form:"currency"`
 	PaymentMethod   string   `json:"payment_method" form:"payment_method"`
 	TransactionID   string   `json:"transaction_id" form:"transaction_id"`
-	CourseIDs       []string `json:"course_ids" form:"course_ids"`
+	ServiceIDs      []string `json:"course_ids" form:"course_ids"`
 }
 
 func (cp *CreatePayment) Mask(isAdmin bool) {

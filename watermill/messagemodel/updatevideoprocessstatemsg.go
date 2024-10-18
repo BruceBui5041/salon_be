@@ -6,7 +6,7 @@ import (
 
 type VideoProcessStateInfo struct {
 	VideoID           string               `json:"video_id"`
-	CourseID          string               `json:"course_id"`
+	ServiceID         string               `json:"course_id"`
 	Timestamp         int64                `json:"timestamp"`
 	Progress          int32                `json:"progress"`
 	State             pb.ProcessState      `json:"state"`

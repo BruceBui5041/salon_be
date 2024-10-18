@@ -15,9 +15,9 @@ func init() {
 
 type Category struct {
 	common.SQLModel `json:",inline"`
-	Name            string    `json:"name" gorm:"not null;size:100"`
-	Description     string    `json:"description"`
-	Courses         []*Course `json:"courses,omitempty" gorm:"foreignKey:CategoryID"`
+	Name            string     `json:"name" gorm:"not null;size:100"`
+	Description     string     `json:"description"`
+	Courses         []*Service `json:"courses,omitempty" gorm:"foreignKey:CategoryID"`
 }
 
 func (Category) TableName() string {

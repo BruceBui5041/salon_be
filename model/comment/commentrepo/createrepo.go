@@ -46,16 +46,16 @@ func (repo *createCommentRepo) CreateNewComment(
 	ctx context.Context,
 	input *commentmodel.CreateComment,
 ) (*models.Comment, error) {
-	courseUID, err := common.FromBase58(input.CourseID)
+	courseUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return nil, err
 	}
 
 	newComment := &models.Comment{
-		UserID:   input.UserID,
-		CourseID: courseUID.GetLocalID(),
-		Rate:     input.Rate,
-		Content:  input.Content,
+		UserID:    input.UserID,
+		ServiceID: courseUID.GetLocalID(),
+		Rate:      input.Rate,
+		Content:   input.Content,
 	}
 
 	commentId, err := repo.commentStore.CreateNewComment(ctx, newComment)

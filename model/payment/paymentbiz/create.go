@@ -58,7 +58,7 @@ func (biz *createPaymentBiz) CreateNewPayment(
 	}
 
 	if payment.TransactionStatus == "completed" {
-		for _, courseID := range input.CourseIDs {
+		for _, courseID := range input.ServiceIDs {
 			courseUID, err := common.FromBase58(courseID)
 			if err != nil {
 				return nil, common.ErrInvalidRequest(err)
@@ -106,7 +106,7 @@ func (biz *createPaymentBiz) validateInput(input *paymentmodel.CreatePayment) er
 	if input.PaymentMethod == "" {
 		return errors.New("payment method is required")
 	}
-	if len(input.CourseIDs) == 0 {
+	if len(input.ServiceIDs) == 0 {
 		return errors.New("at least one course ID is required")
 	}
 	return nil

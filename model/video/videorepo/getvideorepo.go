@@ -12,7 +12,7 @@ type GetVideoCourseStore interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Course, error)
+	) (*models.Service, error)
 }
 
 type GetVideoStore interface {

@@ -28,7 +28,7 @@ func (c *createCommentBiz) CreateNewComment(ctx context.Context, input *commentm
 		return common.ErrInvalidRequest(errors.New("user ID is required"))
 	}
 
-	if input.CourseID == "" {
+	if input.ServiceID == "" {
 		return common.ErrInvalidRequest(errors.New("course ID is required"))
 	}
 
@@ -46,7 +46,7 @@ func (c *createCommentBiz) CreateNewComment(ctx context.Context, input *commentm
 		return common.ErrInvalidRequest(errors.New("comment content must not exceed 1000 characters"))
 	}
 
-	courseUID, err := common.FromBase58(input.CourseID)
+	courseUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return common.ErrInternal(err)
 	}

@@ -13,7 +13,7 @@ const (
 
 type Video struct {
 	common.SQLModel `json:",inline"`
-	CourseID        uint32              `json:"course_id" gorm:"index"`
+	ServiceID       uint32              `json:"course_id" gorm:"index"`
 	LessonID        *uint32             `json:"lesson_id" gorm:"index"`
 	Title           string              `json:"title" gorm:"not null;size:255"`
 	Description     string              `json:"description"`
@@ -22,8 +22,7 @@ type Video struct {
 	ThumbnailURL    string              `json:"thumbnail_url" gorm:"not null;size:255"`
 	Duration        int                 `json:"duration"`
 	Order           int                 `json:"order"`
-	Course          Course              `json:"course" gorm:"constraint:OnDelete:CASCADE;"`
-	Lesson          *Lesson             `json:"lesson,omitempty" gorm:"constraint:OnDelete:CASCADE;"`
+	Course          Service             `json:"course" gorm:"constraint:OnDelete:CASCADE;"`
 	Tags            []*Tag              `json:"tags,omitempty" gorm:"many2many:video_tags;"`
 	Progress        []*Progress         `json:"progress,omitempty"`
 	AllowPreview    bool                `json:"allow_preview" gorm:"default:false"`

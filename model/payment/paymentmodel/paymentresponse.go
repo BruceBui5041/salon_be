@@ -33,7 +33,7 @@ type CourseResponse struct {
 }
 
 func (c *CourseResponse) Mask(isAdmin bool) {
-	c.GenUID(common.DbTypeCourse)
+	c.GenUID(common.DbTypeService)
 }
 
 type EnrollmentResponse struct {

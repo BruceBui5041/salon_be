@@ -15,12 +15,12 @@ func init() {
 
 type Comment struct {
 	common.SQLModel `json:",inline"`
-	UserID          uint32  `json:"user_id" gorm:"column:user_id;index"`
-	CourseID        uint32  `json:"course_id" gorm:"column:course_id;index"`
-	Content         string  `json:"content" gorm:"column:content;type:text"`
-	Rate            uint8   `json:"rate" gorm:"column:rate;type:decimal(2,1);not null"`
-	User            *User   `json:"user,omitempty" gorm:"foreignKey:UserID;constraint:OnDelete:SET NULL;"`
-	Course          *Course `json:"course,omitempty" gorm:"foreignKey:CourseID;constraint:OnDelete:SET NULL;"`
+	UserID          uint32   `json:"user_id" gorm:"column:user_id;index"`
+	ServiceID       uint32   `json:"course_id" gorm:"column:course_id;index"`
+	Content         string   `json:"content" gorm:"column:content;type:text"`
+	Rate            uint8    `json:"rate" gorm:"column:rate;type:decimal(2,1);not null"`
+	User            *User    `json:"user,omitempty" gorm:"foreignKey:UserID;constraint:OnDelete:SET NULL;"`
+	Course          *Service `json:"course,omitempty" gorm:"foreignKey:ServiceID;constraint:OnDelete:SET NULL;"`
 }
 
 func (Comment) TableName() string {

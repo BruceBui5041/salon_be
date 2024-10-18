@@ -29,7 +29,7 @@ type CourseStore interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Course, error)
+	) (*models.Service, error)
 }
 
 type createEnrollmentRepo struct {
@@ -53,7 +53,7 @@ func NewCreateEnrollmentRepo(
 func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userID, courseID uint32, paymentID *uint32) error {
 	newEnrollment := &models.Enrollment{
 		UserID:    userID,
-		CourseID:  courseID,
+		ServiceID: courseID,
 		PaymentID: paymentID,
 	}
 
@@ -119,6 +119,6 @@ func (repo *createEnrollmentRepo) FindCourse(
 	ctx context.Context,
 	conditions map[string]interface{},
 	moreInfo ...interface{},
-) (*models.Course, error) {
+) (*models.Service, error) {
 	return repo.courseStore.FindOne(ctx, conditions, moreInfo...)
 }

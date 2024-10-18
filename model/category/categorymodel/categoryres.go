@@ -14,20 +14,20 @@ func init() {
 
 type CategoryResponse struct {
 	common.SQLModel `json:",inline"`
-	Name            string          `json:"name"`
-	Description     string          `json:"description"`
-	Courses         []models.Course `json:"course,omitempty"`
-	CourseCount     int             `json:"course_count"`
+	Name            string           `json:"name"`
+	Description     string           `json:"description"`
+	Courses         []models.Service `json:"course,omitempty"`
+	CourseCount     int              `json:"course_count"`
 }
 
 func (cr *CategoryResponse) CountCourse() {
-	cr.CourseCount = lo.CountBy(cr.Courses, func(course models.Course) bool {
+	cr.CourseCount = lo.CountBy(cr.Courses, func(course models.Service) bool {
 		return course.Status == "active"
 	})
 }
 
 func (cr *CategoryResponse) RemoveCoursesResponse() {
-	cr.Courses = []models.Course{}
+	cr.Courses = []models.Service{}
 }
 
 // func (cr *CategoryResponse) Mask(isAdmin bool) {
