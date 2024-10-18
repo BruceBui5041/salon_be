@@ -25,6 +25,8 @@ type ReviewInfo struct {
 
 type ServiceVersion struct {
 	common.SQLModel `json:",inline"`
+	ServiceID       uint32          `json:"service_id" gorm:"column:service_id;not null;index"`
+	Service         *Service        `json:"service,omitempty" gorm:"foreignKey:ServiceID"`
 	Title           string          `json:"title" gorm:"column:title;not null;size:255"`
 	Description     string          `json:"description" gorm:"column:description;type:text"`
 	CreatorID       uint32          `json:"creator_id" gorm:"column:creator_id;index"`
@@ -33,7 +35,7 @@ type ServiceVersion struct {
 	Category        *Category       `json:"category,omitempty" gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL;"`
 	Instructors     []User          `json:"instructors" gorm:"many2many:user_service;"`
 	IntroVideo      *Video          `json:"intro_video,omitempty" gorm:"foreignKey:IntroVideoID"`
-	Enrollments     []Enrollment    `json:"enrollments,omitempty" gorm:"foreignKey:ServiceID"`
+	Enrollments     []Enrollment    `json:"enrollments,omitempty" gorm:"foreignKey:ServiceVersionID"`
 	Slug            string          `json:"slug" gorm:"column:slug;not null;size:255"`
 	Thumbnail       string          `json:"thumbnail" gorm:"column:thumbnail;type:text"`
 	Price           decimal.Decimal `json:"price" gorm:"column:price;type:decimal(10,2);not null"`
@@ -47,13 +49,13 @@ func (ServiceVersion) TableName() string {
 	return "service_version"
 }
 
-func (c *ServiceVersion) Mask(isAdmin bool) {
-	c.GenUID(common.DbTypeServiceVersion)
+func (sv *ServiceVersion) Mask(isAdmin bool) {
+	sv.GenUID(common.DbTypeServiceVersion)
 }
 
-func (c *ServiceVersion) AfterFind(tx *gorm.DB) (err error) {
-	c.Mask(false)
-	c.Thumbnail = storagehandler.AddPublicCloudFrontDomain(c.Thumbnail)
+func (sv *ServiceVersion) AfterFind(tx *gorm.DB) (err error) {
+	sv.Mask(false)
+	sv.Thumbnail = storagehandler.AddPublicCloudFrontDomain(sv.Thumbnail)
 	return
 }
 
@@ -64,7 +66,6 @@ func (r *ReviewInfos) Scan(value interface{}) error {
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-
 	return json.Unmarshal(bytes, r)
 }
 
