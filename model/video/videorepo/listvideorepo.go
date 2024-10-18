@@ -10,34 +10,34 @@ type VideoStore interface {
 	Find(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) ([]models.Video, error)
 }
 
-type ListCourseStore interface {
+type ListServiceStore interface {
 	FindAll(ctx context.Context, conditions map[string]interface{}, moreInfo ...interface{}) ([]models.Service, error)
 }
 
 type listVideoRepo struct {
-	videoStore  VideoStore
-	courseStore ListCourseStore
+	videoStore   VideoStore
+	serviceStore ListServiceStore
 }
 
-func NewListVideoRepo(videoStore VideoStore, listCourseStore ListCourseStore) *listVideoRepo {
+func NewListVideoRepo(videoStore VideoStore, listServiceStore ListServiceStore) *listVideoRepo {
 	return &listVideoRepo{
-		videoStore:  videoStore,
-		courseStore: listCourseStore,
+		videoStore:   videoStore,
+		serviceStore: listServiceStore,
 	}
 }
 
-func (repo *listVideoRepo) ListCourseVideos(ctx context.Context, courseSlug string) ([]models.Video, error) {
-	courseConditions := map[string]interface{}{"slug": courseSlug}
-	courses, err := repo.courseStore.FindAll(ctx, courseConditions)
+func (repo *listVideoRepo) ListServiceVideos(ctx context.Context, serviceSlug string) ([]models.Video, error) {
+	serviceConditions := map[string]interface{}{"slug": serviceSlug}
+	services, err := repo.serviceStore.FindAll(ctx, serviceConditions)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(courses) == 0 {
+	if len(services) == 0 {
 		return nil, common.RecordNotFound
 	}
 
-	videoConditions := map[string]interface{}{"course_id": courses[0].Id}
+	videoConditions := map[string]interface{}{"service_id": services[0].Id}
 	videos, err := repo.videoStore.Find(ctx, videoConditions, "ProcessInfos")
 	if err != nil {
 		return nil, err

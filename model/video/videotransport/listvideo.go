@@ -8,19 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ListCourseVideos(appCtx component.AppContext) gin.HandlerFunc {
+func ListServiceVideos(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// courseSlug := c.Param("course_slug")
+		// serviceSlug := c.Param("service_slug")
 
 		// db := appCtx.GetMainDBConnection()
 		// videoStore := videostore.NewSQLStore(db)
-		// courseStore := coursestore.NewSQLStore(db)
-		// repo := videorepo.NewListVideoRepo(videoStore, courseStore)
+		// serviceStore := servicestore.NewSQLStore(db)
+		// repo := videorepo.NewListVideoRepo(videoStore, serviceStore)
 
 		// biz := videobiz.NewListVideoBiz(repo)
 
-		// conditions := map[string]interface{}{"course_slug": courseSlug}
-		// videos, err := biz.ListCourseVideos(c.Request.Context(), conditions)
+		// conditions := map[string]interface{}{"service_slug": serviceSlug}
+		// videos, err := biz.ListServiceVideos(c.Request.Context(), conditions)
 		// if err != nil {
 		// 	panic(err)
 		// }

@@ -45,8 +45,8 @@ func (biz *categoryBiz) ListCategories(ctx context.Context,
 
 	for _, categ := range categoriesRes {
 		// categ.Mask(false)
-		categ.CountCourse()
-		categ.RemoveCoursesResponse()
+		categ.CountService()
+		categ.RemoveServicesResponse()
 	}
 
 	return categoriesRes, nil

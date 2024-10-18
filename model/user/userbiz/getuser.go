@@ -37,7 +37,7 @@ func (biz *getUserBiz) GetUserById(
 
 	for _, enrollment := range user.Enrollments {
 		enrollment.Mask(false)
-		enrollment.Course.Mask(false)
+		enrollment.Service.Mask(false)
 	}
 
 	var userResponse usermodel.GetUserResponse

@@ -7,7 +7,7 @@ import (
 type CreateComment struct {
 	common.SQLModel `json:",inline"`
 	UserID          uint32 `json:"user_id"`
-	ServiceID       string `json:"course_id"`
+	ServiceID       string `json:"service_id"`
 	Rate            uint8  `json:"rate"`
 	Content         string `json:"content"`
 }

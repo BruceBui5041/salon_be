@@ -52,7 +52,7 @@ func (business *loginBusiness) Login(ctx context.Context, data *usermodel.UserLo
 		ctx,
 		map[string]interface{}{"email": data.Email},
 		"Roles",
-		"Enrollments.Course",
+		"Enrollments.Service",
 		"UserProfile",
 	)
 

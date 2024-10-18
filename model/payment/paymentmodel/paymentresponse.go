@@ -19,7 +19,7 @@ func (p *PaymentResponse) Mask(isAdmin bool) {
 	p.GenUID(common.DBTypePayment)
 }
 
-type CourseResponse struct {
+type ServiceResponse struct {
 	common.SQLModel `json:",inline"`
 	Title           string          `json:"title"`
 	Description     string          `json:"description"`
@@ -32,13 +32,13 @@ type CourseResponse struct {
 	DifficultyLevel string          `json:"difficulty_level"`
 }
 
-func (c *CourseResponse) Mask(isAdmin bool) {
+func (c *ServiceResponse) Mask(isAdmin bool) {
 	c.GenUID(common.DbTypeService)
 }
 
 type EnrollmentResponse struct {
 	common.SQLModel `json:",inline"`
-	Course          CourseResponse `json:"course"`
+	Service         ServiceResponse `json:"service"`
 }
 
 func (EnrollmentResponse) TableName() string {

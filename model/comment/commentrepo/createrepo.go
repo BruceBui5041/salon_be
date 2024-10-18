@@ -46,14 +46,14 @@ func (repo *createCommentRepo) CreateNewComment(
 	ctx context.Context,
 	input *commentmodel.CreateComment,
 ) (*models.Comment, error) {
-	courseUID, err := common.FromBase58(input.ServiceID)
+	serviceUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return nil, err
 	}
 
 	newComment := &models.Comment{
 		UserID:    input.UserID,
-		ServiceID: courseUID.GetLocalID(),
+		ServiceID: serviceUID.GetLocalID(),
 		Rate:      input.Rate,
 		Content:   input.Content,
 	}
@@ -71,10 +71,10 @@ func (repo *createCommentRepo) CreateNewComment(
 	return comment, nil
 }
 
-func (repo *createCommentRepo) ValidateCreateComment(ctx context.Context, userID, courseID uint32) (*models.Enrollment, error) {
+func (repo *createCommentRepo) ValidateCreateComment(ctx context.Context, userID, serviceID uint32) (*models.Enrollment, error) {
 	comment, err := repo.commentStore.FindOne(ctx, map[string]interface{}{
-		"user_id":   userID,
-		"course_id": courseID,
+		"user_id":    userID,
+		"service_id": serviceID,
 	})
 
 	if err != nil && err.Error() != gorm.ErrRecordNotFound.Error() {
@@ -86,8 +86,8 @@ func (repo *createCommentRepo) ValidateCreateComment(ctx context.Context, userID
 	}
 
 	enrollment, err := repo.enrollmentStore.FindOne(ctx, map[string]interface{}{
-		"user_id":   userID,
-		"course_id": courseID,
+		"user_id":    userID,
+		"service_id": serviceID,
 	},
 		"Payment",
 	)

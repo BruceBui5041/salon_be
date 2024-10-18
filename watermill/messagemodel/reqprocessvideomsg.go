@@ -9,7 +9,7 @@ type RequestProcessVideoInfo struct {
 	Timestamp         string                `json:"timestamp"`
 	RawVidS3Key       string                `json:"s3key"`
 	UploadedBy        string                `json:"uploaded_by"`
-	CourseId          string                `json:"course_id"`
+	ServiceId         string                `json:"service_id"`
 	VideoId           string                `json:"video_id"`
 	Retry             uint                  `json:"retry"`
 	RequestResolution *pb.ProcessResolution `json:"request_resolution"`

@@ -41,7 +41,7 @@ func ProcessNewVideoRequest(ctx context.Context, appCtx component.AppContext, vi
 	req := &pb.VideoInfo{
 		S3Key:      videoInfo.RawVidS3Key,
 		VideoId:    videoInfo.VideoId,
-		CourseId:   videoInfo.CourseId,
+		ServiceId:  videoInfo.ServiceId,
 		UploadedBy: videoInfo.UploadedBy,
 	}
 

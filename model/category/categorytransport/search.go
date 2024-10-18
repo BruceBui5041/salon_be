@@ -9,7 +9,7 @@ type CategoryTransport struct {
 	generictransport.GenericTransport
 }
 
-func NewCourseTransport(appCtx component.AppContext) *CategoryTransport {
+func NewServiceTransport(appCtx component.AppContext) *CategoryTransport {
 	return &CategoryTransport{
 		GenericTransport: generictransport.GenericTransport{
 			AppContext: appCtx,

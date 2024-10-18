@@ -24,11 +24,11 @@ func CreatePaymentHandler(appCtx component.AppContext) gin.HandlerFunc {
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			// paymentStore := paymentstore.NewSQLStore(tx)
-			// courseStore := coursestore.NewSQLStore(tx)
+			// serviceStore := servicestore.NewSQLStore(tx)
 			// enrollmentStore := enrollmentstore.NewSQLStore(tx)
 			// paymentRepo := paymentrepo.NewCreatePaymentRepo(paymentStore)
 			// enrollmentRepo := enrollmentrepo.NewCreateEnrollmentRepo(
-			// 	enrollmentStore, courseStore,
+			// 	enrollmentStore, serviceStore,
 			// 	appCtx.GetLocalPubSub().GetUnblockPubSub(),
 			// )
 			// biz := paymentbiz.NewCreatePaymentBiz(paymentRepo, enrollmentRepo)

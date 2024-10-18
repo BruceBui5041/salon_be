@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreateVideoCourseStore interface {
+type CreateVideoServiceStore interface {
 	FindOne(
 		ctx context.Context,
 		conditions map[string]interface{},
@@ -50,20 +50,20 @@ type CreateVideoProcessStore interface {
 
 type createVideoRepo struct {
 	videoStore        CreateVideoStore
-	courseStore       CreateVideoCourseStore
+	serviceStore      CreateVideoServiceStore
 	videoProcessStore CreateVideoProcessStore
 	svc               *s3.S3
 }
 
 func NewCreateVideoRepo(
 	videoStore CreateVideoStore,
-	courseStore CreateVideoCourseStore,
+	serviceStore CreateVideoServiceStore,
 	videoProcessStore CreateVideoProcessStore,
 	svc *s3.S3,
 ) *createVideoRepo {
 	return &createVideoRepo{
 		videoStore:        videoStore,
-		courseStore:       courseStore,
+		serviceStore:      serviceStore,
 		videoProcessStore: videoProcessStore,
 		svc:               svc,
 	}
@@ -81,14 +81,14 @@ func (repo *createVideoRepo) CreateNewVideo(
 		return nil, err
 	}
 
-	course, err := repo.courseStore.FindOne(ctx, map[string]interface{}{"id": uid.GetLocalID()})
+	service, err := repo.serviceStore.FindOne(ctx, map[string]interface{}{"id": uid.GetLocalID()})
 	if err != nil {
-		logger.AppLogger.Error(ctx, "failed to find course", zap.Error(err))
+		logger.AppLogger.Error(ctx, "failed to find service", zap.Error(err))
 		return nil, err
 	}
 
 	newVideo := &models.Video{
-		ServiceID:    course.Id,
+		ServiceID:    service.Id,
 		Title:        input.Title,
 		Description:  input.Description,
 		VideoURL:     input.VideoURL,
@@ -110,14 +110,14 @@ func (repo *createVideoRepo) CreateNewVideo(
 	}
 
 	video.Mask(false)
-	course.Mask(false)
+	service.Mask(false)
 
-	sqlObj := common.SQLModel{Id: course.CreatorID}
+	sqlObj := common.SQLModel{Id: service.CreatorID}
 	sqlObj.GenUID(common.DbTypeUser)
 
 	videoStorageInfo := storagehandler.VideoInfo{
 		UploadedBy:        sqlObj.FakeId.String(),
-		CourseId:          course.FakeId.String(),
+		ServiceId:         service.FakeId.String(),
 		VideoId:           video.FakeId.String(),
 		ThumbnailFilename: thumbnailFile.Filename,
 		VideoFilename:     videoFile.Filename,
@@ -175,7 +175,7 @@ func (repo *createVideoRepo) CreateNewVideo(
 		return nil, err
 	}
 
-	video.Course = *course
+	video.Service = *service
 
 	return video, nil
 }

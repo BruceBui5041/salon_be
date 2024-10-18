@@ -58,7 +58,7 @@ func CreateVideoHandlerTest(appCtx component.AppContext) gin.HandlerFunc {
 			videoUploadedInfo := &messagemodel.RequestProcessVideoInfo{
 				RawVidS3Key:       "RawVidS3Key",
 				UploadedBy:        "UploadedBy",
-				CourseId:          "CourseId",
+				ServiceId:         "ServiceId",
 				VideoId:           "VideoId",
 				Timestamp:         timestamp,
 				RequestResolution: pb.ProcessResolution_RESOLUTION_360P.Enum(),

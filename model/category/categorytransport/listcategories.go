@@ -20,7 +20,7 @@ func ListCategories(appCtx component.AppContext) gin.HandlerFunc {
 		result, err := biz.ListCategories(
 			c.Request.Context(),
 			map[string]interface{}{},
-			"Courses",
+			"Services",
 		)
 
 		if err != nil {

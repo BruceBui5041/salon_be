@@ -18,16 +18,16 @@ import (
 )
 
 type VideoCacheInfo struct {
-	VideoID    string
-	VideoURL   string
-	CourseSlug string
-	ExpiresAt  int64
+	VideoID     string
+	VideoURL    string
+	ServiceSlug string
+	ExpiresAt   int64
 }
 
-func (ac *appCache) SetVideoCache(ctx context.Context, courseSlug string, video models.Video) error {
+func (ac *appCache) SetVideoCache(ctx context.Context, serviceSlug string, video models.Video) error {
 	video.Mask(false)
 
-	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.VideoURLPrefix, courseSlug, video.GetFakeId())
+	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.VideoURLPrefix, serviceSlug, video.GetFakeId())
 
 	videoTableName := os.Getenv("DYNAMODB_VIDEO_TABLE_NAME")
 	videoCacheTTL := viper.GetInt("DYNAMODB_VIDEO_CACHE_TTL")
@@ -43,10 +43,10 @@ func (ac *appCache) SetVideoCache(ctx context.Context, courseSlug string, video 
 	}
 
 	videoCacheInfo := VideoCacheInfo{
-		VideoID:    video.GetFakeId(),
-		VideoURL:   video.VideoURL,
-		CourseSlug: courseSlug,
-		ExpiresAt:  expirationTime,
+		VideoID:     video.GetFakeId(),
+		VideoURL:    video.VideoURL,
+		ServiceSlug: serviceSlug,
+		ExpiresAt:   expirationTime,
 	}
 
 	// Prepare the item for DynamoDB
@@ -60,8 +60,8 @@ func (ac *appCache) SetVideoCache(ctx context.Context, courseSlug string, video 
 		"videourl": {
 			S: aws.String(videoCacheInfo.VideoURL),
 		},
-		"courseslug": {
-			S: aws.String(videoCacheInfo.CourseSlug),
+		"serviceslug": {
+			S: aws.String(videoCacheInfo.ServiceSlug),
 		},
 		"ttl": {
 			N: aws.String(strconv.FormatInt(videoCacheInfo.ExpiresAt, 10)),
@@ -81,7 +81,7 @@ func (ac *appCache) SetVideoCache(ctx context.Context, courseSlug string, video 
 	if err != nil {
 		logger.AppLogger.Warn(ctx, "Failed to set video cache",
 			zap.Error(err),
-			zap.String("courseSlug", courseSlug),
+			zap.String("serviceSlug", serviceSlug),
 			zap.Uint32("videoId", video.Id),
 			zap.Int("cacheTTL", videoCacheTTL))
 	}
@@ -89,8 +89,8 @@ func (ac *appCache) SetVideoCache(ctx context.Context, courseSlug string, video 
 	return err
 }
 
-func (ac *appCache) GetVideoCache(ctx context.Context, courseSlug string, videoId string) (*VideoCacheInfo, error) {
-	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.VideoURLPrefix, courseSlug, videoId)
+func (ac *appCache) GetVideoCache(ctx context.Context, serviceSlug string, videoId string) (*VideoCacheInfo, error) {
+	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.VideoURLPrefix, serviceSlug, videoId)
 
 	// Try to get from memory cache first
 	if cachedVideoInfo, found := ac.GetLocalCache().Get(cacheKey); found {
@@ -152,8 +152,8 @@ func (ac *appCache) getVideoCacheDynamoDB(ctx context.Context, cacheKey string, 
 		videoInfo.VideoID = *value.S
 	}
 
-	if value, ok := result.Item["courseslug"]; ok && value.S != nil {
-		videoInfo.CourseSlug = *value.S
+	if value, ok := result.Item["serviceslug"]; ok && value.S != nil {
+		videoInfo.ServiceSlug = *value.S
 	}
 
 	if value, ok := result.Item["ttl"]; ok && value.N != nil {

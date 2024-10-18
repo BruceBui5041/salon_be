@@ -25,8 +25,8 @@ func (repo *getUserRepo) GetUser(ctx context.Context, id uint32) (*models.User, 
 		ctx,
 		map[string]interface{}{"id": id},
 		"Roles",
-		"Enrollments.Course.Creator",
-		"Enrollments.Course.Category",
+		"Enrollments.Service.Creator",
+		"Enrollments.Service.Category",
 		"UserProfile",
 	)
 	if err != nil {

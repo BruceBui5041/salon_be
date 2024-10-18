@@ -4,7 +4,7 @@ import (
 	"salon_be/common"
 )
 
-type GetCourseVideoReponse struct {
+type GetServiceVideoReponse struct {
 	common.SQLModel `json:",inline"`
 	Title           string `json:"title" `
 	Slug            string `json:"slug" `
@@ -17,6 +17,6 @@ type GetCourseVideoReponse struct {
 	Overview        string `json:"overview"`
 }
 
-func (g *GetCourseVideoReponse) Mask(isAdmin bool) {
+func (g *GetServiceVideoReponse) Mask(isAdmin bool) {
 	g.GenUID(common.DbTypeVideo)
 }

@@ -20,8 +20,8 @@ type PaymentRepo interface {
 }
 
 type EnrollmentRepo interface {
-	CreateNewEnrollment(ctx context.Context, userID, courseID uint32, paymentID *uint32) error
-	CheckDuplicateEnrollment(ctx context.Context, userID, courseID uint32) (bool, error)
+	CreateNewEnrollment(ctx context.Context, userID, serviceID uint32, paymentID *uint32) error
+	CheckDuplicateEnrollment(ctx context.Context, userID, serviceID uint32) (bool, error)
 }
 
 type createPaymentBiz struct {
@@ -58,17 +58,17 @@ func (biz *createPaymentBiz) CreateNewPayment(
 	}
 
 	if payment.TransactionStatus == "completed" {
-		for _, courseID := range input.ServiceIDs {
-			courseUID, err := common.FromBase58(courseID)
+		for _, serviceID := range input.ServiceIDs {
+			serviceUID, err := common.FromBase58(serviceID)
 			if err != nil {
 				return nil, common.ErrInvalidRequest(err)
 			}
-			duplicateEnrollment, err := biz.enrollmentRepo.CheckDuplicateEnrollment(ctx, input.UserID, courseUID.GetLocalID())
+			duplicateEnrollment, err := biz.enrollmentRepo.CheckDuplicateEnrollment(ctx, input.UserID, serviceUID.GetLocalID())
 			if err != nil {
 				return nil, common.ErrEntityExisted(models.EnrollmentEntityName, err)
 			}
 			if !duplicateEnrollment {
-				err = biz.enrollmentRepo.CreateNewEnrollment(ctx, payment.UserID, courseUID.GetLocalID(), &payment.Id)
+				err = biz.enrollmentRepo.CreateNewEnrollment(ctx, payment.UserID, serviceUID.GetLocalID(), &payment.Id)
 				if err != nil {
 					return nil, common.ErrCannotCreateEntity(models.EnrollmentEntityName, err)
 				}
@@ -79,8 +79,8 @@ func (biz *createPaymentBiz) CreateNewPayment(
 	payment, err = biz.paymentRepo.FindOne(
 		ctx,
 		map[string]interface{}{"id": payment.Id},
-		"Enrollments.Course.Creator",
-		"Enrollments.Course.Category",
+		"Enrollments.Service.Creator",
+		"Enrollments.Service.Category",
 	)
 	if err != nil {
 		return nil, common.ErrCannotGetEntity(models.PaymentEntityName, err)
@@ -107,7 +107,7 @@ func (biz *createPaymentBiz) validateInput(input *paymentmodel.CreatePayment) er
 		return errors.New("payment method is required")
 	}
 	if len(input.ServiceIDs) == 0 {
-		return errors.New("at least one course ID is required")
+		return errors.New("at least one service ID is required")
 	}
 	return nil
 }

@@ -15,7 +15,7 @@ func (ac *appCache) GetDynamoDBTableDefinitions() []DynamoDBTableDefinition {
 				AttributeType: aws.String("S"),
 			},
 			{
-				AttributeName: aws.String("courseslug"),
+				AttributeName: aws.String("serviceslug"),
 				AttributeType: aws.String("S"),
 			},
 		},
@@ -25,7 +25,7 @@ func (ac *appCache) GetDynamoDBTableDefinitions() []DynamoDBTableDefinition {
 				KeyType:       aws.String("HASH"),
 			},
 			{
-				AttributeName: aws.String("courseslug"),
+				AttributeName: aws.String("serviceslug"),
 				KeyType:       aws.String("RANGE"),
 			},
 		},

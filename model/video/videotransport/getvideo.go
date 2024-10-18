@@ -15,17 +15,17 @@ func GetVideoById(appCtx component.AppContext) gin.HandlerFunc {
 		// 		panic(common.ErrInvalidRequest(err))
 		// 	}
 
-		// 	courseSlug := c.Param("course_slug")
-		// 	if courseSlug == "" {
-		// 		panic(common.ErrInvalidRequest(errors.New("missing course slug")))
+		// 	serviceSlug := c.Param("service_slug")
+		// 	if serviceSlug == "" {
+		// 		panic(common.ErrInvalidRequest(errors.New("missing service slug")))
 		// 	}
 
 		// 	videoStore := videostore.NewSQLStore(appCtx.GetMainDBConnection())
-		// 	courseStore := coursestore.NewSQLStore(appCtx.GetMainDBConnection())
-		// 	repo := videorepo.NewGetVideoRepo(videoStore, courseStore)
+		// 	serviceStore := servicestore.NewSQLStore(appCtx.GetMainDBConnection())
+		// 	repo := videorepo.NewGetVideoRepo(videoStore, serviceStore)
 		// 	biz := videobiz.NewGetVideoBiz(repo)
 
-		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(id), courseSlug)
+		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(id), serviceSlug)
 		// 	if err != nil {
 		// 		panic(err)
 		// 	}

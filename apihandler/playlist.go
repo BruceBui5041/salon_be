@@ -14,18 +14,18 @@ func GetPlaylistHandler(appCtx component.AppContext) gin.HandlerFunc {
 		// }
 
 		// videoId := videoUID.GetLocalID()
-		// courseSlug := c.Param("course_slug")
+		// serviceSlug := c.Param("service_slug")
 		// resolution := c.Param("resolution")
 		// playlistName := c.Param("playlistName")
 
-		// if courseSlug == "" {
-		// 	logger.AppLogger.Error(c, "Missing course slug")
-		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Missing course slug"})
+		// if serviceSlug == "" {
+		// 	logger.AppLogger.Error(c, "Missing service slug")
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Missing service slug"})
 		// 	return
 		// }
 
 		// appCache := appCtx.GetAppCache()
-		// cacheInfo, err := appCache.GetVideoCache(c.Request.Context(), courseSlug, c.Param("video_id"))
+		// cacheInfo, err := appCache.GetVideoCache(c.Request.Context(), serviceSlug, c.Param("video_id"))
 		// if err != nil {
 		// 	logger.AppLogger.Error(c, "Error getting cached URL from DynamoDB", zap.Error(err))
 		// }
@@ -36,18 +36,18 @@ func GetPlaylistHandler(appCtx component.AppContext) gin.HandlerFunc {
 		// } else {
 		// 	db := appCtx.GetMainDBConnection()
 		// 	videoStore := videostore.NewSQLStore(db)
-		// 	courseStore := coursestore.NewSQLStore(db)
-		// 	repo := videorepo.NewGetVideoRepo(videoStore, courseStore)
+		// 	serviceStore := servicestore.NewSQLStore(db)
+		// 	repo := videorepo.NewGetVideoRepo(videoStore, serviceStore)
 		// 	biz := videobiz.NewGetVideoBiz(repo)
 
-		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(videoId), courseSlug)
+		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(videoId), serviceSlug)
 		// 	if err != nil {
 		// 		panic(err)
 		// 	}
 
 		// 	videoURL = video.VideoURL
 
-		// 	err = appCache.SetVideoCache(c.Request.Context(), courseSlug, *video)
+		// 	err = appCache.SetVideoCache(c.Request.Context(), serviceSlug, *video)
 		// 	if err != nil {
 		// 		logger.AppLogger.Error(c.Request.Context(), "Error caching URL in DynamoDB", zap.Error(err))
 		// 	}

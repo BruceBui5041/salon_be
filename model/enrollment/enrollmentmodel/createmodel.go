@@ -7,7 +7,7 @@ import (
 type CreateEnrollment struct {
 	common.SQLModel `json:",inline"`
 	UserID          string `json:"user_id" form:"user_id"`
-	ServiceID       string `json:"course_id" form:"course_id"`
+	ServiceID       string `json:"service_id" form:"service_id"`
 	PaymentID       string `json:"payment_id" form:"payment_id"`
 }
 

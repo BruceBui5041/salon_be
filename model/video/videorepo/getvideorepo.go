@@ -7,7 +7,7 @@ import (
 	models "salon_be/model"
 )
 
-type GetVideoCourseStore interface {
+type GetVideoServiceStore interface {
 	FindOne(
 		ctx context.Context,
 		conditions map[string]interface{},
@@ -20,25 +20,25 @@ type GetVideoStore interface {
 }
 
 type getVideoRepo struct {
-	videoStore  GetVideoStore
-	courseStore GetVideoCourseStore
+	videoStore   GetVideoStore
+	serviceStore GetVideoServiceStore
 }
 
-func NewGetVideoRepo(videoStore GetVideoStore, courseStore GetVideoCourseStore) *getVideoRepo {
+func NewGetVideoRepo(videoStore GetVideoStore, serviceStore GetVideoServiceStore) *getVideoRepo {
 	return &getVideoRepo{
-		videoStore:  videoStore,
-		courseStore: courseStore,
+		videoStore:   videoStore,
+		serviceStore: serviceStore,
 	}
 }
 
-func (repo *getVideoRepo) GetVideo(ctx context.Context, id uint32, courseSlug string) (*models.Video, error) {
-	video, err := repo.videoStore.FindOne(ctx, map[string]interface{}{"id": id}, "Course", "Lesson")
+func (repo *getVideoRepo) GetVideo(ctx context.Context, id uint32, serviceSlug string) (*models.Video, error) {
+	video, err := repo.videoStore.FindOne(ctx, map[string]interface{}{"id": id}, "Service", "Lesson")
 	if err != nil {
 		return nil, common.ErrCannotGetEntity(models.VideoEntityName, err)
 	}
 
-	if video.Course.Slug != courseSlug {
-		return nil, errors.New("course slug mismatch")
+	if video.Service.Slug != serviceSlug {
+		return nil, errors.New("service slug mismatch")
 	}
 
 	return video, nil

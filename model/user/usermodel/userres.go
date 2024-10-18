@@ -30,11 +30,11 @@ type GetUserRoleResponse struct {
 
 type GetUserEnrollmentResponse struct {
 	common.SQLModel `json:",inline"`
-	EnrolledAt      time.Time             `json:"enrolled_at"`
-	Course          GetUserCourseResponse `json:"course"`
+	EnrolledAt      time.Time              `json:"enrolled_at"`
+	Service         GetUserServiceResponse `json:"service"`
 }
 
-type GetUserCourseResponse struct {
+type GetUserServiceResponse struct {
 	common.SQLModel `json:",inline"`
 	Title           string `json:"title"`
 	Description     string `json:"description"`

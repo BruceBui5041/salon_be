@@ -136,7 +136,7 @@ type VideoInfo struct {
 	unknownFields protoimpl.UnknownFields
 
 	VideoId           string            `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
-	CourseId          string            `protobuf:"bytes,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	ServiceId          string            `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	Description       string            `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	UploadedBy        string            `protobuf:"bytes,4,opt,name=uploaded_by,json=uploadedBy,proto3" json:"uploaded_by,omitempty"`
 	Timestamp         string            `protobuf:"bytes,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
@@ -184,9 +184,9 @@ func (x *VideoInfo) GetVideoId() string {
 	return ""
 }
 
-func (x *VideoInfo) GetCourseId() string {
+func (x *VideoInfo) GetServiceId() string {
 	if x != nil {
-		return x.CourseId
+		return x.ServiceId
 	}
 	return ""
 }
@@ -239,7 +239,7 @@ type VideoProcessProgress struct {
 	unknownFields protoimpl.UnknownFields
 
 	VideoId           string            `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
-	CourseId          string            `protobuf:"bytes,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	ServiceId          string            `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	Timestamp         int64             `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	Progress          int32             `protobuf:"varint,4,opt,name=progress,proto3" json:"progress,omitempty"`
 	State             ProcessState      `protobuf:"varint,5,opt,name=state,proto3,enum=videoservice.ProcessState" json:"state,omitempty"`
@@ -287,9 +287,9 @@ func (x *VideoProcessProgress) GetVideoId() string {
 	return ""
 }
 
-func (x *VideoProcessProgress) GetCourseId() string {
+func (x *VideoProcessProgress) GetServiceId() string {
 	if x != nil {
-		return x.CourseId
+		return x.ServiceId
 	}
 	return ""
 }

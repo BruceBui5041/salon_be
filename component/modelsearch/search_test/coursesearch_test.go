@@ -22,7 +22,7 @@ package modelsearch_test
 // 	gormlogger "gorm.io/gorm/logger"
 // )
 
-// func TestDynamicFilterForCourse(t *testing.T) {
+// func TestDynamicFilterForService(t *testing.T) {
 // 	err := godotenv.Load("../../../.env")
 // 	require.NoError(t, err, "Error loading .env file")
 // 	ctx := context.Background()
@@ -34,8 +34,8 @@ package modelsearch_test
 
 // 	logger.CreateAppLogger(ctx)
 
-// 	var totalCourses int64
-// 	err = db.Model(&models.Service{}).Count(&totalCourses).Error
+// 	var totalServices int64
+// 	err = db.Model(&models.Service{}).Count(&totalServices).Error
 // 	require.NoError(t, err)
 
 // 	testCases := []struct {
@@ -46,14 +46,14 @@ package modelsearch_test
 // 		validateResult func(*testing.T, []models.Service)
 // 	}{
 // 		{
-// 			name:   "Filter courses by price (greater than)",
+// 			name:   "Filter services by price (greater than)",
 // 			fields: []string{"price"},
 // 			conditions: []map[string]interface{}{
 // 				{"source": "price", "operator": ">", "target": 50},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Greater(t, c.Price, uint64(50))
 // 				}
 // 			},
@@ -62,15 +62,15 @@ package modelsearch_test
 // 			name:       "get creator",
 // 			fields:     []string{"creator"},
 // 			conditions: []map[string]interface{}{},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.NotEmpty(t, c.Creator.Email)
 // 				}
 // 			},
 // 		},
 // 		{
-// 			name:   "Filter courses by price > 50 OR creator_id = 6",
+// 			name:   "Filter services by price > 50 OR creator_id = 6",
 // 			fields: []string{"price", "creator_id"},
 // 			conditions: []interface{}{
 // 				map[string]interface{}{
@@ -80,33 +80,33 @@ package modelsearch_test
 // 					"source": "creator_id", "operator": "=", "target": 6,
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.True(t, c.Price.GreaterThan(decimal.NewFromInt(50)) || c.CreatorID == 6,
-// 						"Course should have price > 50 or creator_id = 6, but got price: %d and creator_id: %d",
+// 						"Service should have price > 50 or creator_id = 6, but got price: %d and creator_id: %d",
 // 						c.Price, c.CreatorID)
 // 				}
 // 			},
 // 		},
 // 		{
-// 			name:   "Filter courses by creator's email",
+// 			name:   "Filter services by creator's email",
 // 			fields: []string{"creator.email"},
 // 			conditions: []interface{}{
 // 				map[string]interface{}{
 // 					"source": "creator.email", "operator": "=", "target": "abcd123@gmail.com",
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Equal(t, "abcd123@gmail.com", c.Creator.Email,
-// 						"Course creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email)
+// 						"Service creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email)
 // 				}
 // 			},
 // 		},
 // 		{
-// 			name:   "Filter courses by creator's email AND price is 120",
+// 			name:   "Filter services by creator's email AND price is 120",
 // 			fields: []string{"creator.email"},
 // 			conditions: []interface{}{
 // 				map[string]interface{}{
@@ -116,17 +116,17 @@ package modelsearch_test
 // 					"source": "price", "operator": "=", "target": 120,
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Equal(t, "abcd123@gmail.com", c.Creator.Email,
-// 						"Course creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
+// 						"Service creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
 // 					)
 // 				}
 // 			},
 // 		},
 // 		{
-// 			name:   "Filter courses by creator's email OR price is 120",
+// 			name:   "Filter services by creator's email OR price is 120",
 // 			fields: []string{"creator.email"},
 // 			conditions: []interface{}{
 // 				[]interface{}{
@@ -144,11 +144,11 @@ package modelsearch_test
 // 					},
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Equal(t, "abcd123@gmail.com", c.Creator.Email,
-// 						"Course creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
+// 						"Service creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
 // 					)
 
 // 				}
@@ -156,7 +156,7 @@ package modelsearch_test
 // 		},
 
 // 		{
-// 			name:   "creator.email == abcd123@gmail.com AND course.id = 4 AND price = 120 AND creator.role.name = instructor",
+// 			name:   "creator.email == abcd123@gmail.com AND service.id = 4 AND price = 120 AND creator.role.name = instructor",
 // 			fields: []string{"creator.email", "creator.roles.name", "price"},
 // 			conditions: []interface{}{
 // 				[]interface{}{
@@ -174,11 +174,11 @@ package modelsearch_test
 // 					},
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Equal(t, "abcd123@gmail.com", c.Creator.Email,
-// 						"Course creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
+// 						"Service creator's email should be abcd123@gmail.com, but got %s", c.Creator.Email,
 // 					)
 
 // 					assert.Equal(t, uint64(120), c.Price,
@@ -193,7 +193,7 @@ package modelsearch_test
 // 		},
 
 // 		{
-// 			name:   "course price between 80 and 125",
+// 			name:   "service price between 80 and 125",
 // 			fields: []string{"id", "price"},
 // 			conditions: []interface{}{
 // 				[]interface{}{
@@ -205,9 +205,9 @@ package modelsearch_test
 // 					},
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.GreaterOrEqual(t, uint64(125), c.Price,
 // 						"Price should be GreaterOrEqual 120, but got %d", c.Price,
 // 					)
@@ -218,16 +218,16 @@ package modelsearch_test
 // 			},
 // 		},
 // 		{
-// 			name:   "course overview is null",
+// 			name:   "service overview is null",
 // 			fields: []string{"overview"},
 // 			conditions: []interface{}{
 // 				map[string]interface{}{
 // 					"source": "overview", "operator": "is null", "target": nil,
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.Equal(t, "", c.Overview,
 // 						"Overview should be NULL, but got %d", c.Overview,
 // 					)
@@ -236,16 +236,16 @@ package modelsearch_test
 // 		},
 
 // 		{
-// 			name:   "course overview is not null",
+// 			name:   "service overview is not null",
 // 			fields: []string{"overview"},
 // 			conditions: []interface{}{
 // 				map[string]interface{}{
 // 					"source": "overview", "operator": "is not null", "target": nil,
 // 				},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.Service) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
+// 			validateResult: func(t *testing.T, services []models.Service) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
 // 					assert.NotEmpty(t, c.Overview,
 // 						"Overview should be not NULL, but got %s", c.Overview,
 // 					)
@@ -256,7 +256,7 @@ package modelsearch_test
 
 // 	for _, tc := range testCases {
 // 		t.Run(tc.name, func(t *testing.T) {
-// 			var courses []models.Service
+// 			var services []models.Service
 
 // 			var logBuffer bytes.Buffer
 // 			log.SetOutput(&logBuffer)
@@ -271,11 +271,11 @@ package modelsearch_test
 // 			)
 
 // 			sql := query.ToSQL(func(tx *gorm.DB) *gorm.DB {
-// 				return tx.Find(&courses)
+// 				return tx.Find(&services)
 // 			})
 // 			t.Logf("Generated SQL: %s", sql)
 
-// 			err := query.Find(&courses).Error
+// 			err := query.Find(&services).Error
 // 			if err != nil {
 // 				t.Logf("Error: %v", err)
 // 			}
@@ -283,7 +283,7 @@ package modelsearch_test
 // 			t.Logf("Function logs:\n%s", logBuffer.String())
 
 // 			require.NoError(t, err)
-// 			tc.validateResult(t, courses)
+// 			tc.validateResult(t, services)
 // 		})
 // 	}
 // }

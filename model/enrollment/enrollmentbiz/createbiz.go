@@ -13,11 +13,11 @@ import (
 type EnrollmentRepo interface {
 	CreateNewEnrollment(
 		ctx context.Context,
-		userID, courseID uint32,
+		userID, serviceID uint32,
 		paymentID *uint32,
 	) error
-	CheckDuplicateEnrollment(ctx context.Context, userID, courseID uint32) (bool, error)
-	FindCourse(
+	CheckDuplicateEnrollment(ctx context.Context, userID, serviceID uint32) (bool, error)
+	FindService(
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
@@ -43,7 +43,7 @@ func (e *createEnrollmentBiz) CreateNewEnrollment(
 		return common.ErrInvalidRequest(err)
 	}
 
-	courseUID, err := common.FromBase58(input.ServiceID)
+	serviceUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return common.ErrInvalidRequest(err)
 	}
@@ -52,23 +52,23 @@ func (e *createEnrollmentBiz) CreateNewEnrollment(
 		return err
 	}
 
-	isDuplicate, err := e.enrollmentRepo.CheckDuplicateEnrollment(ctx, userUID.GetLocalID(), courseUID.GetLocalID())
+	isDuplicate, err := e.enrollmentRepo.CheckDuplicateEnrollment(ctx, userUID.GetLocalID(), serviceUID.GetLocalID())
 	if err != nil {
 		return common.ErrCannotGetEntity(models.EnrollmentEntityName, err)
 	}
 	if isDuplicate {
-		return errors.New("user is already enrolled in this course")
+		return errors.New("user is already enrolled in this service")
 	}
 
-	course, err := e.enrollmentRepo.FindCourse(ctx, map[string]interface{}{"id": courseUID.GetLocalID()})
+	service, err := e.enrollmentRepo.FindService(ctx, map[string]interface{}{"id": serviceUID.GetLocalID()})
 	if err != nil {
-		return common.ErrCannotGetEntity(models.CourseEntityName, err)
+		return common.ErrCannotGetEntity(models.ServiceEntityName, err)
 	}
 
 	var paymentID *uint32
-	if course.Price.Equal(decimal.Zero) {
+	if service.Price.Equal(decimal.Zero) {
 		if input.PaymentID == "" {
-			return errors.New("payment is required for non-free courses")
+			return errors.New("payment is required for non-free services")
 		}
 		paymentUID, err := common.FromBase58(input.PaymentID)
 		if err != nil {
@@ -78,7 +78,7 @@ func (e *createEnrollmentBiz) CreateNewEnrollment(
 		paymentID = &localPaymentID
 	}
 
-	err = e.enrollmentRepo.CreateNewEnrollment(ctx, userUID.GetLocalID(), courseUID.GetLocalID(), paymentID)
+	err = e.enrollmentRepo.CreateNewEnrollment(ctx, userUID.GetLocalID(), serviceUID.GetLocalID(), paymentID)
 	if err != nil {
 		return common.ErrCannotCreateEntity(models.EnrollmentEntityName, err)
 	}
@@ -92,7 +92,7 @@ func (e *createEnrollmentBiz) validateInput(input *enrollmentmodel.CreateEnrollm
 	}
 
 	if input.ServiceID == "" {
-		return errors.New("course ID is required")
+		return errors.New("service ID is required")
 	}
 
 	return nil

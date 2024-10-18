@@ -27,8 +27,8 @@ package modelsearch_test
 
 // 	logger.CreateAppLogger(ctx)
 
-// 	var totalCourses int64
-// 	err = db.Model(&models.Service{}).Count(&totalCourses).Error
+// 	var totalServices int64
+// 	err = db.Model(&models.Service{}).Count(&totalServices).Error
 // 	require.NoError(t, err)
 
 // 	testCases := []struct {
@@ -39,15 +39,15 @@ package modelsearch_test
 // 		validateResult func(*testing.T, []models.User)
 // 	}{
 // 		{
-// 			name:   "Filter courses by price (greater than)",
-// 			fields: []string{"created_courses"},
+// 			name:   "Filter services by price (greater than)",
+// 			fields: []string{"created_services"},
 // 			conditions: []map[string]interface{}{
-// 				{"source": "created_courses.id", "operator": "is not null", "target": ""},
+// 				{"source": "created_services.id", "operator": "is not null", "target": ""},
 // 			},
-// 			validateResult: func(t *testing.T, courses []models.User) {
-// 				assert.NotEmpty(t, courses)
-// 				for _, c := range courses {
-// 					assert.NotEmpty(t, c.CreatedCourses, uint64(50))
+// 			validateResult: func(t *testing.T, services []models.User) {
+// 				assert.NotEmpty(t, services)
+// 				for _, c := range services {
+// 					assert.NotEmpty(t, c.CreatedServices, uint64(50))
 // 				}
 // 			},
 // 		},

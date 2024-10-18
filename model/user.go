@@ -25,7 +25,7 @@ type User struct {
 	Email           string        `json:"email" gorm:"column:email;uniqueIndex;not null;size:100"`
 	Roles           []*Role       `json:"roles" gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID"`
 	Auths           []UserAuth    `json:"auths" gorm:"foreignKey:UserID"`
-	CreatedCourses  []Service     `json:"created_courses" gorm:"foreignKey:CreatorID"`
+	CreatedServices []Service     `json:"created_services" gorm:"foreignKey:CreatorID"`
 	Enrollments     []*Enrollment `json:"enrollments" `
 	Progress        []Progress    `json:"progress"`
 	Salt            string        `json:"-" gorm:"column:salt;"`

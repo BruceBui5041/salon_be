@@ -31,7 +31,7 @@ type Service struct {
 	CategoryID      uint32          `json:"category_id" gorm:"column:category_id;index"`
 	Creator         *User           `json:"creator,omitempty" gorm:"constraint:OnDelete:SET NULL;"`
 	Category        *Category       `json:"category,omitempty" gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL;"`
-	Instructors     []User          `json:"instructors" gorm:"many2many:user_course;"`
+	Instructors     []User          `json:"instructors" gorm:"many2many:user_service;"`
 	IntroVideo      *Video          `json:"intro_video,omitempty" gorm:"foreignKey:IntroVideoID"`
 	Enrollments     []Enrollment    `json:"enrollments,omitempty" gorm:"foreignKey:ServiceID"`
 	Slug            string          `json:"slug" gorm:"column:slug;not null;size:255"`

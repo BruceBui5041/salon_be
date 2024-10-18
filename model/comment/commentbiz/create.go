@@ -12,7 +12,7 @@ import (
 
 type CommentRepo interface {
 	CreateNewComment(ctx context.Context, input *commentmodel.CreateComment) (*models.Comment, error)
-	ValidateCreateComment(ctx context.Context, userID, courseID uint32) (*models.Enrollment, error)
+	ValidateCreateComment(ctx context.Context, userID, serviceID uint32) (*models.Enrollment, error)
 }
 
 type createCommentBiz struct {
@@ -29,7 +29,7 @@ func (c *createCommentBiz) CreateNewComment(ctx context.Context, input *commentm
 	}
 
 	if input.ServiceID == "" {
-		return common.ErrInvalidRequest(errors.New("course ID is required"))
+		return common.ErrInvalidRequest(errors.New("service ID is required"))
 	}
 
 	if input.Rate > 5 || input.Rate < 1 {
@@ -46,13 +46,13 @@ func (c *createCommentBiz) CreateNewComment(ctx context.Context, input *commentm
 		return common.ErrInvalidRequest(errors.New("comment content must not exceed 1000 characters"))
 	}
 
-	courseUID, err := common.FromBase58(input.ServiceID)
+	serviceUID, err := common.FromBase58(input.ServiceID)
 	if err != nil {
 		return common.ErrInternal(err)
 	}
 
-	// Check if the user is enrolled in the course and the payment is completed
-	enrollment, err := c.repo.ValidateCreateComment(ctx, input.UserID, courseUID.GetLocalID())
+	// Check if the user is enrolled in the service and the payment is completed
+	enrollment, err := c.repo.ValidateCreateComment(ctx, input.UserID, serviceUID.GetLocalID())
 	if err != nil {
 		return err
 	}

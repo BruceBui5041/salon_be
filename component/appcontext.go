@@ -40,7 +40,7 @@ type AppQueue interface {
 type CronJob interface {
 	Start()
 	RegisterVideoJobs(ctx context.Context, appCtx AppContext) error
-	RegisterCourseJobs(ctx context.Context, appCtx AppContext) error
+	RegisterServiceJobs(ctx context.Context, appCtx AppContext) error
 }
 
 type AppCache interface {
@@ -48,12 +48,12 @@ type AppCache interface {
 	SetUserCache(ctx context.Context, user *models.User) error
 	DeleteUserCache(ctx context.Context, userId string) error
 
-	SetVideoCache(ctx context.Context, courseSlug string, video models.Video) error
-	GetVideoCache(ctx context.Context, courseSlug string, videoId string) (*cache.VideoCacheInfo, error)
+	SetVideoCache(ctx context.Context, serviceSlug string, video models.Video) error
+	GetVideoCache(ctx context.Context, serviceSlug string, videoId string) (*cache.VideoCacheInfo, error)
 
 	SetEnrollmentCache(ctx context.Context, enrollment *cache.EnrollmentCache) error
-	GetEnrollmentCache(ctx context.Context, courseSlug, userId string) (*cache.EnrollmentCache, error)
-	DeleteEnrollmentCache(ctx context.Context, courseSlug, userId string) error
+	GetEnrollmentCache(ctx context.Context, serviceSlug, userId string) (*cache.EnrollmentCache, error)
+	DeleteEnrollmentCache(ctx context.Context, serviceSlug, userId string) error
 
 	CreateDynamoDBTables(ctx context.Context, tables []cache.DynamoDBTableDefinition) error
 	GetDynamoDBTableDefinitions() []cache.DynamoDBTableDefinition

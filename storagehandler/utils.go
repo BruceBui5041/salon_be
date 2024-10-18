@@ -11,7 +11,7 @@ import (
 
 type VideoInfo struct {
 	UploadedBy        string `json:"uploaded_by"`
-	CourseId          string `json:"course_id"`
+	ServiceId         string `json:"service_id"`
 	VideoId           string `json:"video_id"`
 	ThumbnailFilename string `json:"thumbnail_filename"`
 	VideoFilename     string `json:"video_filename"`
@@ -19,9 +19,9 @@ type VideoInfo struct {
 
 func GenerateVideoS3Key(info VideoInfo) string {
 	extension := filepath.Ext(info.VideoFilename)
-	return fmt.Sprintf("course/%s/%s/%s/video_segment/%s",
+	return fmt.Sprintf("service/%s/%s/%s/video_segment/%s",
 		info.UploadedBy,
-		info.CourseId,
+		info.ServiceId,
 		info.VideoId,
 		fmt.Sprintf("%s%s", info.VideoId, extension),
 	)
@@ -29,9 +29,9 @@ func GenerateVideoS3Key(info VideoInfo) string {
 
 func GenerateVideoThumbnailS3Key(info VideoInfo) string {
 	thumbnailFilename := generateThumbnailFilename(info.ThumbnailFilename)
-	return fmt.Sprintf("course/%s/%s/%s/thumbnail/%s",
+	return fmt.Sprintf("service/%s/%s/%s/thumbnail/%s",
 		info.UploadedBy,
-		info.CourseId,
+		info.ServiceId,
 		info.VideoId,
 		thumbnailFilename,
 	)
@@ -42,17 +42,17 @@ func generateThumbnailFilename(filename string) string {
 	return "thumbnail" + extension
 }
 
-type CourseInfo struct {
+type ServiceInfo struct {
 	UploadedBy string `json:"uploaded_by"`
-	CourseId   string `json:"course_id"`
+	ServiceId  string `json:"service_id"`
 	Filename   string `json:"filename"`
 }
 
-func GenerateCourseThumbnaiS3Key(info CourseInfo) string {
-	return fmt.Sprintf("course/%s/%s/%s",
+func GenerateServiceThumbnaiS3Key(info ServiceInfo) string {
+	return fmt.Sprintf("service/%s/%s/%s",
 		info.UploadedBy,
-		info.CourseId,
-		utils.RenameFile(info.Filename, fmt.Sprintf("thumbnail_%s", info.CourseId)),
+		info.ServiceId,
+		utils.RenameFile(info.Filename, fmt.Sprintf("thumbnail_%s", info.ServiceId)),
 	)
 }
 

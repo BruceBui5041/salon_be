@@ -41,11 +41,11 @@ type CacheRoleRes struct {
 
 type CacheEnrollment struct {
 	common.SQLModel `json:",inline"`
-	EnrolledAt      time.Time   `json:"enrolled_at"`
-	Course          CacheCourse `json:"course"`
+	EnrolledAt      time.Time    `json:"enrolled_at"`
+	Service         CacheService `json:"service"`
 }
 
-type CacheCourse struct {
+type CacheService struct {
 	common.SQLModel `json:",inline"`
 	Title           string `json:"title"`
 	Description     string `json:"description"`

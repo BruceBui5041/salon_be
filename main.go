@@ -226,19 +226,19 @@ func startHTTPServer(appCtx component.AppContext) {
 	)
 	{
 		// for get master list
-		video.GET("/playlist/:course_slug/:video_id", apihandler.GetPlaylistHandler(appCtx))
+		video.GET("/playlist/:service_slug/:video_id", apihandler.GetPlaylistHandler(appCtx))
 
 		// for get video playlish
 		video.GET(
-			"/playlist/:course_slug/:video_id/:resolution/:playlistName",
+			"/playlist/:service_slug/:video_id/:resolution/:playlistName",
 			apihandler.GetPlaylistHandler(appCtx),
 		)
 
 		video.GET("", apihandler.SegmentHandler(appCtx))
 		// video.GET("/:id", videotransport.GetVideoBySlug(appCtx))
 		videoGroupInstructor.GET(
-			"/:course_slug",
-			videotransport.ListCourseVideos(appCtx),
+			"/:service_slug",
+			videotransport.ListServiceVideos(appCtx),
 		)
 
 	}
@@ -329,11 +329,11 @@ func createAppCache(awsSess *session.Session) component.AppCache {
 func startCronJobs(appCtx component.AppContext) {
 	cronCtx := context.Background()
 	tracer := otel.Tracer("CRONJOB")
-	cronCtx, span := tracer.Start(cronCtx, "cron job update course count field", trace.WithSpanKind(trace.SpanKindServer))
+	cronCtx, span := tracer.Start(cronCtx, "cron job update service count field", trace.WithSpanKind(trace.SpanKindServer))
 	defer span.End()
 
 	appCron := appCtx.GetCronJob()
 	appCron.RegisterVideoJobs(cronCtx, appCtx)
-	appCron.RegisterCourseJobs(cronCtx, appCtx)
+	appCron.RegisterServiceJobs(cronCtx, appCtx)
 	appCron.Start()
 }

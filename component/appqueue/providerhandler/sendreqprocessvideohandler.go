@@ -18,7 +18,7 @@ func SendRequestProcessVideo(ctx context.Context, appQ component.AppQueue, video
 	req := &pb.VideoInfo{
 		S3Key:             videoInfo.RawVidS3Key,
 		VideoId:           videoInfo.VideoId,
-		CourseId:          videoInfo.CourseId,
+		ServiceId:         videoInfo.ServiceId,
 		UploadedBy:        videoInfo.UploadedBy,
 		Timestamp:         videoInfo.Timestamp,
 		Retry:             int32(videoInfo.Retry),

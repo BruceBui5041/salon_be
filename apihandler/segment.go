@@ -14,17 +14,17 @@ func SegmentHandler(appCtx component.AppContext) gin.HandlerFunc {
 		// }
 
 		// videoId := uid.GetLocalID()
-		// courseSlug := c.Query("course_slug")
+		// serviceSlug := c.Query("service_slug")
 		// resolution := c.Query("resolution")
 		// segmentNumber := c.Query("number")
 
-		// if resolution == "" || segmentNumber == "" || courseSlug == "" {
+		// if resolution == "" || segmentNumber == "" || serviceSlug == "" {
 		// 	logger.AppLogger.Error(c, "Missing required parameters")
 		// 	panic(errors.New("missing required parameters"))
 		// }
 
 		// appCache := appCtx.GetAppCache()
-		// cacheInfo, err := appCache.GetVideoCache(c.Request.Context(), courseSlug, c.Query("video_id"))
+		// cacheInfo, err := appCache.GetVideoCache(c.Request.Context(), serviceSlug, c.Query("video_id"))
 		// if err != nil {
 		// 	logger.AppLogger.Error(c, "Error getting cached URL from DynamoDB", zap.Error(err))
 		// }
@@ -35,18 +35,18 @@ func SegmentHandler(appCtx component.AppContext) gin.HandlerFunc {
 		// } else {
 		// 	db := appCtx.GetMainDBConnection()
 		// 	videoStore := videostore.NewSQLStore(db)
-		// 	courseStore := coursestore.NewSQLStore(db)
-		// 	repo := videorepo.NewGetVideoRepo(videoStore, courseStore)
+		// 	serviceStore := servicestore.NewSQLStore(db)
+		// 	repo := videorepo.NewGetVideoRepo(videoStore, serviceStore)
 		// 	biz := videobiz.NewGetVideoBiz(repo)
 
-		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(videoId), courseSlug)
+		// 	video, err := biz.GetVideoById(c.Request.Context(), uint32(videoId), serviceSlug)
 		// 	if err != nil {
 		// 		panic(err)
 		// 	}
 
 		// 	videoURL = video.VideoURL
 
-		// 	err = appCache.SetVideoCache(c.Request.Context(), courseSlug, *video)
+		// 	err = appCache.SetVideoCache(c.Request.Context(), serviceSlug, *video)
 		// 	if err != nil {
 		// 		logger.AppLogger.Error(c.Request.Context(), "Error caching URL in DynamoDB", zap.Error(err))
 		// 	}

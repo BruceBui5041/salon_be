@@ -24,7 +24,7 @@ type CreateEnrollmentStore interface {
 	) (*models.Enrollment, error)
 }
 
-type CourseStore interface {
+type ServiceStore interface {
 	FindOne(
 		ctx context.Context,
 		conditions map[string]interface{},
@@ -33,27 +33,27 @@ type CourseStore interface {
 }
 
 type createEnrollmentRepo struct {
-	store       CreateEnrollmentStore
-	courseStore CourseStore
-	localPub    *gochannel.GoChannel
+	store        CreateEnrollmentStore
+	serviceStore ServiceStore
+	localPub     *gochannel.GoChannel
 }
 
 func NewCreateEnrollmentRepo(
 	store CreateEnrollmentStore,
-	courseStore CourseStore,
+	serviceStore ServiceStore,
 	localPub *gochannel.GoChannel,
 ) *createEnrollmentRepo {
 	return &createEnrollmentRepo{
-		store:       store,
-		courseStore: courseStore,
-		localPub:    localPub,
+		store:        store,
+		serviceStore: serviceStore,
+		localPub:     localPub,
 	}
 }
 
-func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userID, courseID uint32, paymentID *uint32) error {
+func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userID, serviceID uint32, paymentID *uint32) error {
 	newEnrollment := &models.Enrollment{
 		UserID:    userID,
-		ServiceID: courseID,
+		ServiceID: serviceID,
 		PaymentID: paymentID,
 	}
 
@@ -65,7 +65,7 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	enrollment, err := repo.store.FindOne(
 		ctx,
 		map[string]interface{}{"id": enrollId},
-		"Course",
+		"Service",
 		"Payment",
 	)
 	if err != nil {
@@ -76,14 +76,14 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	tempUser.GenUID(common.DbTypeUser)
 
 	enrollment.Mask(false)
-	enrollment.Course.Mask(false)
+	enrollment.Service.Mask(false)
 	enrollment.Payment.Mask(false)
 
 	// publish event to update user cache on local and dynamoDB
 	updateCacheMsg := &messagemodel.EnrollmentChangeInfo{
 		UserId:            tempUser.GetFakeId(),
-		CourseId:          enrollment.Course.GetFakeId(),
-		CourseSlug:        enrollment.Course.Slug,
+		ServiceId:         enrollment.Service.GetFakeId(),
+		ServiceSlug:       enrollment.Service.Slug,
 		EnrollmentId:      enrollment.GetFakeId(),
 		PaymentId:         enrollment.Payment.GetFakeId(),
 		TransactionStatus: enrollment.Payment.TransactionStatus,
@@ -101,10 +101,10 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	return nil
 }
 
-func (repo *createEnrollmentRepo) CheckDuplicateEnrollment(ctx context.Context, userID, courseID uint32) (bool, error) {
+func (repo *createEnrollmentRepo) CheckDuplicateEnrollment(ctx context.Context, userID, serviceID uint32) (bool, error) {
 	enrollment, err := repo.store.FindOne(ctx, map[string]interface{}{
-		"user_id":   userID,
-		"course_id": courseID,
+		"user_id":    userID,
+		"service_id": serviceID,
 	})
 	if err != nil {
 		if err == common.RecordNotFound {
@@ -115,10 +115,10 @@ func (repo *createEnrollmentRepo) CheckDuplicateEnrollment(ctx context.Context, 
 	return enrollment != nil, nil
 }
 
-func (repo *createEnrollmentRepo) FindCourse(
+func (repo *createEnrollmentRepo) FindService(
 	ctx context.Context,
 	conditions map[string]interface{},
 	moreInfo ...interface{},
 ) (*models.Service, error) {
-	return repo.courseStore.FindOne(ctx, conditions, moreInfo...)
+	return repo.serviceStore.FindOne(ctx, conditions, moreInfo...)
 }

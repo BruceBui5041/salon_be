@@ -17,8 +17,8 @@ func UpdateEnrollmentCache(
 ) error {
 	enrollment := &cache.EnrollmentCache{
 		UserId:            info.UserId,
-		CourseId:          info.CourseId,
-		CourseSlug:        info.CourseSlug,
+		ServiceId:         info.ServiceId,
+		ServiceSlug:       info.ServiceSlug,
 		EnrollmentId:      info.EnrollmentId,
 		PaymentId:         info.PaymentId,
 		TransactionStatus: info.TransactionStatus,
@@ -26,7 +26,7 @@ func UpdateEnrollmentCache(
 
 	appCache := appCtx.GetAppCache()
 
-	if err := appCache.DeleteEnrollmentCache(ctx, info.CourseId, info.UserId); err != nil {
+	if err := appCache.DeleteEnrollmentCache(ctx, info.ServiceId, info.UserId); err != nil {
 		logger.AppLogger.Error(ctx,
 			"Failed to DeleteEnrollmentCache",
 			zap.Error(err),

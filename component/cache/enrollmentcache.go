@@ -17,8 +17,8 @@ import (
 
 type EnrollmentCache struct {
 	UserId            string `json:"user_id"`
-	CourseId          string `json:"course_id"`
-	CourseSlug        string `json:"course_slug"`
+	ServiceId         string `json:"service_id"`
+	ServiceSlug       string `json:"service_slug"`
 	EnrollmentId      string `json:"enrollment_id"`
 	PaymentId         string `json:"payment_id"`
 	TransactionStatus string `json:"transaction_status"`
@@ -28,7 +28,7 @@ func (ac *appCache) SetEnrollmentCache(ctx context.Context, enrollmentCache *Enr
 	cacheKey := fmt.Sprintf(
 		"%s:%s:%s",
 		appconst.EnrollmentPrefix,
-		enrollmentCache.CourseSlug,
+		enrollmentCache.ServiceSlug,
 		enrollmentCache.UserId,
 	)
 
@@ -52,11 +52,11 @@ func (ac *appCache) SetEnrollmentCache(ctx context.Context, enrollmentCache *Enr
 		"userid": {
 			S: aws.String(enrollmentCache.UserId),
 		},
-		"courseslug": {
-			S: aws.String(enrollmentCache.CourseSlug),
+		"serviceslug": {
+			S: aws.String(enrollmentCache.ServiceSlug),
 		},
-		"courseid": {
-			S: aws.String(enrollmentCache.CourseId),
+		"serviceid": {
+			S: aws.String(enrollmentCache.ServiceId),
 		},
 		"enrollmentid": {
 			S: aws.String(enrollmentCache.EnrollmentId),
@@ -77,7 +77,7 @@ func (ac *appCache) SetEnrollmentCache(ctx context.Context, enrollmentCache *Enr
 		enrollmentTableName,
 		item,
 		cacheKey,
-		fmt.Sprintf("%s:%s", enrollmentCache.CourseSlug, enrollmentCache.UserId),
+		fmt.Sprintf("%s:%s", enrollmentCache.ServiceSlug, enrollmentCache.UserId),
 		cacheDuration,
 	)
 
@@ -86,17 +86,17 @@ func (ac *appCache) SetEnrollmentCache(ctx context.Context, enrollmentCache *Enr
 			zap.Error(err),
 			zap.String("enrollmentId", enrollmentCache.EnrollmentId),
 			zap.String("userId", enrollmentCache.UserId),
-			zap.String("courseId", enrollmentCache.CourseId),
-			zap.String("courseSlug", enrollmentCache.CourseSlug),
+			zap.String("serviceId", enrollmentCache.ServiceId),
+			zap.String("serviceSlug", enrollmentCache.ServiceSlug),
 			zap.Int("cacheTTL", enrollmentCacheTTL))
 	}
 
 	return err
 }
 
-func (ac *appCache) GetEnrollmentCache(ctx context.Context, courseSlug, userId string) (*EnrollmentCache, error) {
+func (ac *appCache) GetEnrollmentCache(ctx context.Context, serviceSlug, userId string) (*EnrollmentCache, error) {
 	start := time.Now()
-	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.EnrollmentPrefix, courseSlug, userId)
+	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.EnrollmentPrefix, serviceSlug, userId)
 
 	if cachedEnrollment, found := ac.GetLocalCache().Get(cacheKey); found {
 		if enrollment, ok := cachedEnrollment.(*EnrollmentCache); ok {
@@ -105,7 +105,7 @@ func (ac *appCache) GetEnrollmentCache(ctx context.Context, courseSlug, userId s
 		logger.AppLogger.Warn(ctx, "Failed to retrieve enrollment from memory cache", zap.String("key", cacheKey))
 	}
 
-	enrollmentCache, err := ac.getEnrollmentCacheDynamoDB(ctx, cacheKey, courseSlug)
+	enrollmentCache, err := ac.getEnrollmentCacheDynamoDB(ctx, cacheKey, serviceSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (ac *appCache) GetEnrollmentCache(ctx context.Context, courseSlug, userId s
 	return enrollmentCache, nil
 }
 
-func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, courseSlug string) (*EnrollmentCache, error) {
+func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, serviceSlug string) (*EnrollmentCache, error) {
 	enrollmentTableName := os.Getenv("DYNAMODB_ENROLLMENT_TABLE_NAME")
 
 	input := &dynamodb.GetItemInput{
@@ -132,8 +132,8 @@ func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, co
 			"cachekey": {
 				S: aws.String(cacheKey),
 			},
-			"courseslug": {
-				S: aws.String(courseSlug),
+			"serviceslug": {
+				S: aws.String(serviceSlug),
 			},
 		},
 		TableName:      aws.String(enrollmentTableName),
@@ -154,11 +154,11 @@ func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, co
 	if v, ok := result.Item["userid"]; ok && v.S != nil {
 		enrollmentCache.UserId = *v.S
 	}
-	if v, ok := result.Item["courseid"]; ok && v.S != nil {
-		enrollmentCache.CourseId = *v.S
+	if v, ok := result.Item["serviceid"]; ok && v.S != nil {
+		enrollmentCache.ServiceId = *v.S
 	}
-	if v, ok := result.Item["courseslug"]; ok && v.S != nil {
-		enrollmentCache.CourseSlug = *v.S
+	if v, ok := result.Item["serviceslug"]; ok && v.S != nil {
+		enrollmentCache.ServiceSlug = *v.S
 	}
 	if v, ok := result.Item["enrollmentid"]; ok && v.S != nil {
 		enrollmentCache.EnrollmentId = *v.S
@@ -170,7 +170,7 @@ func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, co
 		enrollmentCache.TransactionStatus = *v.S
 	}
 
-	if enrollmentCache.UserId == "" || enrollmentCache.CourseSlug == "" {
+	if enrollmentCache.UserId == "" || enrollmentCache.ServiceSlug == "" {
 		logger.AppLogger.Warn(ctx, "dynamoDB item incomplete", zap.String("key", cacheKey))
 		return nil, nil
 	}
@@ -178,11 +178,11 @@ func (ac *appCache) getEnrollmentCacheDynamoDB(ctx context.Context, cacheKey, co
 	return enrollmentCache, nil
 }
 
-func (ac *appCache) DeleteEnrollmentCache(ctx context.Context, courseSlug, userId string) error {
-	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.EnrollmentPrefix, courseSlug, userId)
+func (ac *appCache) DeleteEnrollmentCache(ctx context.Context, serviceSlug, userId string) error {
+	cacheKey := fmt.Sprintf("%s:%s:%s", appconst.EnrollmentPrefix, serviceSlug, userId)
 
 	ac.GetLocalCache().Delete(cacheKey)
 
-	logger.AppLogger.Info(ctx, "Enrollment cache deleted successfully", zap.String("courseSlug", courseSlug), zap.String("userId", userId))
+	logger.AppLogger.Info(ctx, "Enrollment cache deleted successfully", zap.String("serviceSlug", serviceSlug), zap.String("userId", userId))
 	return nil
 }

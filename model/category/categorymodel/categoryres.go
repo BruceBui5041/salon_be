@@ -16,18 +16,18 @@ type CategoryResponse struct {
 	common.SQLModel `json:",inline"`
 	Name            string           `json:"name"`
 	Description     string           `json:"description"`
-	Courses         []models.Service `json:"course,omitempty"`
-	CourseCount     int              `json:"course_count"`
+	Services        []models.Service `json:"service,omitempty"`
+	ServiceCount    int              `json:"service_count"`
 }
 
-func (cr *CategoryResponse) CountCourse() {
-	cr.CourseCount = lo.CountBy(cr.Courses, func(course models.Service) bool {
-		return course.Status == "active"
+func (cr *CategoryResponse) CountService() {
+	cr.ServiceCount = lo.CountBy(cr.Services, func(service models.Service) bool {
+		return service.Status == "active"
 	})
 }
 
-func (cr *CategoryResponse) RemoveCoursesResponse() {
-	cr.Courses = []models.Service{}
+func (cr *CategoryResponse) RemoveServicesResponse() {
+	cr.Services = []models.Service{}
 }
 
 // func (cr *CategoryResponse) Mask(isAdmin bool) {
