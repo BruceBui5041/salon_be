@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"video_server/appconst"
-	"video_server/component/logger"
-	"video_server/watermill/messagemodel"
+	"salon_be/appconst"
+	"salon_be/component/logger"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"

@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"video_server/appconst"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/tokenprovider/jwt"
-	models "video_server/model"
-	"video_server/utils"
+	"salon_be/appconst"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/tokenprovider/jwt"
+	models "salon_be/model"
+	"salon_be/utils"
 
 	"github.com/gin-gonic/gin"
 )

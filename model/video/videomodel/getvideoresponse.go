@@ -1,8 +1,8 @@
 package videomodel
 
 import (
-	"video_server/common"
-	models "video_server/model"
+	"salon_be/common"
+	models "salon_be/model"
 )
 
 type GetCourseVideoReponse struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/video/videomodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/video/videomodel"
 )
 
 type VideoRepo interface {

@@ -2,9 +2,9 @@ package progressrepo
 
 import (
 	"context"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/progress/progressmodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/progress/progressmodel"
 )
 
 type CreateProgressStore interface {

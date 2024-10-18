@@ -3,11 +3,11 @@ package userprofilerepo
 import (
 	"context"
 	"fmt"
-	"video_server/appconst"
-	"video_server/component/logger"
-	models "video_server/model"
-	"video_server/model/userprofile/userprofilemodel"
-	"video_server/storagehandler"
+	"salon_be/appconst"
+	"salon_be/component/logger"
+	models "salon_be/model"
+	"salon_be/model/userprofile/userprofilemodel"
+	"salon_be/storagehandler"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/jinzhu/copier"

@@ -1,8 +1,8 @@
 package jwt
 
 import (
+	"salon_be/component/tokenprovider"
 	"time"
-	"video_server/component/tokenprovider"
 
 	"github.com/dgrijalva/jwt-go"
 )

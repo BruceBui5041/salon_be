@@ -2,7 +2,7 @@ package userprofilestore
 
 import (
 	"context"
-	models "video_server/model"
+	models "salon_be/model"
 
 	"gorm.io/gorm"
 )

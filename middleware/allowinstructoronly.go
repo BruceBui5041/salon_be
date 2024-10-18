@@ -3,9 +3,9 @@ package middleware
 import (
 	"encoding/json"
 	"errors"
-	"video_server/common"
-	"video_server/component"
-	models "video_server/model"
+	"salon_be/common"
+	"salon_be/component"
+	models "salon_be/model"
 
 	"github.com/gin-gonic/gin"
 )

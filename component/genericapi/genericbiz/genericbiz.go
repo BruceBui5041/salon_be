@@ -2,8 +2,8 @@ package genericbiz
 
 import (
 	"context"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/component/genericapi/genericstore"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/component/genericapi/genericstore"
 )
 
 type GenericBiz interface {

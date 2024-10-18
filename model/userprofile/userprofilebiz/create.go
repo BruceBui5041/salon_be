@@ -3,9 +3,9 @@ package userprofilebiz
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/userprofile/userprofilemodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/userprofile/userprofilemodel"
 )
 
 type UserProfileRepo interface {

@@ -2,9 +2,9 @@ package userbiz
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/logger"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/logger"
 
 	"go.uber.org/zap"
 )

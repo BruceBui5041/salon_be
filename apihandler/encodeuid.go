@@ -2,9 +2,9 @@ package apihandler
 
 import (
 	"net/http"
+	"salon_be/common"
+	"salon_be/component"
 	"strconv"
-	"video_server/common"
-	"video_server/component"
 
 	"github.com/gin-gonic/gin"
 )

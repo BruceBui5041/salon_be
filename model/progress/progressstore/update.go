@@ -2,8 +2,8 @@ package progressstore
 
 import (
 	"context"
-	"video_server/common"
-	models "video_server/model"
+	"salon_be/common"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) Update(

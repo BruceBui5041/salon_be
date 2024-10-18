@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"regexp"
-	"video_server/common"
-	"video_server/component/hasher"
-	"video_server/component/tokenprovider"
-	models "video_server/model"
-	"video_server/model/user/usermodel"
+	"salon_be/common"
+	"salon_be/component/hasher"
+	"salon_be/component/tokenprovider"
+	models "salon_be/model"
+	"salon_be/model/user/usermodel"
 )
 
 type RegisterStorage interface {

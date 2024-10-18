@@ -2,8 +2,8 @@ package rolestore
 
 import (
 	"context"
-	models "video_server/model"
-	"video_server/model/role/rolemodel"
+	models "salon_be/model"
+	"salon_be/model/role/rolemodel"
 )
 
 func (s *sqlStore) Update(ctx context.Context, id uint32, data *rolemodel.UpdateRole) error {

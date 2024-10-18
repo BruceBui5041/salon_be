@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 	"encoding/json"
-	"video_server/common"
-	"video_server/component/genericapi/modelhelper"
-	"video_server/component/logger"
+	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
+	"salon_be/component/logger"
 
 	"github.com/samber/lo"
 	"go.uber.org/zap"

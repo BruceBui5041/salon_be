@@ -2,9 +2,9 @@ package permissionrepo
 
 import (
 	"context"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/permission/permissionmodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/permission/permissionmodel"
 )
 
 type CreatePermissionStore interface {

@@ -3,9 +3,9 @@ package enrollmentbiz
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/enrollment/enrollmentmodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/enrollment/enrollmentmodel"
 
 	"github.com/shopspring/decimal"
 )

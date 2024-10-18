@@ -3,9 +3,9 @@ package cronjob
 import (
 	"context"
 	"fmt"
+	"salon_be/component/logger"
 	"strconv"
 	"time"
-	"video_server/component/logger"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"

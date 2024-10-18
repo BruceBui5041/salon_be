@@ -1,8 +1,8 @@
 package models
 
 import (
-	"video_server/common"
-	"video_server/storagehandler"
+	"salon_be/common"
+	"salon_be/storagehandler"
 
 	"gorm.io/gorm"
 )

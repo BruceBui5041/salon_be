@@ -2,11 +2,11 @@ package enrollmentrepo
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component/logger"
-	models "video_server/model"
-	"video_server/watermill"
-	"video_server/watermill/messagemodel"
+	"salon_be/common"
+	"salon_be/component/logger"
+	models "salon_be/model"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"go.uber.org/zap"

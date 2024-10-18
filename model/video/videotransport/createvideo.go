@@ -1,22 +1,15 @@
 package videotransport
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/logger"
+	pb "salon_be/proto/video_service/video_service"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 	"time"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/logger"
-	"video_server/model/course/coursestore"
-	"video_server/model/video/videobiz"
-	"video_server/model/video/videomodel"
-	"video_server/model/video/videorepo"
-	"video_server/model/video/videostore"
-	"video_server/model/videoprocessinfo/videoprocessinfostore"
-	pb "video_server/proto/video_service/video_service"
-	"video_server/watermill"
-	"video_server/watermill/messagemodel"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,48 +18,29 @@ import (
 
 func CreateVideoHandler(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input videomodel.CreateVideo
+		// var input videomodel.CreateVideo
 
-		if err := c.ShouldBind(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+		// if err := c.ShouldBind(&input); err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// 	return
+		// }
 
-		videoFile, err := c.FormFile("video")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "No video file uploaded"})
-			return
-		}
+		// videoFile, err := c.FormFile("video")
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "No video file uploaded"})
+		// 	return
+		// }
 
-		thumbnailFile, err := c.FormFile("thumbnail")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "No thumbnail file uploaded"})
-			return
-		}
-
-		requester, ok := c.MustGet(common.CurrentUser).(common.Requester)
-		if !ok {
-			panic(common.ErrInvalidRequest(errors.New("cannot find requester")))
-		}
+		// requester, ok := c.MustGet(common.CurrentUser).(common.Requester)
+		// if !ok {
+		// 	panic(common.ErrInvalidRequest(errors.New("cannot find requester")))
+		// }
 
 		db := appCtx.GetMainDBConnection()
-		svc := appCtx.GetS3Client()
+		// svc := appCtx.GetS3Client()
 
-		if err = db.Transaction(func(tx *gorm.DB) error {
-			courseStore := coursestore.NewSQLStore(tx)
-			videoStore := videostore.NewSQLStore(tx)
-			videoProcessStore := videoprocessinfostore.NewSQLStore(tx)
-			repo := videorepo.NewCreateVideoRepo(videoStore, courseStore, videoProcessStore, svc)
-			biz := videobiz.NewCreateVideoBiz(repo)
+		if err := db.Transaction(func(tx *gorm.DB) error {
 
-			video, err := biz.CreateNewVideo(c.Request.Context(), &input, videoFile, thumbnailFile)
-			if err != nil {
-				panic(common.ErrInternal(err))
-			}
-
-			requester.Mask(false)
-
-			c.JSON(http.StatusOK, common.SimpleSuccessResponse(video))
 			return nil
 		}); err != nil {
 			panic(common.ErrInternal(err))

@@ -3,9 +3,9 @@ package paymentbiz
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/payment/paymentmodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/payment/paymentmodel"
 
 	"github.com/jinzhu/copier"
 )

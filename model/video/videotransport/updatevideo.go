@@ -2,12 +2,12 @@ package videotransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/video/videobiz"
-	"video_server/model/video/videomodel"
-	"video_server/model/video/videorepo"
-	"video_server/model/video/videostore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/video/videobiz"
+	"salon_be/model/video/videomodel"
+	"salon_be/model/video/videorepo"
+	"salon_be/model/video/videostore"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

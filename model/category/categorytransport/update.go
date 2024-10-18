@@ -2,13 +2,13 @@ package categorytransport
 
 import (
 	"net/http"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/category/categorybiz"
+	"salon_be/model/category/categorymodel"
+	"salon_be/model/category/categoryrepo"
+	"salon_be/model/category/categorystore"
 	"strconv"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/category/categorybiz"
-	"video_server/model/category/categorymodel"
-	"video_server/model/category/categoryrepo"
-	"video_server/model/category/categorystore"
 
 	"github.com/gin-gonic/gin"
 )

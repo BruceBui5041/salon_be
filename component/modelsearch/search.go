@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"salon_be/common"
+	"salon_be/component/logger"
 	"strings"
-	"video_server/common"
-	"video_server/component/logger"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"

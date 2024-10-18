@@ -1,9 +1,9 @@
 package models
 
 import (
+	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
 	"time"
-	"video_server/common"
-	"video_server/component/genericapi/modelhelper"
 
 	"gorm.io/gorm"
 )

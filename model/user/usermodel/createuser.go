@@ -1,6 +1,6 @@
 package usermodel
 
-import "video_server/common"
+import "salon_be/common"
 
 // CreateUser represents the data needed to create a new user
 type CreateUser struct {

@@ -2,7 +2,7 @@ package watermill
 
 import (
 	"context"
-	"video_server/component"
+	"salon_be/component"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"

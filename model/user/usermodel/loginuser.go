@@ -2,9 +2,9 @@ package usermodel
 
 import (
 	"errors"
-	"video_server/common"
-	"video_server/component/tokenprovider"
-	models "video_server/model"
+	"salon_be/common"
+	"salon_be/component/tokenprovider"
+	models "salon_be/model"
 )
 
 type UserLogin struct {

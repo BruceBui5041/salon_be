@@ -1,8 +1,8 @@
 package models
 
 import (
+	"salon_be/common"
 	"time"
-	"video_server/common"
 
 	"gorm.io/gorm"
 )

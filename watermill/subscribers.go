@@ -3,8 +3,8 @@ package watermill
 import (
 	"context"
 	"log"
-	"video_server/appconst"
-	"video_server/component"
+	"salon_be/appconst"
+	"salon_be/component"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 )

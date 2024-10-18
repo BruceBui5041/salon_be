@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"salon_be/appconst"
+	"salon_be/component/logger"
 	"time"
-	"video_server/appconst"
-	"video_server/component/logger"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"

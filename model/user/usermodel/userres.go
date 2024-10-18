@@ -1,9 +1,9 @@
 package usermodel
 
 import (
+	"salon_be/common"
+	models "salon_be/model"
 	"time"
-	"video_server/common"
-	models "video_server/model"
 )
 
 type GetUserResponse struct {

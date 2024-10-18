@@ -2,9 +2,9 @@ package userrepo
 
 import (
 	"context"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/user/usermodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/user/usermodel"
 
 	"gorm.io/gorm"
 )

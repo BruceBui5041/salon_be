@@ -2,8 +2,8 @@ package videorepo
 
 import (
 	"context"
-	models "video_server/model"
-	"video_server/model/video/videomodel"
+	models "salon_be/model"
+	"salon_be/model/video/videomodel"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 )

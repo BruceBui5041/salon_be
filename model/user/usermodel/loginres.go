@@ -1,7 +1,7 @@
 package usermodel
 
 import (
-	"video_server/component/tokenprovider"
+	"salon_be/component/tokenprovider"
 )
 
 type LoginRes struct {

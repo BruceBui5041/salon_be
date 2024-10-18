@@ -3,12 +3,12 @@ package roletransport
 import (
 	"errors"
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/role/rolebiz"
-	"video_server/model/role/rolemodel"
-	"video_server/model/role/rolerepo"
-	"video_server/model/role/rolestore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/role/rolebiz"
+	"salon_be/model/role/rolemodel"
+	"salon_be/model/role/rolerepo"
+	"salon_be/model/role/rolestore"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

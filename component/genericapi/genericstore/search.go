@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"video_server/common"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/component/genericapi/modelhelper"
-	"video_server/component/modelsearch"
+	"salon_be/common"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/component/genericapi/modelhelper"
+	"salon_be/component/modelsearch"
 
 	"github.com/jinzhu/copier"
 )

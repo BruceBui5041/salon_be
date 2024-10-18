@@ -2,7 +2,7 @@ package rolestore
 
 import (
 	"context"
-	models "video_server/model"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) Find(ctx context.Context, cond map[string]interface{}) (*models.Role, error) {

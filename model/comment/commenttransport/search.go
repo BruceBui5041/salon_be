@@ -2,11 +2,11 @@ package commenttransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/model/comment/commentbiz"
-	"video_server/model/comment/commentstore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/model/comment/commentbiz"
+	"salon_be/model/comment/commentstore"
 
 	"github.com/gin-gonic/gin"
 )

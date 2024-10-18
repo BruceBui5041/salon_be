@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/logger"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

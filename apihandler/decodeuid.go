@@ -2,8 +2,8 @@ package apihandler
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
+	"salon_be/common"
+	"salon_be/component"
 
 	"github.com/gin-gonic/gin"
 )

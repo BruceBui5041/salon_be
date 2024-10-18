@@ -1,4 +1,4 @@
-module video_server
+module salon_be
 
 go 1.22.1
 

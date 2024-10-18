@@ -3,11 +3,11 @@ package grpcserver
 import (
 	"context"
 	"fmt"
+	"salon_be/component"
+	"salon_be/component/logger"
+	pb "salon_be/proto/video_service/video_service"
+	"salon_be/watermill/messagemodel"
 	"time"
-	"video_server/component"
-	"video_server/component/logger"
-	pb "video_server/proto/video_service/video_service"
-	"video_server/watermill/messagemodel"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

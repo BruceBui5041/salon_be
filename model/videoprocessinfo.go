@@ -1,7 +1,7 @@
 package models
 
 import (
-	"video_server/common"
+	"salon_be/common"
 )
 
 const (

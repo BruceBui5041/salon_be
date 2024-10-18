@@ -2,13 +2,13 @@ package userbiz
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component/hasher"
-	"video_server/component/tokenprovider"
-	models "video_server/model"
-	"video_server/model/user/usermodel"
-	"video_server/watermill"
-	"video_server/watermill/messagemodel"
+	"salon_be/common"
+	"salon_be/component/hasher"
+	"salon_be/component/tokenprovider"
+	models "salon_be/model"
+	"salon_be/model/user/usermodel"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/jinzhu/copier"

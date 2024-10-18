@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"salon_be/component"
+	"salon_be/component/logger"
+	"salon_be/watermill"
 	"sync"
-	"video_server/component"
-	"video_server/component/logger"
-	"video_server/watermill"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

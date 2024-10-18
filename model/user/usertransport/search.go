@@ -2,11 +2,11 @@ package usertransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/model/user/userbiz"
-	"video_server/model/user/userstore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/model/user/userbiz"
+	"salon_be/model/user/userstore"
 
 	"github.com/gin-gonic/gin"
 )

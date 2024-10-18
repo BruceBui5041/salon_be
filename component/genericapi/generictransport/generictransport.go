@@ -1,6 +1,6 @@
 package generictransport
 
-import "video_server/component"
+import "salon_be/component"
 
 type GenericTransport struct {
 	AppContext component.AppContext

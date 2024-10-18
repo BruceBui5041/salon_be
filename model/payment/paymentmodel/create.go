@@ -1,7 +1,7 @@
 package paymentmodel
 
 import (
-	"video_server/common"
+	"salon_be/common"
 )
 
 type CreatePayment struct {

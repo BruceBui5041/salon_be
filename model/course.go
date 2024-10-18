@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-	"video_server/common"
-	"video_server/component/genericapi/modelhelper"
-	"video_server/storagehandler"
+	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
+	"salon_be/storagehandler"
 
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"

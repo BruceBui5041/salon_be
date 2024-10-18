@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"log"
+	"salon_be/component/logger"
+	"salon_be/component/modelsearch"
+	models "salon_be/model"
 	"testing"
-	"video_server/component/logger"
-	"video_server/component/modelsearch"
-	models "video_server/model"
 
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"

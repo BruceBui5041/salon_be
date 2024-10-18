@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"video_server/appconst"
-	"video_server/watermill/messagemodel"
+	"salon_be/appconst"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/go-redis/redis/v8"
 )

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"salon_be/appconst"
+	pb "salon_be/proto/video_service/video_service"
 	"strings"
 	"time"
-	"video_server/appconst"
-	pb "video_server/proto/video_service/video_service"
 
 	"github.com/gin-gonic/gin"
 )

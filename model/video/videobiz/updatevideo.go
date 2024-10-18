@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
-	"video_server/appconst"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/video/videomodel"
-	"video_server/storagehandler"
+	"salon_be/appconst"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/video/videomodel"
+	"salon_be/storagehandler"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 )

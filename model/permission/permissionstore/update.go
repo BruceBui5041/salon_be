@@ -2,7 +2,7 @@ package permissionstore
 
 import (
 	"context"
-	models "video_server/model"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) Update(ctx context.Context, id uint32, data *models.Permission) error {

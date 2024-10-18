@@ -3,8 +3,8 @@ package storagehandler
 import (
 	"fmt"
 	"path/filepath"
-	"video_server/appconst"
-	"video_server/utils"
+	"salon_be/appconst"
+	"salon_be/utils"
 
 	"github.com/google/uuid"
 )

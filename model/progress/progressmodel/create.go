@@ -1,8 +1,8 @@
 package progressmodel
 
 import (
+	"salon_be/common"
 	"time"
-	"video_server/common"
 )
 
 type CreateProgress struct {

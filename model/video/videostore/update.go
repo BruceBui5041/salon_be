@@ -2,7 +2,7 @@ package videostore
 
 import (
 	"context"
-	"video_server/model/video/videomodel"
+	"salon_be/model/video/videomodel"
 )
 
 func (s *sqlStore) UpdateVideo(

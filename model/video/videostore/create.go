@@ -2,7 +2,7 @@ package videostore
 
 import (
 	"context"
-	models "video_server/model"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) CreateNewVideo(

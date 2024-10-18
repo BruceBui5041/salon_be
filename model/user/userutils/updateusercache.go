@@ -2,11 +2,11 @@ package userutils
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/logger"
-	"video_server/model/user/userrepo"
-	"video_server/model/user/userstore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/logger"
+	"salon_be/model/user/userrepo"
+	"salon_be/model/user/userstore"
 
 	"go.uber.org/zap"
 )

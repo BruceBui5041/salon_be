@@ -3,8 +3,8 @@ package videorepo
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
+	"salon_be/common"
+	models "salon_be/model"
 )
 
 type GetVideoCourseStore interface {

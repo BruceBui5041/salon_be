@@ -2,9 +2,9 @@ package userstore
 
 import (
 	"context"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/component/modelsearch"
-	models "video_server/model"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/component/modelsearch"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) Search(

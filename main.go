@@ -8,34 +8,29 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"salon_be/apihandler"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/component/appqueue"
+	"salon_be/component/cache"
+	"salon_be/component/genericapi/generictransport"
+	"salon_be/component/grpcserver"
+	"salon_be/component/logger"
+	"salon_be/component/telemetry"
+	"salon_be/component/ws"
+	"salon_be/middleware"
+	"salon_be/model/category/categorytransport"
+	"salon_be/model/comment/commenttransport"
+	"salon_be/model/payment/paymenttransport"
+	"salon_be/model/permission/permissiontransport"
+	"salon_be/model/role/roletransport"
+	"salon_be/model/user/usertransport"
+	"salon_be/model/userprofile/userprofiletransport"
+	"salon_be/model/video/videotransport"
+	"salon_be/watermill"
 	"time"
-	"video_server/apihandler"
-	"video_server/common"
-	"video_server/component"
-	"video_server/component/appqueue"
-	"video_server/component/appqueue/consumerhandler"
-	"video_server/component/cache"
-	"video_server/component/cronjob"
-	"video_server/component/genericapi/generictransport"
-	"video_server/component/grpcserver"
-	"video_server/component/logger"
-	"video_server/component/telemetry"
-	"video_server/component/ws"
-	"video_server/middleware"
-	"video_server/model/category/categorytransport"
-	"video_server/model/comment/commenttransport"
-	"video_server/model/course/coursetransport"
-	"video_server/model/lecture/lecturetransport"
-	"video_server/model/lesson/lessontransport"
-	"video_server/model/payment/paymenttransport"
-	"video_server/model/permission/permissiontransport"
-	"video_server/model/role/roletransport"
-	"video_server/model/user/usertransport"
-	"video_server/model/userprofile/userprofiletransport"
-	"video_server/model/video/videotransport"
-	"video_server/watermill"
 
-	pb "video_server/proto/video_service/video_service"
+	pb "salon_be/proto/video_service/video_service"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -48,7 +43,6 @@ import (
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -96,28 +90,29 @@ func main() {
 		createAppCache(awsSession),
 		awsSession,
 		appqueue.CreateAppQueue(awsSession),
-		cronjob.CreateCron(),
+		// cronjob.CreateCron(),
+		nil,
 		s3.New(awsSession),
 	)
 
-	appCache := appContext.GetAppCache()
-	if err := appCache.CreateDynamoDBTables(ctx, appCache.GetDynamoDBTableDefinitions()); err != nil {
-		logger.AppLogger.Fatal(ctx, "create dynamaDB tables failed", zap.Error(err))
-	}
+	// appCache := appContext.GetAppCache()
+	// if err := appCache.CreateDynamoDBTables(ctx, appCache.GetDynamoDBTableDefinitions()); err != nil {
+	// 	logger.AppLogger.Fatal(ctx, "create dynamaDB tables failed", zap.Error(err))
+	// }
 
-	results := appContext.GetAppQueue().CreateSQSQueues(ctx)
-	logger.AppLogger.Info(ctx, "created sqs queue", zap.Any("res", results))
+	// results := appContext.GetAppQueue().CreateSQSQueues(ctx)
+	// logger.AppLogger.Info(ctx, "created sqs queue", zap.Any("res", results))
 
 	go watermill.StartSubscribers(appContext)
 
 	// Start gRPC server
 	// startGRPCServer()
 
-	videoProcessProgressTopic := viper.GetString("UPDATE_VIDEO_PROCESS_PROGRESS_TOPIC")
-	consumeTopics := []string{videoProcessProgressTopic}
-	go appContext.GetAppQueue().StartSQSMessageListener(ctx, appContext, consumeTopics, consumerhandler.QueueMsgHander)
+	// videoProcessProgressTopic := viper.GetString("UPDATE_VIDEO_PROCESS_PROGRESS_TOPIC")
+	// consumeTopics := []string{videoProcessProgressTopic}
+	// go appContext.GetAppQueue().StartSQSMessageListener(ctx, appContext, consumeTopics, consumerhandler.QueueMsgHander)
 
-	startCronJobs(appContext)
+	// startCronJobs(appContext)
 
 	// Start HTTP server
 	startHTTPServer(appContext)
@@ -210,65 +205,10 @@ func startHTTPServer(appCtx component.AppContext) {
 		userprofile.PUT("", middleware.RequiredAuth(appCtx), userprofiletransport.UpdateProfileHandler(appCtx))
 	}
 
-	previewVideo := r.Group("/preview_video", middleware.PublicVideoCheck(appCtx))
-	{
-		// for get master list
-		previewVideo.GET("/playlist/:course_slug/:video_id",
-			apihandler.GetPlaylistHandler(appCtx),
-		)
-
-		// for get video playlish
-		previewVideo.GET(
-			"/playlist/:course_slug/:video_id/:resolution/:playlistName",
-			apihandler.GetPlaylistHandler(appCtx),
-		)
-
-		previewVideo.GET("",
-			apihandler.SegmentHandler(appCtx),
-		)
-	}
-
 	commentGroup := r.Group("/comment")
 	{
 		commentGroup.POST("", middleware.RequiredAuth(appCtx), commenttransport.CreateCommentHandler(appCtx))
 		commentGroup.PUT("/:id", middleware.RequiredAuth(appCtx), commenttransport.UpdateCommentHandler(appCtx))
-	}
-
-	courseGroup := r.Group("/course")
-	{
-		courseGroup.GET("", coursetransport.ListCourses(appCtx))
-		courseGroup.GET("/:id", coursetransport.GetCourseByID(appCtx))
-
-	}
-
-	courseGroupInstructor := r.Group(
-		"/course",
-		middleware.RequiredAuth(appCtx),
-		middleware.AllowIntructorOnly(appCtx),
-	)
-	{
-		courseGroupInstructor.POST("", coursetransport.CreateCourseHandler(appCtx))
-		courseGroupInstructor.PUT("/:id", coursetransport.UpdateCourseHandler(appCtx))
-		courseGroupInstructor.GET("/:id/videos", coursetransport.GetCourseVideos(appCtx))
-	}
-
-	lessonGroup := r.Group("/lessons", middleware.RequiredAuth(appCtx), middleware.AllowIntructorOnly(appCtx))
-	{
-		lessonGroup.POST("", lessontransport.CreateLessonHandler(appCtx))
-		lessonGroup.PUT("/:id", lessontransport.UpdateLessonHandler(appCtx))
-		lessonGroup.DELETE("/:id", lessontransport.DeleteLessonHandler(appCtx))
-		lessonGroup.GET("/:id", lessontransport.GetLessonHandler(appCtx))
-	}
-
-	lectureGroup := r.Group(
-		"/lectures",
-		middleware.RequiredAuth(appCtx),
-		middleware.AllowIntructorOnly(appCtx),
-	)
-	{
-		lectureGroup.POST("", lecturetransport.CreateLectureHandler(appCtx))
-		lectureGroup.PUT("/:id", lecturetransport.UpdateLectureHandler(appCtx))
-		lectureGroup.DELETE("/:id", lecturetransport.DeleteLectureHandler(appCtx))
 	}
 
 	videoGroupInstructor := r.Group("/video",
@@ -283,7 +223,6 @@ func startHTTPServer(appCtx component.AppContext) {
 	video := r.Group(
 		"/video",
 		middleware.RequiredAuth(appCtx),
-		middleware.EnrollmentCheck(appCtx),
 	)
 	{
 		// for get master list

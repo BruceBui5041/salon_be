@@ -2,9 +2,9 @@ package watermill
 
 import (
 	"encoding/json"
-	"video_server/component"
-	"video_server/component/logger"
-	"video_server/watermill/messagemodel"
+	"salon_be/component"
+	"salon_be/component/logger"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"go.uber.org/zap"

@@ -3,9 +3,9 @@ package cache
 import (
 	"context"
 	"fmt"
+	"salon_be/component/logger"
 	"strings"
 	"time"
-	"video_server/component/logger"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"

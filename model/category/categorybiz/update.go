@@ -3,9 +3,9 @@ package categorybiz
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/category/categorymodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/category/categorymodel"
 )
 
 type UpdateCategoryRepo interface {

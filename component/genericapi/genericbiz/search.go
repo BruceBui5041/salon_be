@@ -2,8 +2,8 @@ package genericbiz
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component/genericapi/genericmodel"
+	"salon_be/common"
+	"salon_be/component/genericapi/genericmodel"
 )
 
 func (b *genericBiz) Search(

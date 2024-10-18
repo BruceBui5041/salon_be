@@ -2,10 +2,10 @@ package generictransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component/genericapi/genericbiz"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/component/genericapi/genericstore"
+	"salon_be/common"
+	"salon_be/component/genericapi/genericbiz"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/component/genericapi/genericstore"
 
 	"github.com/gin-gonic/gin"
 )

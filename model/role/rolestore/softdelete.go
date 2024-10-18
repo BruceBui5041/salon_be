@@ -2,7 +2,7 @@ package rolestore
 
 import (
 	"context"
-	models "video_server/model"
+	models "salon_be/model"
 )
 
 func (s *sqlStore) SoftDelete(ctx context.Context, id uint32) error {

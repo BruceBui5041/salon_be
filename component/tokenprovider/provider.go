@@ -2,9 +2,9 @@ package tokenprovider
 
 import (
 	"errors"
+	"salon_be/common"
+	models "salon_be/model"
 	"time"
-	"video_server/common"
-	models "video_server/model"
 )
 
 type Provider interface {

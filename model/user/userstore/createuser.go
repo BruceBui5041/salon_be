@@ -3,8 +3,8 @@ package userstore
 import (
 	"context"
 	"errors"
-	models "video_server/model"
-	user "video_server/model/user/usermodel"
+	models "salon_be/model"
+	user "salon_be/model/user/usermodel"
 
 	"gorm.io/gorm"
 )

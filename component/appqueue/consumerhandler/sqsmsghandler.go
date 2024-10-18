@@ -3,8 +3,8 @@ package consumerhandler
 import (
 	"context"
 	"fmt"
-	"video_server/component"
-	"video_server/component/logger"
+	"salon_be/component"
+	"salon_be/component/logger"
 
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"go.uber.org/zap"

@@ -1,8 +1,8 @@
 package categorytransport
 
 import (
-	"video_server/component"
-	"video_server/component/genericapi/generictransport"
+	"salon_be/component"
+	"salon_be/component/genericapi/generictransport"
 )
 
 type CategoryTransport struct {

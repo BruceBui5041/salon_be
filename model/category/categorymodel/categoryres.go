@@ -1,9 +1,9 @@
 package categorymodel
 
 import (
-	"video_server/common"
-	"video_server/component/genericapi/modelhelper"
-	models "video_server/model"
+	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
+	models "salon_be/model"
 
 	"github.com/samber/lo"
 )

@@ -2,10 +2,10 @@ package commentbiz
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component/genericapi/genericmodel"
-	models "video_server/model"
-	"video_server/model/comment/commentmodel"
+	"salon_be/common"
+	"salon_be/component/genericapi/genericmodel"
+	models "salon_be/model"
+	"salon_be/model/comment/commentmodel"
 
 	"github.com/jinzhu/copier"
 )

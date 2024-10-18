@@ -2,9 +2,9 @@ package genericbiz
 
 import (
 	"context"
-	"video_server/common"
-	"video_server/component/genericapi/genericmodel"
-	"video_server/component/genericapi/modelhelper"
+	"salon_be/common"
+	"salon_be/component/genericapi/genericmodel"
+	"salon_be/component/genericapi/modelhelper"
 )
 
 func (biz *genericBiz) Create(ctx context.Context, input genericmodel.CreateRequest) (interface{}, error) {

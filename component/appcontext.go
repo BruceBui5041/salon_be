@@ -2,9 +2,9 @@ package component
 
 import (
 	"context"
-	"video_server/component/cache"
-	models "video_server/model"
-	pb "video_server/proto/video_service/video_service"
+	"salon_be/component/cache"
+	models "salon_be/model"
+	pb "salon_be/proto/video_service/video_service"
 
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/aws/aws-sdk-go/aws/session"

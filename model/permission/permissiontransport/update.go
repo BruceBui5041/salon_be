@@ -3,12 +3,12 @@ package permissiontransport
 import (
 	"errors"
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/permission/permissionbiz"
-	"video_server/model/permission/permissionmodel"
-	"video_server/model/permission/permissionrepo"
-	"video_server/model/permission/permissionstore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/permission/permissionbiz"
+	"salon_be/model/permission/permissionmodel"
+	"salon_be/model/permission/permissionrepo"
+	"salon_be/model/permission/permissionstore"
 
 	"github.com/gin-gonic/gin"
 )

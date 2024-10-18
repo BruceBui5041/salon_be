@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"video_server/common"
+	"salon_be/common"
 
 	"gorm.io/gorm"
 )

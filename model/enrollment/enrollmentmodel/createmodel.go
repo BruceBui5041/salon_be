@@ -1,7 +1,7 @@
 package enrollmentmodel
 
 import (
-	"video_server/common"
+	"salon_be/common"
 )
 
 type CreateEnrollment struct {

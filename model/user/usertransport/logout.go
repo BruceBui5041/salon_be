@@ -2,10 +2,10 @@ package usertransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/user/userbiz"
-	"video_server/utils"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/user/userbiz"
+	"salon_be/utils"
 
 	"github.com/gin-gonic/gin"
 )

@@ -3,9 +3,9 @@ package commentrepo
 import (
 	"context"
 	"errors"
-	"video_server/common"
-	models "video_server/model"
-	"video_server/model/comment/commentmodel"
+	"salon_be/common"
+	models "salon_be/model"
+	"salon_be/model/comment/commentmodel"
 
 	"gorm.io/gorm"
 )

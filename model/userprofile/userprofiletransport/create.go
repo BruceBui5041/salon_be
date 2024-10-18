@@ -2,12 +2,12 @@ package userprofiletransport
 
 import (
 	"net/http"
-	"video_server/common"
-	"video_server/component"
-	"video_server/model/userprofile/userprofilebiz"
-	"video_server/model/userprofile/userprofilemodel"
-	"video_server/model/userprofile/userprofilerepo"
-	"video_server/model/userprofile/userprofilestore"
+	"salon_be/common"
+	"salon_be/component"
+	"salon_be/model/userprofile/userprofilebiz"
+	"salon_be/model/userprofile/userprofilemodel"
+	"salon_be/model/userprofile/userprofilerepo"
+	"salon_be/model/userprofile/userprofilestore"
 
 	"github.com/gin-gonic/gin"
 )
