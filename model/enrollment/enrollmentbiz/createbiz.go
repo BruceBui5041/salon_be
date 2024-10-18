@@ -21,7 +21,7 @@ type EnrollmentRepo interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Service, error)
+	) (*models.ServiceVersion, error)
 }
 
 type createEnrollmentBiz struct {

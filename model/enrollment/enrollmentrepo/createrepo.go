@@ -29,7 +29,7 @@ type ServiceStore interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Service, error)
+	) (*models.ServiceVersion, error)
 }
 
 type createEnrollmentRepo struct {
@@ -119,6 +119,6 @@ func (repo *createEnrollmentRepo) FindService(
 	ctx context.Context,
 	conditions map[string]interface{},
 	moreInfo ...interface{},
-) (*models.Service, error) {
+) (*models.ServiceVersion, error) {
 	return repo.serviceStore.FindOne(ctx, conditions, moreInfo...)
 }

@@ -11,7 +11,7 @@ type VideoStore interface {
 }
 
 type ListServiceStore interface {
-	FindAll(ctx context.Context, conditions map[string]interface{}, moreInfo ...interface{}) ([]models.Service, error)
+	FindAll(ctx context.Context, conditions map[string]interface{}, moreInfo ...interface{}) ([]models.ServiceVersion, error)
 }
 
 type listVideoRepo struct {

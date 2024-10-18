@@ -20,18 +20,18 @@ func init() {
 
 type User struct {
 	common.SQLModel `json:",inline"`
-	LastName        string        `json:"lastname" gorm:"column:lastname;"`
-	FirstName       string        `json:"firstname" gorm:"column:firstname;"`
-	Email           string        `json:"email" gorm:"column:email;uniqueIndex;not null;size:100"`
-	Roles           []*Role       `json:"roles" gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID"`
-	Auths           []UserAuth    `json:"auths" gorm:"foreignKey:UserID"`
-	CreatedServices []Service     `json:"created_services" gorm:"foreignKey:CreatorID"`
-	Enrollments     []*Enrollment `json:"enrollments" `
-	Progress        []Progress    `json:"progress"`
-	Salt            string        `json:"-" gorm:"column:salt;"`
-	Password        string        `json:"-" gorm:"column:password;"`
-	UserProfile     *UserProfile  `json:"user_profile,omitempty" gorm:"foreignKey:UserID"`
-	Comments        []*Comment    `json:"comments,omitempty" gorm:"foreignKey:UserID"`
+	LastName        string           `json:"lastname" gorm:"column:lastname;"`
+	FirstName       string           `json:"firstname" gorm:"column:firstname;"`
+	Email           string           `json:"email" gorm:"column:email;uniqueIndex;not null;size:100"`
+	Roles           []*Role          `json:"roles" gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID"`
+	Auths           []UserAuth       `json:"auths" gorm:"foreignKey:UserID"`
+	CreatedServices []ServiceVersion `json:"created_services" gorm:"foreignKey:CreatorID"`
+	Enrollments     []*Enrollment    `json:"enrollments" `
+	Progress        []Progress       `json:"progress"`
+	Salt            string           `json:"-" gorm:"column:salt;"`
+	Password        string           `json:"-" gorm:"column:password;"`
+	UserProfile     *UserProfile     `json:"user_profile,omitempty" gorm:"foreignKey:UserID"`
+	Comments        []*Comment       `json:"comments,omitempty" gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {

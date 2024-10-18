@@ -9,12 +9,11 @@ import (
 
 const (
 	DbTypeVideo            = 1
-	DbTypeService          = 2
+	DbTypeServiceVersion   = 2
 	DbTypeTag              = 3
 	DbTypeUser             = 4
 	DBTypeCategory         = 5
-	DBTypeLesson           = 6
-	DBTypeLecture          = 7
+	DBTypeService          = 6
 	DBTypeVideoProcessInfo = 8
 	DBTypeEnrollment       = 9
 	DBTypePayment          = 10

@@ -8,7 +8,6 @@ type UpdateVideo struct {
 	Duration     *int    `json:"duration" form:"duration"`
 	Order        *int    `json:"order" form:"order"`
 	AllowPreview *bool   `json:"allow_preview" form:"allow_preview"`
-	LessonID     *uint32 `json:"lesson_id"`
 	RawVideoURL  string  `json:"raw_video_url"`
 }
 

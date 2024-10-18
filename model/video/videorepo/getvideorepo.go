@@ -12,7 +12,7 @@ type GetVideoServiceStore interface {
 		ctx context.Context,
 		conditions map[string]interface{},
 		moreInfo ...interface{},
-	) (*models.Service, error)
+	) (*models.ServiceVersion, error)
 }
 
 type GetVideoStore interface {
@@ -32,7 +32,7 @@ func NewGetVideoRepo(videoStore GetVideoStore, serviceStore GetVideoServiceStore
 }
 
 func (repo *getVideoRepo) GetVideo(ctx context.Context, id uint32, serviceSlug string) (*models.Video, error) {
-	video, err := repo.videoStore.FindOne(ctx, map[string]interface{}{"id": id}, "Service", "Lesson")
+	video, err := repo.videoStore.FindOne(ctx, map[string]interface{}{"id": id}, "Service")
 	if err != nil {
 		return nil, common.ErrCannotGetEntity(models.VideoEntityName, err)
 	}
