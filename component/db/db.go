@@ -45,6 +45,8 @@ func ConnectToDB(ctx context.Context) component.DBInstances {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
+		// uncomment on the first migration run to create tables without relation error
+		// DisableForeignKeyConstraintWhenMigrating: true,
 	})
 
 	if err != nil {

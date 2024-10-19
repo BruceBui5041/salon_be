@@ -81,20 +81,24 @@ func (repo *createVideoRepo) CreateNewVideo(
 		return nil, err
 	}
 
-	service, err := repo.serviceStore.FindOne(ctx, map[string]interface{}{"id": uid.GetLocalID()})
+	serviceVersion, err := repo.serviceStore.FindOne(
+		ctx,
+		map[string]interface{}{"id": uid.GetLocalID()},
+	)
+
 	if err != nil {
 		logger.AppLogger.Error(ctx, "failed to find service", zap.Error(err))
 		return nil, err
 	}
 
 	newVideo := &models.Video{
-		ServiceID:    service.Id,
-		Title:        input.Title,
-		Description:  input.Description,
-		VideoURL:     input.VideoURL,
-		Duration:     input.Duration,
-		Order:        input.Order,
-		ThumbnailURL: input.ThumbnailURL,
+		ServiceVersionID: serviceVersion.Id,
+		Title:            input.Title,
+		Description:      input.Description,
+		VideoURL:         input.VideoURL,
+		Duration:         input.Duration,
+		Order:            input.Order,
+		ThumbnailURL:     input.ThumbnailURL,
 	}
 
 	videoId, err := repo.videoStore.CreateNewVideo(ctx, newVideo)
@@ -110,14 +114,14 @@ func (repo *createVideoRepo) CreateNewVideo(
 	}
 
 	video.Mask(false)
-	service.Mask(false)
+	serviceVersion.Mask(false)
 
-	sqlObj := common.SQLModel{Id: service.CreatorID}
+	sqlObj := common.SQLModel{Id: serviceVersion.Service.CreatorID}
 	sqlObj.GenUID(common.DbTypeUser)
 
 	videoStorageInfo := storagehandler.VideoInfo{
 		UploadedBy:        sqlObj.FakeId.String(),
-		ServiceId:         service.FakeId.String(),
+		ServiceId:         serviceVersion.FakeId.String(),
 		VideoId:           video.FakeId.String(),
 		ThumbnailFilename: thumbnailFile.Filename,
 		VideoFilename:     videoFile.Filename,
@@ -175,7 +179,7 @@ func (repo *createVideoRepo) CreateNewVideo(
 		return nil, err
 	}
 
-	video.Service = *service
+	video.ServiceVersion = *serviceVersion
 
 	return video, nil
 }

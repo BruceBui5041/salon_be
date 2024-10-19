@@ -50,11 +50,11 @@ func NewCreateEnrollmentRepo(
 	}
 }
 
-func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userID, serviceID uint32, paymentID *uint32) error {
+func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userID, serviceVersionID uint32, paymentID *uint32) error {
 	newEnrollment := &models.Enrollment{
-		UserID:    userID,
-		ServiceID: serviceID,
-		PaymentID: paymentID,
+		UserID:           userID,
+		ServiceVersionID: serviceVersionID,
+		PaymentID:        paymentID,
 	}
 
 	enrollId, err := repo.store.Create(ctx, newEnrollment)
@@ -76,14 +76,14 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	tempUser.GenUID(common.DbTypeUser)
 
 	enrollment.Mask(false)
-	enrollment.Service.Mask(false)
+	enrollment.ServiceVersion.Mask(false)
 	enrollment.Payment.Mask(false)
 
 	// publish event to update user cache on local and dynamoDB
 	updateCacheMsg := &messagemodel.EnrollmentChangeInfo{
 		UserId:            tempUser.GetFakeId(),
-		ServiceId:         enrollment.Service.GetFakeId(),
-		ServiceSlug:       enrollment.Service.ServiceVersion.Slug,
+		ServiceId:         enrollment.ServiceVersion.GetFakeId(),
+		ServiceSlug:       enrollment.ServiceVersion.Slug,
 		EnrollmentId:      enrollment.GetFakeId(),
 		PaymentId:         enrollment.Payment.GetFakeId(),
 		TransactionStatus: enrollment.Payment.TransactionStatus,
@@ -101,10 +101,10 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	return nil
 }
 
-func (repo *createEnrollmentRepo) CheckDuplicateEnrollment(ctx context.Context, userID, serviceID uint32) (bool, error) {
+func (repo *createEnrollmentRepo) CheckDuplicateEnrollment(ctx context.Context, userID, serviceVersionID uint32) (bool, error) {
 	enrollment, err := repo.store.FindOne(ctx, map[string]interface{}{
-		"user_id":    userID,
-		"service_id": serviceID,
+		"user_id":            userID,
+		"service_version_id": serviceVersionID,
 	})
 	if err != nil {
 		if err == common.RecordNotFound {

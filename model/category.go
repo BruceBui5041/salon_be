@@ -18,7 +18,7 @@ type Category struct {
 	Name            string            `json:"name" gorm:"not null;size:100"`
 	Code            string            `json:"code" gorm:"not null;size:100"`
 	Description     string            `json:"description"`
-	Services        []*ServiceVersion `json:"services,omitempty" gorm:"foreignKey:CategoryID"`
+	ServiceVersions []*ServiceVersion `json:"service_versions,omitempty" gorm:"foreignKey:CategoryID"`
 }
 
 func (Category) TableName() string {

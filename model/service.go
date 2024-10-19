@@ -17,10 +17,12 @@ type Service struct {
 	common.SQLModel  `json:",inline"`
 	Name             string           `json:"name" gorm:"column:name;not null;size:255"`
 	Description      string           `json:"description" gorm:"column:description;type:text"`
+	CreatorID        uint32           `json:"creator_id" gorm:"column:creator_id;index"`
+	Creator          *User            `json:"creator,omitempty" gorm:"constraint:OnDelete:SET NULL;foreignKey:CreatorID"`
 	Versions         []ServiceVersion `json:"versions,omitempty" gorm:"foreignKey:ServiceID"`
 	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ServiceVersionID"`
 	ServiceVersionID *uint32          `json:"service_version_id,omitempty" gorm:"column:service_version_id"`
-	Enrollments      []Enrollment     `json:"enrollments,omitempty" gorm:"foreignKey:ServiceID"`
+	Comments         []*Comment       `json:"comments,omitempty" gorm:"foreignKey:ServiceID"`
 }
 
 func (Service) TableName() string {

@@ -44,7 +44,7 @@ func UpdateUserCache(
 
 	for _, enrollment := range user.Enrollments {
 		enrollment.Mask(false)
-		enrollment.Service.Mask(false)
+		enrollment.ServiceVersion.Mask(false)
 	}
 
 	err = appCtx.GetAppCache().SetUserCache(ctx, user)
