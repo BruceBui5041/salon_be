@@ -18,8 +18,9 @@ type Service struct {
 	Name             string           `json:"name" gorm:"column:name;not null;size:255"`
 	Description      string           `json:"description" gorm:"column:description;type:text"`
 	Versions         []ServiceVersion `json:"versions,omitempty" gorm:"foreignKey:ServiceID"`
-	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ActiveVersionID"`
+	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ServiceVersionID"`
 	ServiceVersionID *uint32          `json:"service_version_id,omitempty" gorm:"column:service_version_id"`
+	Enrollments      []Enrollment     `json:"enrollments,omitempty" gorm:"foreignKey:ServiceID"`
 }
 
 func (Service) TableName() string {

@@ -7,14 +7,20 @@ import (
 	"os"
 	"time"
 
+	"salon_be/component"
 	"salon_be/component/logger"
+	models "salon_be/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 )
 
-func ConnectToDB(ctx context.Context) *gorm.DB {
+type dbInstances struct {
+	mySQL *gorm.DB
+}
+
+func ConnectToDB(ctx context.Context) component.DBInstances {
 	// Get database connection details from environment variables
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
@@ -45,5 +51,55 @@ func ConnectToDB(ctx context.Context) *gorm.DB {
 		logger.AppLogger.Fatal(ctx, err.Error())
 	}
 
-	return db
+	return &dbInstances{mySQL: db}
+}
+
+func (d *dbInstances) GetMySQLDBConnection() *gorm.DB {
+	return d.mySQL
+}
+
+func (d *dbInstances) AutoMigrateMySQL() error {
+	migrator := d.mySQL.Migrator()
+
+	tables := []interface{}{
+		&models.User{},
+		&models.Role{},
+		&models.Category{},
+
+		&models.UserAuth{},
+		&models.UserProfile{},
+		&models.UserRole{},
+		&models.Permission{},
+		&models.RolePermission{},
+		&models.Video{},
+		&models.VideoProcessInfo{},
+		&models.ServiceVersion{},
+		&models.Service{},
+
+		&models.Payment{},
+		&models.Enrollment{},
+
+		&models.Comment{},
+	}
+
+	for _, table := range tables {
+		tableName := d.mySQL.NamingStrategy.TableName(fmt.Sprintf("%T", table))
+
+		if !migrator.HasTable(table) {
+			log.Printf("Creating table: %s", tableName)
+			if err := migrator.CreateTable(table); err != nil {
+				return fmt.Errorf("failed to create table %s: %w", tableName, err)
+			}
+			log.Printf("Table created successfully: %s", tableName)
+		} else {
+			log.Printf("Table already exists: %s", tableName)
+			// Optionally, you can still run AutoMigrate to add new columns or indexes
+			if err := migrator.AutoMigrate(table); err != nil {
+				return fmt.Errorf("failed to auto migrate table %s: %w", tableName, err)
+			}
+			log.Printf("Table auto migrated successfully: %s", tableName)
+		}
+	}
+
+	return nil
 }

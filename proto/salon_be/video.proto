@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package videoservice;
+package salonbe;
 
 option go_package = "salon_be/proto";
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"salon_be/component/cache"
 	models "salon_be/model"
-	pb "salon_be/proto/video_service/video_service"
+	pb "salon_be/proto/salon_be/salon_be"
 
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -22,6 +22,11 @@ type AppContext interface {
 	GetAppQueue() AppQueue
 	GetS3Client() *s3.S3
 	GetCronJob() CronJob
+}
+
+type DBInstances interface {
+	GetMySQLDBConnection() *gorm.DB
+	AutoMigrateMySQL() error
 }
 
 type AppQueue interface {
@@ -66,7 +71,7 @@ type LocalPubSub interface {
 }
 
 type appCtx struct {
-	db                 *gorm.DB
+	dbInstances        DBInstances
 	localPubSub        LocalPubSub
 	videoServiceClient pb.VideoProcessingServiceClient
 	jwtSecretKey       string
@@ -78,7 +83,7 @@ type appCtx struct {
 }
 
 func NewAppContext(
-	db *gorm.DB,
+	dbInstances DBInstances,
 	localPubSub LocalPubSub,
 	videoServiceClient pb.VideoProcessingServiceClient,
 	jwtSecretKey string,
@@ -90,7 +95,7 @@ func NewAppContext(
 ) *appCtx {
 
 	return &appCtx{
-		db:                 db,
+		dbInstances:        dbInstances,
 		localPubSub:        localPubSub,
 		videoServiceClient: videoServiceClient,
 		jwtSecretKey:       jwtSecretKey,
@@ -103,7 +108,7 @@ func NewAppContext(
 }
 
 func (ctx *appCtx) GetMainDBConnection() *gorm.DB {
-	return ctx.db
+	return ctx.dbInstances.GetMySQLDBConnection()
 }
 
 func (ctx *appCtx) GetLocalPubSub() LocalPubSub {

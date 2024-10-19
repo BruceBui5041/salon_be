@@ -1,7 +1,7 @@
 package messagemodel
 
 import (
-	pb "salon_be/proto/video_service/video_service"
+	pb "salon_be/proto/salon_be/salon_be"
 )
 
 // RequestProcessVideoInfo represents the information about a newly uploaded video

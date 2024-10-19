@@ -1,7 +1,7 @@
 package grpcserver
 
 import (
-	pb "salon_be/proto/video_service/video_service" // import the generated protobuf package
+	pb "salon_be/proto/salon_be/salon_be" // import the generated protobuf package
 )
 
 type VideoServiceServer struct {

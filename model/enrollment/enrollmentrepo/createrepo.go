@@ -83,7 +83,7 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	updateCacheMsg := &messagemodel.EnrollmentChangeInfo{
 		UserId:            tempUser.GetFakeId(),
 		ServiceId:         enrollment.Service.GetFakeId(),
-		ServiceSlug:       enrollment.Service.Slug,
+		ServiceSlug:       enrollment.Service.ServiceVersion.Slug,
 		EnrollmentId:      enrollment.GetFakeId(),
 		PaymentId:         enrollment.Payment.GetFakeId(),
 		TransactionStatus: enrollment.Payment.TransactionStatus,

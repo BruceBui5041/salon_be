@@ -6,7 +6,7 @@ import (
 	"salon_be/appconst"
 	"salon_be/component"
 	"salon_be/component/logger"
-	pb "salon_be/proto/video_service/video_service"
+	pb "salon_be/proto/salon_be/salon_be"
 	"salon_be/watermill/messagemodel"
 
 	"github.com/spf13/viper"
