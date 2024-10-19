@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -60,6 +61,12 @@ func main() {
 
 	jwtSecretKey := os.Getenv("JWTSecretKey")
 
+	// client, conn, err := grpcserver.ConnectToVideoProcessingServer(ctx)
+	// if err != nil {
+	// 	logger.AppLogger.Fatal(ctx, "failed to start grpc server", zap.Error(err))
+	// }
+	// defer conn.Close()
+
 	awsSession, err := config.CreateAWSSession()
 	if err != nil {
 		log.Fatalf("Failed to create AWS session: %v", err)
@@ -73,11 +80,29 @@ func main() {
 		config.CreateAppCache(awsSession),
 		awsSession,
 		config.CreateAppQueue(awsSession),
+		// cronjob.CreateCron(),
 		nil,
 		config.CreateS3Client(awsSession),
 	)
 
+	appCache := appContext.GetAppCache()
+	if err := appCache.CreateDynamoDBTables(ctx, appCache.GetDynamoDBTableDefinitions()); err != nil {
+		logger.AppLogger.Fatal(ctx, "create dynamaDB tables failed", zap.Error(err))
+	}
+
+	// results := appContext.GetAppQueue().CreateSQSQueues(ctx)
+	// logger.AppLogger.Info(ctx, "created sqs queue", zap.Any("res", results))
+
 	go watermill.StartSubscribers(appContext)
+
+	// Start gRPC server
+	// startGRPCServer()
+
+	// videoProcessProgressTopic := viper.GetString("UPDATE_VIDEO_PROCESS_PROGRESS_TOPIC")
+	// consumeTopics := []string{videoProcessProgressTopic}
+	// go appContext.GetAppQueue().StartSQSMessageListener(ctx, appContext, consumeTopics, consumerhandler.QueueMsgHander)
+
+	// startCronJobs(appContext)
 
 	// Start HTTP server
 	server.StartHTTPServer(appContext)

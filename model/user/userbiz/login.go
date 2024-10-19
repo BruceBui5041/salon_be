@@ -4,6 +4,7 @@ import (
 	"context"
 	"salon_be/common"
 	"salon_be/component/hasher"
+	"salon_be/component/logger"
 	"salon_be/component/tokenprovider"
 	models "salon_be/model"
 	"salon_be/model/user/usermodel"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/jinzhu/copier"
+	"go.uber.org/zap"
 )
 
 type LoginStorage interface {
@@ -52,11 +54,12 @@ func (business *loginBusiness) Login(ctx context.Context, data *usermodel.UserLo
 		ctx,
 		map[string]interface{}{"email": data.Email},
 		"Roles",
-		"Enrollments.Service",
+		"Enrollments.ServiceVersion",
 		"UserProfile",
 	)
 
 	if err != nil {
+		logger.AppLogger.Error(ctx, "user not found", zap.Error(err))
 		return nil, usermodel.ErrUsernameOrPasswordInvalid
 	}
 

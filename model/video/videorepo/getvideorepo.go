@@ -37,7 +37,7 @@ func (repo *getVideoRepo) GetVideo(ctx context.Context, id uint32, serviceSlug s
 		return nil, common.ErrCannotGetEntity(models.VideoEntityName, err)
 	}
 
-	if video.ServiceVersion.Slug != serviceSlug {
+	if video.ServiceVersion.Service.Slug != serviceSlug {
 		return nil, errors.New("service slug mismatch")
 	}
 

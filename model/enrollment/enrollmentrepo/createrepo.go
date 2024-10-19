@@ -65,7 +65,7 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	enrollment, err := repo.store.FindOne(
 		ctx,
 		map[string]interface{}{"id": enrollId},
-		"Service",
+		"ServiceVersion.Service",
 		"Payment",
 	)
 	if err != nil {
@@ -83,7 +83,7 @@ func (repo *createEnrollmentRepo) CreateNewEnrollment(ctx context.Context, userI
 	updateCacheMsg := &messagemodel.EnrollmentChangeInfo{
 		UserId:            tempUser.GetFakeId(),
 		ServiceId:         enrollment.ServiceVersion.GetFakeId(),
-		ServiceSlug:       enrollment.ServiceVersion.Slug,
+		ServiceSlug:       enrollment.ServiceVersion.Service.Slug,
 		EnrollmentId:      enrollment.GetFakeId(),
 		PaymentId:         enrollment.Payment.GetFakeId(),
 		TransactionStatus: enrollment.Payment.TransactionStatus,

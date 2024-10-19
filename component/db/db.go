@@ -47,6 +47,7 @@ func ConnectToDB(ctx context.Context) component.DBInstances {
 		Logger: newLogger,
 		// uncomment on the first migration run to create tables without relation error
 		// DisableForeignKeyConstraintWhenMigrating: true,
+		IgnoreRelationshipsWhenMigrating: true,
 	})
 
 	if err != nil {

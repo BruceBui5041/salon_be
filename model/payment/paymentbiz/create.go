@@ -79,8 +79,8 @@ func (biz *createPaymentBiz) CreateNewPayment(
 	payment, err = biz.paymentRepo.FindOne(
 		ctx,
 		map[string]interface{}{"id": payment.Id},
-		"Enrollments.Service.Creator",
-		"Enrollments.Service.Category",
+		"Enrollments.ServiceVersion.Creator",
+		"Enrollments.ServiceVersion.Category",
 	)
 	if err != nil {
 		return nil, common.ErrCannotGetEntity(models.PaymentEntityName, err)
