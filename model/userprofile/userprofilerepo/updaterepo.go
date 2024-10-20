@@ -42,7 +42,7 @@ func (repo *updateProfileRepo) UpdateProfile(
 	profileId uint32,
 	input *userprofilemodel.UpdateProfileModel,
 ) error {
-	var newProfilePicURL *string
+	updatedUserProfile := &models.UserProfile{}
 	if input.ProfilePictureURL != nil {
 		pictureFile, err := input.ProfilePictureURL.Open()
 		if err != nil {
@@ -59,13 +59,9 @@ func (repo *updateProfileRepo) UpdateProfile(
 			return fmt.Errorf("failed to upload profile picture to S3: %w", err)
 		}
 
-		newProfilePicURL = &key
+		updatedUserProfile.ProfilePictureURL = key
 	}
 
-	updatedUserProfile := &models.UserProfile{}
-	if newProfilePicURL != nil {
-		updatedUserProfile.ProfilePictureURL = *newProfilePicURL
-	}
 	if err := copier.Copy(&updatedUserProfile, input); err != nil {
 		logger.AppLogger.Error(ctx, "Failed to copy updated user profile", zap.Error(err))
 		return err

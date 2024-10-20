@@ -31,11 +31,11 @@ func (biz *updateCategoryBiz) UpdateCategory(ctx context.Context, id uint32, dat
 		return common.ErrEntityNotFound(models.CategoryEntityName, errors.New("category not found"))
 	}
 
-	if data.Name != "" && len(data.Name) > 100 {
+	if data.Name != nil && len(*data.Name) > 100 {
 		return common.ErrInvalidRequest(errors.New("category name must not exceed 100 characters"))
 	}
 
-	if data.Code != "" && len(data.Code) > 100 {
+	if data.Code != nil && len(*data.Code) > 100 {
 		return common.ErrInvalidRequest(errors.New("code must not exceed 100 characters"))
 	}
 

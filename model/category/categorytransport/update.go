@@ -1,6 +1,7 @@
 package categorytransport
 
 import (
+	"errors"
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
@@ -8,17 +9,18 @@ import (
 	"salon_be/model/category/categorymodel"
 	"salon_be/model/category/categoryrepo"
 	"salon_be/model/category/categorystore"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func UpdateCategoryHandler(appCtx component.AppContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := strconv.Atoi(ctx.Param("id"))
+		uid, err := common.FromBase58(ctx.Param("id"))
 		if err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
+
+		id := uid.GetLocalID()
 
 		var input categorymodel.UpdateCategory
 
@@ -26,7 +28,10 @@ func UpdateCategoryHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := ctx.MustGet(common.CurrentUser).(common.Requester)
+		requester, ok := ctx.MustGet(common.CurrentUser).(common.Requester)
+		if !ok {
+			panic(common.ErrInvalidRequest(errors.New("cannot find requester")))
+		}
 
 		// Check if the requester is an admin (you might want to implement this check)
 		if !requester.IsAdmin() {
@@ -36,7 +41,7 @@ func UpdateCategoryHandler(appCtx component.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection()
 
 		store := categorystore.NewSQLStore(db)
-		repo := categoryrepo.NewUpdateCategoryRepo(store)
+		repo := categoryrepo.NewUpdateCategoryRepo(store, appCtx.GetS3Client())
 		biz := categorybiz.NewUpdateCategoryBiz(repo)
 
 		if err := biz.UpdateCategory(ctx.Request.Context(), uint32(id), &input); err != nil {

@@ -63,6 +63,13 @@ func GenerateUserProfilePictureS3Key(userId string, filename string) string {
 	)
 }
 
+func GenerateCategoryImageS3Key(cateId string, filename string) string {
+	return fmt.Sprintf(
+		"category/image/%s",
+		utils.RenameFile(filename, fmt.Sprintf("%s_%s", cateId, filename)),
+	)
+}
+
 func AddPublicCloudFrontDomain(s3Key string) string {
 	return fmt.Sprintf("%s/%s", appconst.AWSCloudFrontPublicFile, s3Key)
 }
