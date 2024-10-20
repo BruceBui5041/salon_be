@@ -16,7 +16,7 @@ func init() {
 type Role struct {
 	common.SQLModel `json:",inline"`
 	Name            string            `json:"name" gorm:"uniqueIndex;not null;size:50"`
-	Code            string            `json:"code" gorm:"uniqueIndex;not null;size:50"`
+	Code            string            `json:"code" gorm:"uniqueIndex;not null;size:50;unique"`
 	Description     string            `json:"description"`
 	Users           []*User           `json:"users,omitempty" gorm:"many2many:user_role;joinForeignKey:RoleID;joinReferences:UserID"`
 	Permissions     []*Permission     `json:"permissions,omitempty" gorm:"many2many:role_permission;joinForeignKey:RoleID;joinReferences:PermissionID"`

@@ -35,6 +35,10 @@ func (biz *updateCategoryBiz) UpdateCategory(ctx context.Context, id uint32, dat
 		return common.ErrInvalidRequest(errors.New("category name must not exceed 100 characters"))
 	}
 
+	if data.Code != "" && len(data.Code) > 100 {
+		return common.ErrInvalidRequest(errors.New("code must not exceed 100 characters"))
+	}
+
 	if err := biz.repo.UpdateCategory(ctx, id, data); err != nil {
 		return common.ErrCannotUpdateEntity(models.CategoryEntityName, err)
 	}

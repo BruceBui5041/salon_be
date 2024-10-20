@@ -29,6 +29,14 @@ func (c *createCategoryBiz) CreateNewCategory(ctx context.Context, input *catego
 		return common.ErrInvalidRequest(errors.New("category name must not exceed 100 characters"))
 	}
 
+	if input.Code == "" {
+		return common.ErrInvalidRequest(errors.New("code is required"))
+	}
+
+	if len(input.Code) > 100 {
+		return common.ErrInvalidRequest(errors.New("code must not exceed 100 characters"))
+	}
+
 	category, err := c.repo.CreateNewCategory(ctx, input)
 	if err != nil {
 		return common.ErrCannotCreateEntity(models.CategoryEntityName, err)

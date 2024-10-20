@@ -31,6 +31,7 @@ func (repo *createCategoryRepo) CreateNewCategory(
 	newCategory := &models.Category{
 		Name:        input.Name,
 		Description: input.Description,
+		Code:        input.Code,
 	}
 
 	category, err := repo.store.Create(ctx, newCategory)
