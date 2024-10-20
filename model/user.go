@@ -52,7 +52,7 @@ func (u *User) GetEmail() string {
 
 func (u *User) IsAdmin() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Code == "ADMIN"
+		return role.Code == "ADMIN" || role.Code == "SUPER_ADMIN"
 	})
 
 	return has

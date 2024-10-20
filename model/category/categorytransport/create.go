@@ -39,7 +39,7 @@ func CreateCategoryHandler(appCtx component.AppContext) gin.HandlerFunc {
 				panic(err)
 			}
 
-			ctx.JSON(http.StatusOK, common.SimpleSuccessResponse(input.GetFakeId()))
+			ctx.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 			return nil
 		}); err != nil {
 			panic(err)
