@@ -3,6 +3,7 @@ package models
 import (
 	"salon_be/common"
 	"salon_be/component/genericapi/modelhelper"
+	"salon_be/storagehandler"
 
 	"gorm.io/gorm"
 )
@@ -33,5 +34,6 @@ func (c *Category) Mask(isAdmin bool) {
 
 func (c *Category) AfterFind(tx *gorm.DB) (err error) {
 	c.Mask(false)
+	c.Image = storagehandler.AddPublicCloudFrontDomain(c.Image)
 	return
 }
