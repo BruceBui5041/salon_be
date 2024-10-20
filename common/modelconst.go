@@ -45,17 +45,17 @@ type Requester interface {
 	GetFakeId() string
 	Mask(isAdmin bool)
 	IsAdmin() bool
-	IsStudent() bool
+	IsUser() bool
 	IsSuperAdmin() bool
 	IsInstructor() bool
 }
 
 type SQLModel struct {
-	Id        uint32     `json:"-" gorm:"column,id;"`
+	Id        uint32     `json:"-" gorm:"column,id;" form:"id"`
 	FakeId    *UID       `json:"id" gorm:"-"`
-	Status    string     `json:"status" form:"status" gorm:"column:status;type:ENUM('active','inactive','suspended');default:active"`
-	CreatedAt *time.Time `json:"created_at,omitempty" gorm:"column,created_at;"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty" gorm:"column,updated_at;"`
+	Status    string     `json:"status" gorm:"column:status;type:ENUM('active','inactive','suspended');default:active" form:"status"`
+	CreatedAt *time.Time `json:"created_at,omitempty" gorm:"column,created_at;" form:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty" gorm:"column,updated_at;" form:"updated_at"`
 }
 
 func (model *SQLModel) GenUID(dbType int) {

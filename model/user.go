@@ -52,15 +52,15 @@ func (u *User) GetEmail() string {
 
 func (u *User) IsAdmin() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Name == "admin"
+		return role.Code == "ADMIN"
 	})
 
 	return has
 }
 
-func (u *User) IsStudent() bool {
+func (u *User) IsUser() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Name == "student"
+		return role.Code == "USER"
 	})
 
 	return has
@@ -68,7 +68,7 @@ func (u *User) IsStudent() bool {
 
 func (u *User) IsInstructor() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Name == "instructor"
+		return role.Code == "INSTRUCTOR"
 	})
 
 	return has
@@ -76,7 +76,7 @@ func (u *User) IsInstructor() bool {
 
 func (u *User) IsSuperAdmin() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Name == "super_admin"
+		return role.Code == "SUPER_ADMIN"
 	})
 
 	return has
