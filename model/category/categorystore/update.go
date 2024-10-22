@@ -16,3 +16,19 @@ func (s *sqlStore) Update(
 
 	return nil
 }
+
+func (s *sqlStore) UpdateParentId(
+	ctx context.Context,
+	id uint32,
+	parentID *uint32,
+) error {
+	if err := s.db.
+		Table(models.Category{}.TableName()).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{"parent_id": parentID}).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
+}

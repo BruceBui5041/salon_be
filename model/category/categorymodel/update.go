@@ -7,4 +7,5 @@ type UpdateCategory struct {
 	Description *string               `json:"description" form:"description"`
 	Code        *string               `json:"code" form:"code"`
 	Image       *multipart.FileHeader `json:"image" form:"image"`
+	ParentID    *string               `json:"parent_id" form:"parent_id"`
 }

@@ -21,6 +21,9 @@ type Category struct {
 	Image           string            `json:"image" gorm:"not null;size:255"`
 	OriginImage     string            `json:"-" gorm:"-"`
 	Description     string            `json:"description"`
+	ParentID        *uint32           `json:"-" gorm:"column:parent_id;default:null"`
+	Parent          *Category         `json:"parent,omitempty" gorm:"foreignKey:ParentID"`
+	SubCategories   []*Category       `json:"sub_categories,omitempty" gorm:"foreignKey:ParentID"`
 	ServiceVersions []*ServiceVersion `json:"service_versions,omitempty" gorm:"foreignKey:CategoryID"`
 }
 
@@ -35,5 +38,6 @@ func (c *Category) Mask(isAdmin bool) {
 func (c *Category) AfterFind(tx *gorm.DB) (err error) {
 	c.Mask(false)
 	c.Image = storagehandler.AddPublicCloudFrontDomain(c.Image)
+	c.OriginImage = c.Image
 	return
 }

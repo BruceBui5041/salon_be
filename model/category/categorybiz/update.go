@@ -39,6 +39,12 @@ func (biz *updateCategoryBiz) UpdateCategory(ctx context.Context, id uint32, dat
 		return common.ErrInvalidRequest(errors.New("code must not exceed 100 characters"))
 	}
 
+	if data.ParentID != nil {
+		if *data.ParentID == oldData.GetFakeId() {
+			return common.ErrInvalidRequest(errors.New("parent category cannot be itself"))
+		}
+	}
+
 	if err := biz.repo.UpdateCategory(ctx, id, data); err != nil {
 		return common.ErrCannotUpdateEntity(models.CategoryEntityName, err)
 	}

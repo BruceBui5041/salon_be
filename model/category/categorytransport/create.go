@@ -32,7 +32,7 @@ func CreateCategoryHandler(appCtx component.AppContext) gin.HandlerFunc {
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			categoryStore := categorystore.NewSQLStore(tx)
-			repo := categoryrepo.NewCreateCategoryRepo(categoryStore)
+			repo := categoryrepo.NewCreateCategoryRepo(categoryStore, appCtx.GetS3Client())
 			categoryBusiness := categorybiz.NewCreateCategoryBiz(repo)
 
 			if err := categoryBusiness.CreateNewCategory(ctx.Request.Context(), &input); err != nil {

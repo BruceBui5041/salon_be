@@ -26,6 +26,12 @@ type UpdateCategoryStore interface {
 		id uint32,
 		data *models.Category,
 	) error
+
+	UpdateParentId(
+		ctx context.Context,
+		id uint32,
+		parentID *uint32,
+	) error
 }
 
 type updateCategoryRepo struct {
@@ -55,6 +61,24 @@ func (repo *updateCategoryRepo) GetCategory(ctx context.Context, id uint32) (*mo
 func (repo *updateCategoryRepo) UpdateCategory(ctx context.Context, id uint32, data *categorymodel.UpdateCategory) error {
 	var categ models.Category
 	copier.Copy(&categ, data)
+
+	if data.ParentID != nil {
+		if *data.ParentID == "" {
+			categ.ParentID = nil
+			if err := repo.store.UpdateParentId(ctx, id, nil); err != nil {
+				return common.ErrDB(err)
+			}
+		} else {
+			uid, err := common.FromBase58(*data.ParentID)
+			if err != nil {
+				return common.ErrInvalidRequest(err)
+			}
+
+			localID := uid.GetLocalID()
+			categ.ParentID = &localID
+		}
+
+	}
 
 	if data.Image != nil {
 		pictureFile, err := data.Image.Open()

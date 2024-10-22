@@ -34,6 +34,6 @@ const (
 	AWSVideoS3BuckerName = "hls-video-segment"
 	AWSCloudFrontVideo   = "https://d17cfikyg12m49.cloudfront.net"
 
-	AWSPublicBucket         = "study-flatform-public"
-	AWSCloudFrontPublicFile = "https://dfy5larca2zqe.cloudfront.net"
+	AWSPublicBucket         = "salon-dev-pub"
+	AWSCloudFrontPublicFile = "https://d3i048dqjftjb3.cloudfront.net"
 )

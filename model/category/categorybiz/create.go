@@ -37,6 +37,13 @@ func (c *createCategoryBiz) CreateNewCategory(ctx context.Context, input *catego
 		return common.ErrInvalidRequest(errors.New("code must not exceed 100 characters"))
 	}
 
+	if input.ParentID != nil {
+		input.Mask(false)
+		if *input.ParentID == input.GetFakeId() {
+			return common.ErrInvalidRequest(errors.New("parent category cannot be itself"))
+		}
+	}
+
 	category, err := c.repo.CreateNewCategory(ctx, input)
 	if err != nil {
 		return common.ErrCannotCreateEntity(models.CategoryEntityName, err)
