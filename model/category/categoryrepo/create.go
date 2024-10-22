@@ -54,7 +54,7 @@ func (repo *createCategoryRepo) CreateNewCategory(
 		Code:        input.Code,
 	}
 
-	if input.ParentID != nil {
+	if input.ParentID != nil && *input.ParentID != "" {
 		uid, err := common.FromBase58(*input.ParentID)
 		if err != nil {
 			return nil, common.ErrInvalidRequest(err)

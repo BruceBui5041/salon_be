@@ -77,7 +77,6 @@ func (repo *updateCategoryRepo) UpdateCategory(ctx context.Context, id uint32, d
 			localID := uid.GetLocalID()
 			categ.ParentID = &localID
 		}
-
 	}
 
 	if data.Image != nil {
