@@ -83,6 +83,7 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.Enrollment{},
 
 		&models.Comment{},
+		&models.Image{},
 	}
 
 	for _, table := range tables {

@@ -32,6 +32,7 @@ type ServiceVersion struct {
 	Category   *Category `json:"category,omitempty" gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL;"`
 
 	Enrollments []*Enrollment `json:"enrollments,omitempty" gorm:"foreignKey:ServiceVersionID"`
+	Images      []Image       `json:"images,omitempty" gorm:"foreignKey:ServiceVersionID"`
 
 	Title           string           `json:"title" gorm:"column:title;not null;size:255"`
 	Description     string           `json:"description" gorm:"column:description;type:text"`

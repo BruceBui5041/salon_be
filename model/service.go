@@ -29,6 +29,7 @@ type Service struct {
 	RatingCount      uint32           `json:"rating_count" gorm:"column:rating_count"`
 	ReviewInfo       ReviewInfos      `json:"review_info" gorm:"column:review_info;type:json"`
 	AverageRating    decimal.Decimal  `json:"avg_rating" gorm:"column:avg_rating;type:decimal(3,1)"`
+	Images           []Image          `json:"images,omitempty" gorm:"foreignKey:ServiceID"`
 }
 
 func (Service) TableName() string {
