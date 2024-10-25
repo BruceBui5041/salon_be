@@ -2,11 +2,10 @@ package servicerepo
 
 import (
 	"context"
+	"errors"
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/service/servicemodel"
-
-	"github.com/shopspring/decimal"
 )
 
 type ServiceStore interface {
@@ -46,18 +45,40 @@ func (repo *createServiceRepo) CreateNewService(
 	}
 
 	if input.ServiceVersion != nil {
+		categoryUID, err := common.FromBase58(input.ServiceVersion.CategoryID)
+		if err != nil {
+			return nil, common.ErrInvalidRequest(errors.New("invalid category ID"))
+		}
+
+		subCategoryUID, err := common.FromBase58(input.ServiceVersion.SubCategoryID)
+		if err != nil {
+			return nil, common.ErrInvalidRequest(errors.New("invalid sub category ID"))
+		}
+
+		// Parse IntroVideoID into UID if it's not nil
+		var introVideoUID *uint32
+		if input.ServiceVersion.IntroVideoID != nil {
+			uid, err := common.DecomposeUID(*input.ServiceVersion.IntroVideoID)
+			if err != nil {
+				return nil, common.ErrInvalidRequest(errors.New("invalid intro video ID"))
+			}
+			localId := uid.GetLocalID()
+			introVideoUID = &localId
+		}
+
 		serviceVersion := &models.ServiceVersion{
-			ServiceID:    service.Id,
-			Title:        input.ServiceVersion.Title,
-			Description:  input.ServiceVersion.Description,
-			CategoryID:   input.ServiceVersion.CategoryID,
-			IntroVideoID: input.ServiceVersion.IntroVideoID,
-			Thumbnail:    input.ServiceVersion.Thumbnail,
-			Price:        decimal.NewFromFloat(input.ServiceVersion.Price),
+			ServiceID:     service.Id,
+			Title:         input.ServiceVersion.Title,
+			Description:   input.ServiceVersion.Description,
+			CategoryID:    categoryUID.GetLocalID(),
+			SubCategoryID: subCategoryUID.GetLocalID(),
+			IntroVideoID:  introVideoUID,
+			Thumbnail:     input.ServiceVersion.Thumbnail,
+			Price:         input.ServiceVersion.Price.GetDecimal(),
 		}
 
 		if input.ServiceVersion.DiscountedPrice != nil {
-			discounted := decimal.NewFromFloat(*input.ServiceVersion.DiscountedPrice)
+			discounted := input.ServiceVersion.DiscountedPrice.GetDecimal()
 			serviceVersion.DiscountedPrice = &discounted
 		}
 

@@ -3,9 +3,12 @@ package servicebiz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/service/servicemodel"
+
+	"github.com/shopspring/decimal"
 )
 
 type ServiceRepo interface {
@@ -34,12 +37,22 @@ func (biz *createServiceBiz) CreateNewService(ctx context.Context, input *servic
 			return common.ErrInvalidRequest(errors.New("service version title is required"))
 		}
 
-		if input.ServiceVersion.CategoryID == 0 {
+		if input.ServiceVersion.CategoryID == "" {
 			return common.ErrInvalidRequest(errors.New("category ID is required"))
 		}
 
-		if input.ServiceVersion.Price <= 0 {
+		if input.ServiceVersion.SubCategoryID == "" {
+			return common.ErrInvalidRequest(errors.New("sub category ID is required"))
+		}
+
+		price := input.ServiceVersion.Price.GetDecimal()
+		if price.Equal(decimal.Zero) {
 			return common.ErrInvalidRequest(errors.New("price must be greater than 0"))
+		}
+
+		if input.ServiceVersion.DiscountedPrice != nil &&
+			input.ServiceVersion.DiscountedPrice.Decimal.GreaterThanOrEqual(price) {
+			return common.ErrInvalidRequest(fmt.Errorf("discount price must be less than price. Price %s", price.String()))
 		}
 	}
 

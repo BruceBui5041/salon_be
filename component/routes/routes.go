@@ -16,6 +16,7 @@ import (
 	"salon_be/model/payment/paymenttransport"
 	"salon_be/model/permission/permissiontransport"
 	"salon_be/model/role/roletransport"
+	"salon_be/model/service/servicetransport"
 	"salon_be/model/user/usertransport"
 	"salon_be/model/userprofile/userprofiletransport"
 	"salon_be/model/video/videotransport"
@@ -37,6 +38,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupVideoRoutes(r, appCtx)
 	setupPaymentRoutes(r, appCtx)
 	setupCategoryRoutes(r, appCtx)
+	setupServiceRoutes(r, appCtx)
 
 	setupAuthRoutes(r, appCtx)
 	setupUtilityRoutes(r, appCtx)
@@ -47,6 +49,14 @@ func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
 	genAPIs := r.Group("/")
 	{
 		genAPIs.POST("search", genTransport.Search())
+	}
+}
+
+func setupServiceRoutes(r *gin.Engine, appCtx component.AppContext) {
+	service := r.Group("/service", middleware.RequiredAuth(appCtx))
+	{
+		service.POST("", servicetransport.CreateServiceHandler(appCtx))
+		// service.PATCH("/:id", permissiontransport.UpdatePermissionHandler(appCtx))
 	}
 }
 

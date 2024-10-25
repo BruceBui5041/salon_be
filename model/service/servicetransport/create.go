@@ -2,6 +2,7 @@
 package servicetransport
 
 import (
+	"errors"
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
@@ -23,7 +24,10 @@ func CreateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		requester := ctx.MustGet(common.CurrentUser).(common.Requester)
+		requester, ok := ctx.MustGet(common.CurrentUser).(common.Requester)
+		if !ok {
+			panic(common.ErrInvalidRequest(errors.New("requester not found")))
+		}
 
 		db := appCtx.GetMainDBConnection()
 

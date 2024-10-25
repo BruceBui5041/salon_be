@@ -1,6 +1,9 @@
 package servicemodel
 
-import "salon_be/common"
+import (
+	"salon_be/common"
+	"salon_be/utils/customtypes"
+)
 
 type CreateService struct {
 	common.SQLModel `json:",inline"`
@@ -10,13 +13,14 @@ type CreateService struct {
 }
 
 type CreateServiceVersion struct {
-	Title           string   `json:"title"`
-	Description     string   `json:"description"`
-	CategoryID      uint32   `json:"category_id"`
-	IntroVideoID    *uint32  `json:"intro_video_id,omitempty"`
-	Thumbnail       string   `json:"thumbnail"`
-	Price           float64  `json:"price"`
-	DiscountedPrice *float64 `json:"discounted_price,omitempty"`
+	Title           string                         `json:"title"`
+	Description     string                         `json:"description"`
+	CategoryID      string                         `json:"category_id"`
+	SubCategoryID   string                         `json:"sub_category_id"`
+	IntroVideoID    *string                        `json:"intro_video_id,omitempty"`
+	Thumbnail       string                         `json:"thumbnail"`
+	Price           customtypes.DecimalString      `json:"price"`
+	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty"`
 }
 
 func (cs *CreateService) Mask(isAdmin bool) {
