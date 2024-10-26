@@ -82,6 +82,7 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.Payment{},
 		&models.Enrollment{},
 
+		&models.M2MServiceVersionImage{},
 		&models.Comment{},
 		&models.Image{},
 	}

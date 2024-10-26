@@ -37,6 +37,7 @@ func (repo *createServiceRepo) CreateNewService(
 	input *servicemodel.CreateService,
 ) (*models.Service, error) {
 	service := &models.Service{
+		SQLModel:  common.SQLModel{Status: "inactive"},
 		CreatorID: input.CreatorID,
 		Slug:      input.Slug,
 	}

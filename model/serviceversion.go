@@ -23,15 +23,15 @@ type ReviewInfo struct {
 type ServiceVersion struct {
 	common.SQLModel `json:",inline"`
 	ServiceID       uint32               `json:"-" gorm:"column:service_id;not null;index"`
-	Service         *Service             `json:"service,omitempty" gorm:"foreignKey:ServiceID"`
+	Service         *Service             `json:"service,omitempty" gorm:"foreignKey:ServiceID;references:Id"`
 	IntroVideoID    *uint32              `json:"-" gorm:"column:intro_video_id;index"`
-	IntroVideo      *Video               `json:"intro_video,omitempty" gorm:"foreignKey:IntroVideoID"`
+	IntroVideo      *Video               `json:"intro_video,omitempty" gorm:"foreignKey:IntroVideoID;references:Id"`
 	CategoryID      uint32               `json:"-" gorm:"column:category_id;index"`
-	Category        *Category            `json:"category,omitempty" gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL;"`
+	Category        *Category            `json:"category,omitempty" gorm:"foreignKey:CategoryID;references:Id;constraint:OnDelete:SET NULL;"`
 	SubCategoryID   uint32               `json:"-" gorm:"column:sub_category_id;index"`
-	SubCategory     *Category            `json:"sub_category,omitempty" gorm:"foreignKey:SubCategoryID;constraint:OnDelete:SET NULL;"`
-	Enrollments     []*Enrollment        `json:"enrollments,omitempty" gorm:"foreignKey:ServiceVersionID"`
-	Images          []Image              `json:"images,omitempty" gorm:"foreignKey:ServiceVersionID"`
+	SubCategory     *Category            `json:"sub_category,omitempty" gorm:"foreignKey:SubCategoryID;references:Id;constraint:OnDelete:SET NULL;"`
+	Enrollments     []*Enrollment        `json:"enrollments,omitempty" gorm:"foreignKey:ServiceVersionID;references:Id"`
+	Images          []*Image             `json:"images,omitempty" gorm:"many2many:service_version_images;foreignKey:Id;joinForeignKey:ServiceVersionID;References:Id;joinReferences:ImageID;constraint:OnDelete:CASCADE;"`
 	Title           string               `json:"title" gorm:"column:title;not null;size:255"`
 	Description     string               `json:"description" gorm:"column:description;type:text"`
 	ServiceMen      []User               `json:"service_men" gorm:"many2many:user_service;"`
