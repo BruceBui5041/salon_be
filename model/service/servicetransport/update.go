@@ -1,7 +1,6 @@
 package servicetransport
 
 import (
-	"errors"
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
@@ -27,13 +26,6 @@ func UpdateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 		// if !ok {
 		// 	panic(common.ErrInvalidRequest(errors.New("requester not found")))
 		// }
-
-		serviceUID, err := common.FromBase58(ctx.Param("id"))
-		if err != nil {
-			panic(common.ErrInvalidRequest(errors.New("invalid category ID")))
-		}
-
-		input.ServiceID = serviceUID.GetLocalID()
 
 		db := appCtx.GetMainDBConnection()
 

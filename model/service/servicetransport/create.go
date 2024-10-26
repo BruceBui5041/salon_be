@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
+	"salon_be/model/image/imagerepo"
+	"salon_be/model/image/imagestore"
 	"salon_be/model/service/servicebiz"
 	"salon_be/model/service/servicemodel"
 	"salon_be/model/service/servicerepo"
@@ -34,7 +36,10 @@ func CreateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			serviceStore := servicestore.NewSQLStore(tx)
 			serviceVersionStore := serviceversionstore.NewSQLStore(tx)
-			repo := servicerepo.NewCreateServiceRepo(serviceStore, serviceVersionStore)
+			imageStore := imagestore.NewSQLStore(tx)
+
+			imageRepo := imagerepo.NewCreateImageRepo(imageStore, appCtx.GetS3Client())
+			repo := servicerepo.NewCreateServiceRepo(serviceStore, serviceVersionStore, imageRepo)
 			business := servicebiz.NewCreateServiceBiz(repo)
 
 			input.CreatorID = requester.GetUserId()

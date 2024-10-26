@@ -43,11 +43,21 @@ func (repo *updateServiceRepo) UpdateService(
 	ctx context.Context,
 	input *servicemodel.UpdateService,
 ) (*models.Service, error) {
-	service := &models.Service{
-		ServiceVersionID: &input.ServiceID,
+	serviceVersionId, err := input.GetServiceVersionLocalId()
+	if err != nil {
+		return nil, err
 	}
 
-	if err := repo.serviceStore.Update(ctx, input.ServiceID, service); err != nil {
+	serviceID, err := input.GetServiceLocalId()
+	if err != nil {
+		return nil, err
+	}
+
+	service := &models.Service{
+		ServiceVersionID: &serviceVersionId,
+	}
+
+	if err := repo.serviceStore.Update(ctx, serviceID, service); err != nil {
 		return nil, common.ErrDB(err)
 	}
 
@@ -73,7 +83,7 @@ func (repo *updateServiceRepo) UpdateService(
 		}
 
 		serviceVersion := &models.ServiceVersion{
-			ServiceID:     input.ServiceID,
+			ServiceID:     serviceID,
 			Title:         input.ServiceVersion.Title,
 			Description:   input.ServiceVersion.Description,
 			CategoryID:    categoryUID.GetLocalID(),
@@ -103,7 +113,7 @@ func (repo *updateServiceRepo) UpdateService(
 			return nil, common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
 		}
 
-		if err := repo.serviceVersionStore.Update(ctx, input.ServiceVersionID, serviceVersion); err != nil {
+		if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {
 			return nil, common.ErrDB(err)
 		}
 

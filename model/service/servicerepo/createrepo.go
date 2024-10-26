@@ -3,9 +3,13 @@ package servicerepo
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"salon_be/common"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/service/servicemodel"
+
+	"go.uber.org/zap"
 )
 
 type ServiceStore interface {
@@ -17,18 +21,25 @@ type ServiceVersionStore interface {
 	CreateNewServiceVersion(ctx context.Context, data *models.ServiceVersion) error
 }
 
+type ImageRepo interface {
+	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+}
+
 type createServiceRepo struct {
 	serviceStore        ServiceStore
 	serviceVersionStore ServiceVersionStore
+	imageRepo           ImageRepo // Add this field
 }
 
 func NewCreateServiceRepo(
 	serviceStore ServiceStore,
 	serviceVersionStore ServiceVersionStore,
+	imageRepo ImageRepo,
 ) *createServiceRepo {
 	return &createServiceRepo{
 		serviceStore:        serviceStore,
 		serviceVersionStore: serviceVersionStore,
+		imageRepo:           imageRepo,
 	}
 }
 
@@ -92,7 +103,20 @@ func (repo *createServiceRepo) CreateNewService(
 		service.ServiceVersionID = &serviceVersion.Id
 		service.ServiceVersion = serviceVersion
 
+		if len(input.ServiceVersion.Images) > 0 {
+			for _, file := range input.ServiceVersion.Images {
+				img, err := repo.imageRepo.CreateImage(ctx, file, service.Id, input.CreatorID)
+				if err != nil {
+					logger.AppLogger.Error(ctx, "faild to upload service image", zap.Error(err))
+					return nil, common.ErrDB(err)
+				}
+
+				serviceVersion.Images = append(serviceVersion.Images, img)
+			}
+		}
+
 		if err := repo.serviceStore.Update(ctx, service.Id, service); err != nil {
+			logger.AppLogger.Error(ctx, "failed to update service", zap.Error(err))
 			return nil, common.ErrDB(err)
 		}
 

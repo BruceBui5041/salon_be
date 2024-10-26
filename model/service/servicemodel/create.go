@@ -1,6 +1,7 @@
 package servicemodel
 
 import (
+	"mime/multipart"
 	"salon_be/common"
 	"salon_be/utils/customtypes"
 )
@@ -22,6 +23,7 @@ type CreateServiceVersion struct {
 	Price           customtypes.DecimalString      `json:"price"`
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty"`
 	Duration        uint32                         `json:"duration"`
+	Images          []*multipart.FileHeader        `json:"images" form:"images"`
 }
 
 func (cs *CreateService) Mask(isAdmin bool) {
