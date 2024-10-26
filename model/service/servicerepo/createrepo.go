@@ -10,6 +10,7 @@ import (
 
 type ServiceStore interface {
 	CreateNewService(ctx context.Context, data *models.Service) error
+	Update(ctx context.Context, serviceID uint32, data *models.Service) error
 }
 
 type ServiceVersionStore interface {
@@ -88,6 +89,12 @@ func (repo *createServiceRepo) CreateNewService(
 
 		service.ServiceVersionID = &serviceVersion.Id
 		service.ServiceVersion = serviceVersion
+
+		if err := repo.serviceStore.Update(ctx, service.Id, service); err != nil {
+			return nil, common.ErrDB(err)
+		}
+
+		service.ServiceVersionID = &serviceVersion.Id
 	}
 
 	return service, nil

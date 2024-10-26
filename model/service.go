@@ -19,11 +19,11 @@ func init() {
 
 type Service struct {
 	common.SQLModel  `json:",inline"`
-	CreatorID        uint32           `json:"creator_id" gorm:"column:creator_id;index"`
+	CreatorID        uint32           `json:"-" gorm:"column:creator_id;index"`
 	Creator          *User            `json:"creator,omitempty" gorm:"constraint:OnDelete:SET NULL;foreignKey:CreatorID"`
 	Versions         []ServiceVersion `json:"versions,omitempty" gorm:"foreignKey:ServiceID"`
 	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ServiceVersionID"`
-	ServiceVersionID *uint32          `json:"service_version_id,omitempty" gorm:"column:service_version_id"`
+	ServiceVersionID *uint32          `json:"-" gorm:"column:service_version_id"`
 	Comments         []*Comment       `json:"comments,omitempty" gorm:"foreignKey:ServiceID"`
 	Slug             string           `json:"slug" gorm:"column:slug;not null;size:255"`
 	RatingCount      uint32           `json:"rating_count" gorm:"column:rating_count"`

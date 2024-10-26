@@ -56,9 +56,13 @@ func (biz *createServiceBiz) CreateNewService(ctx context.Context, input *servic
 		}
 	}
 
-	_, err := biz.repo.CreateNewService(ctx, input)
+	newService, err := biz.repo.CreateNewService(ctx, input)
 	if err != nil {
 		return common.ErrCannotCreateEntity(models.ServiceEntityName, err)
+	}
+
+	if newService.ServiceVersionID == nil {
+		return common.ErrInvalidRequest(errors.New("service must have service version"))
 	}
 
 	return nil

@@ -50,6 +50,8 @@ func (sv *ServiceVersion) Mask(isAdmin bool) {
 
 func (sv *ServiceVersion) AfterFind(tx *gorm.DB) (err error) {
 	sv.Mask(false)
-	sv.Thumbnail = storagehandler.AddPublicCloudFrontDomain(sv.Thumbnail)
+	if sv.Thumbnail != "" {
+		sv.Thumbnail = storagehandler.AddPublicCloudFrontDomain(sv.Thumbnail)
+	}
 	return
 }
