@@ -38,6 +38,7 @@ type ServiceVersion struct {
 	Thumbnail       string               `json:"thumbnail" gorm:"column:thumbnail;type:text"`
 	Price           decimal.Decimal      `json:"price" gorm:"column:price;type:decimal(10,2);not null"`
 	DiscountedPrice *decimal.NullDecimal `json:"discounted_price" gorm:"column:discounted_price;type:decimal(10,2)"`
+	Duration        uint32               `json:"duration" gorm:"column:duration;not null"`
 }
 
 func (ServiceVersion) TableName() string {

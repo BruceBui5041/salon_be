@@ -21,6 +21,7 @@ type CreateServiceVersion struct {
 	Thumbnail       string                         `json:"thumbnail"`
 	Price           customtypes.DecimalString      `json:"price"`
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty"`
+	Duration        uint32                         `json:"duration"`
 }
 
 func (cs *CreateService) Mask(isAdmin bool) {

@@ -54,6 +54,10 @@ func (biz *createServiceBiz) CreateNewService(ctx context.Context, input *servic
 			input.ServiceVersion.DiscountedPrice.Decimal.GreaterThanOrEqual(price) {
 			return common.ErrInvalidRequest(fmt.Errorf("discount price must be less than price. Price %s", price.String()))
 		}
+
+		if input.ServiceVersion.Duration < 900 {
+			return common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
+		}
 	}
 
 	newService, err := biz.repo.CreateNewService(ctx, input)

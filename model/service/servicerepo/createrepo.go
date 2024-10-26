@@ -76,6 +76,7 @@ func (repo *createServiceRepo) CreateNewService(
 			IntroVideoID:  introVideoUID,
 			Thumbnail:     input.ServiceVersion.Thumbnail,
 			Price:         input.ServiceVersion.Price.GetDecimal(),
+			Duration:      input.ServiceVersion.Duration,
 		}
 
 		if input.ServiceVersion.DiscountedPrice != nil {
