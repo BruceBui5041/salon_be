@@ -1,11 +1,12 @@
-// service/servicetransport/create.go
 package servicetransport
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
+	"salon_be/component/logger"
 	"salon_be/model/image/imagerepo"
 	"salon_be/model/image/imagestore"
 	"salon_be/model/service/servicebiz"
@@ -15,15 +16,36 @@ import (
 	"salon_be/model/serviceversion/serviceversionstore"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 func CreateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input servicemodel.CreateService
+		var request servicemodel.CreateServiceRequest
 
-		if err := ctx.ShouldBind(&input); err != nil {
+		// Parse multipart form
+		if err := ctx.Request.ParseMultipartForm(32 << 20); err != nil { // 32MB max
+			logger.AppLogger.Error(ctx.Request.Context(), "failed to parse multipart form", zap.Error(err))
 			panic(err)
+		}
+
+		// Bind the request struct (will get JSON string and images)
+		if err := ctx.ShouldBind(&request); err != nil {
+			logger.AppLogger.Error(ctx.Request.Context(), "failed to bind form data", zap.Error(err))
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		// Parse the JSON string into CreateService
+		var serviceData servicemodel.CreateService
+		if err := json.Unmarshal([]byte(request.JSON), &serviceData); err != nil {
+			logger.AppLogger.Error(ctx.Request.Context(), "failed to unmarshal JSON data", zap.Error(err))
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		// Assign the uploaded images to the service version
+		if serviceData.ServiceVersion != nil {
+			serviceData.ServiceVersion.Images = request.Images
 		}
 
 		requester, ok := ctx.MustGet(common.CurrentUser).(common.Requester)
@@ -42,8 +64,8 @@ func CreateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 			repo := servicerepo.NewCreateServiceRepo(serviceStore, serviceVersionStore, imageRepo)
 			business := servicebiz.NewCreateServiceBiz(repo)
 
-			input.CreatorID = requester.GetUserId()
-			if err := business.CreateNewService(ctx.Request.Context(), &input); err != nil {
+			serviceData.CreatorID = requester.GetUserId()
+			if err := business.CreateNewService(ctx.Request.Context(), &serviceData); err != nil {
 				panic(err)
 			}
 
