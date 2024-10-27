@@ -3,12 +3,15 @@ package servicerepo
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"salon_be/common"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/service/servicemodel"
 	"salon_be/utils/customtypes"
 
 	"github.com/shopspring/decimal"
+	"go.uber.org/zap"
 )
 
 type UpdateServiceStore interface {
@@ -24,18 +27,25 @@ type UpdateServiceVersionStore interface {
 	Update(ctx context.Context, versionID uint32, data *models.ServiceVersion) error
 }
 
+type UpdateImageRepo interface {
+	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+}
+
 type updateServiceRepo struct {
 	serviceStore        UpdateServiceStore
 	serviceVersionStore UpdateServiceVersionStore
+	imageRepo           UpdateImageRepo
 }
 
 func NewUpdateServiceRepo(
 	serviceStore UpdateServiceStore,
 	serviceVersionStore UpdateServiceVersionStore,
+	imageRepo UpdateImageRepo,
 ) *updateServiceRepo {
 	return &updateServiceRepo{
 		serviceStore:        serviceStore,
 		serviceVersionStore: serviceVersionStore,
+		imageRepo:           imageRepo,
 	}
 }
 
@@ -53,6 +63,16 @@ func (repo *updateServiceRepo) UpdateService(
 		return nil, err
 	}
 
+	// Find existing service to get creator_id
+	existingService, err := repo.serviceStore.FindOne(ctx, map[string]interface{}{"id": serviceID})
+	if err != nil {
+		return nil, common.ErrDB(err)
+	}
+
+	if existingService == nil {
+		return nil, common.ErrEntityNotFound("service", nil)
+	}
+
 	service := &models.Service{
 		ServiceVersionID: &serviceVersionId,
 	}
@@ -62,32 +82,31 @@ func (repo *updateServiceRepo) UpdateService(
 	}
 
 	if input.ServiceVersion != nil {
-		categoryUID, err := common.FromBase58(input.ServiceVersion.CategoryID)
+		categoryID, err := input.ServiceVersion.GetCateogryLocalId(ctx)
 		if err != nil {
-			return nil, common.ErrInvalidRequest(errors.New("invalid category ID"))
+			return nil, err
 		}
 
-		subCategoryUID, err := common.FromBase58(input.ServiceVersion.SubCategoryID)
+		subCategoryID, err := input.ServiceVersion.GetSubCategoryLocalId(ctx)
 		if err != nil {
-			return nil, common.ErrInvalidRequest(errors.New("invalid sub category ID"))
+			return nil, err
 		}
 
 		var introVideoUID *uint32
 		if input.ServiceVersion.IntroVideoID != "" {
-			uid, err := common.DecomposeUID(input.ServiceVersion.IntroVideoID)
+			introVideoID, err := input.ServiceVersion.GetIntroVideoLocalId(ctx)
 			if err != nil {
-				return nil, common.ErrInvalidRequest(errors.New("invalid intro video ID"))
+				return nil, err
 			}
-			localId := uid.GetLocalID()
-			introVideoUID = &localId
+			introVideoUID = &introVideoID
 		}
 
 		serviceVersion := &models.ServiceVersion{
 			ServiceID:     serviceID,
 			Title:         input.ServiceVersion.Title,
 			Description:   input.ServiceVersion.Description,
-			CategoryID:    categoryUID.GetLocalID(),
-			SubCategoryID: subCategoryUID.GetLocalID(),
+			CategoryID:    categoryID,
+			SubCategoryID: subCategoryID,
 			IntroVideoID:  introVideoUID,
 			Thumbnail:     input.ServiceVersion.Thumbnail,
 			Price:         input.ServiceVersion.Price.GetDecimal(),
@@ -111,6 +130,19 @@ func (repo *updateServiceRepo) UpdateService(
 
 		if input.ServiceVersion.Duration < 900 {
 			return nil, common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
+		}
+
+		// Handle image uploads
+		if len(input.ServiceVersion.Images) > 0 {
+			for _, file := range input.ServiceVersion.Images {
+				img, err := repo.imageRepo.CreateImage(ctx, file, serviceID, existingService.CreatorID)
+				if err != nil {
+					logger.AppLogger.Error(ctx, "failed to upload service image", zap.Error(err))
+					return nil, common.ErrDB(err)
+				}
+
+				serviceVersion.Images = append(serviceVersion.Images, img)
+			}
 		}
 
 		if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {

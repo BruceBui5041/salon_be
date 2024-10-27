@@ -50,9 +50,14 @@ func (biz *updateServiceBiz) UpdateService(ctx context.Context, input *servicemo
 		}
 
 		if input.ServiceVersion.DiscountedPrice != nil {
+			serviceID, err := input.GetServiceLocalId()
+			if err != nil {
+				return err
+			}
+
 			service, err := biz.repo.FindOne(
 				ctx,
-				map[string]interface{}{"id": input.ServiceID},
+				map[string]interface{}{"id": serviceID},
 				"ServiceVersion",
 			)
 			if err != nil {
