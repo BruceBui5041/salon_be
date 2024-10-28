@@ -20,7 +20,7 @@ func (s *sqlStore) FindOne(
 	service := &models.Service{}
 
 	if err := db.Where(conditions).First(&service).Error; err != nil {
-		return nil, common.ErrCannotListEntity(models.ServiceEntityName, err)
+		return nil, common.ErrEntityNotFound(models.ServiceEntityName, err)
 	}
 
 	return service, nil

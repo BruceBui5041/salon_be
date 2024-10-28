@@ -24,7 +24,13 @@ type UpdateServiceStore interface {
 }
 
 type UpdateServiceVersionStore interface {
+	CreateNewServiceVersion(ctx context.Context, data *models.ServiceVersion) error
 	Update(ctx context.Context, versionID uint32, data *models.ServiceVersion) error
+	FindOne(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreInfo ...string,
+	) (*models.ServiceVersion, error)
 }
 
 type UpdateImageRepo interface {
@@ -70,15 +76,7 @@ func (repo *updateServiceRepo) UpdateService(
 	}
 
 	if existingService == nil {
-		return nil, common.ErrEntityNotFound("service", nil)
-	}
-
-	service := &models.Service{
-		ServiceVersionID: &serviceVersionId,
-	}
-
-	if err := repo.serviceStore.Update(ctx, serviceID, service); err != nil {
-		return nil, common.ErrDB(err)
+		return nil, common.ErrEntityNotFound(models.ServiceEntityName, nil)
 	}
 
 	if input.ServiceVersion != nil {
@@ -99,6 +97,12 @@ func (repo *updateServiceRepo) UpdateService(
 				return nil, err
 			}
 			introVideoUID = &introVideoID
+		}
+
+		existingServiceVersion, err := repo.serviceVersionStore.FindOne(ctx, map[string]interface{}{"id": serviceVersionId})
+		if err != nil {
+			logger.AppLogger.Error(ctx, "version not found", zap.Error(err))
+			return nil, err
 		}
 
 		serviceVersion := &models.ServiceVersion{
@@ -145,15 +149,23 @@ func (repo *updateServiceRepo) UpdateService(
 			}
 		}
 
-		if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {
-			return nil, common.ErrDB(err)
+		// create new version as draft if the service and current version were published
+		if existingService.Status == "active" && existingServiceVersion.Status == "active" {
+			serviceVersion.Status = "inactive"
+			if err := repo.serviceVersionStore.CreateNewServiceVersion(ctx, serviceVersion); err != nil {
+				return nil, common.ErrDB(err)
+			}
+		} else {
+			if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {
+				return nil, common.ErrDB(err)
+			}
 		}
 
-		service.ServiceVersionID = &serviceVersion.Id
-		service.ServiceVersion = serviceVersion
+		existingService.ServiceVersionID = &serviceVersion.Id
+		existingService.ServiceVersion = serviceVersion
 	}
 
-	return service, nil
+	return existingService, nil
 }
 
 func (repo *updateServiceRepo) FindOne(

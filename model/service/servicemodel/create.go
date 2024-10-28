@@ -2,7 +2,6 @@ package servicemodel
 
 import (
 	"mime/multipart"
-	"salon_be/common"
 	"salon_be/utils/customtypes"
 )
 
@@ -12,10 +11,9 @@ type CreateServiceRequest struct {
 }
 
 type CreateService struct {
-	common.SQLModel `json:",inline"`
-	CreatorID       uint32                `json:"creator_id" form:"creator_id"`
-	Slug            string                `json:"slug" form:"slug"`
-	ServiceVersion  *CreateServiceVersion `json:"service_version" form:"service_version"`
+	CreatorID      uint32                `json:"creator_id" form:"creator_id"`
+	Slug           string                `json:"slug" form:"slug"`
+	ServiceVersion *CreateServiceVersion `json:"service_version" form:"service_version"`
 }
 
 type CreateServiceVersion struct {
@@ -29,8 +27,4 @@ type CreateServiceVersion struct {
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty" form:"discounted_price"`
 	Duration        uint32                         `json:"duration" form:"duration"`
 	Images          []*multipart.FileHeader        `json:"images" form:"images"`
-}
-
-func (cs *CreateService) Mask(isAdmin bool) {
-	cs.GenUID(common.DBTypeService)
 }

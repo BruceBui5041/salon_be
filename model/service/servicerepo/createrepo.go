@@ -80,6 +80,7 @@ func (repo *createServiceRepo) CreateNewService(
 		}
 
 		serviceVersion := &models.ServiceVersion{
+			SQLModel:      common.SQLModel{Status: "inactive"},
 			ServiceID:     service.Id,
 			Title:         input.ServiceVersion.Title,
 			Description:   input.ServiceVersion.Description,
