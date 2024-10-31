@@ -78,7 +78,7 @@ func (repo *publishServiceRepo) PublishService(
 		}
 
 		// Update version status and set published date
-		now := time.Now()
+		now := time.Now().UTC()
 		if err := repo.serviceVersionStore.Update(
 			ctx,
 			versionId,
