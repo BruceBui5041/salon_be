@@ -4,6 +4,7 @@ import (
 	"salon_be/common"
 	"salon_be/component/genericapi/modelhelper"
 	"salon_be/storagehandler"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -39,6 +40,7 @@ type ServiceVersion struct {
 	Price           decimal.Decimal      `json:"price" gorm:"column:price;type:decimal(10,2);not null"`
 	DiscountedPrice *decimal.NullDecimal `json:"discounted_price" gorm:"column:discounted_price;type:decimal(10,2)"`
 	Duration        uint32               `json:"duration" gorm:"column:duration;not null"`
+	PublishedDate   *time.Time           `json:"published_date" gorm:"column:published_date;type:datetime"`
 }
 
 func (ServiceVersion) TableName() string {

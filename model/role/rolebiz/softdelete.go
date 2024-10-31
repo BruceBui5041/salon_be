@@ -25,7 +25,7 @@ func (biz *deleteRoleBiz) SoftDeleteRole(ctx context.Context, id uint32) error {
 		return common.ErrCannotGetEntity(models.RoleEntityName, err)
 	}
 
-	if oldData.Status == "inactive" {
+	if oldData.Status == common.StatusInactive {
 		return common.ErrEntityDeleted(models.RoleEntityName, nil)
 	}
 

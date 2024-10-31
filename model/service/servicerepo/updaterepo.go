@@ -150,8 +150,8 @@ func (repo *updateServiceRepo) UpdateService(
 		}
 
 		// create new version as draft if the service and current version were published
-		if existingService.Status == "active" && existingServiceVersion.Status == "active" {
-			serviceVersion.Status = "inactive"
+		if existingService.Status == common.StatusActive && existingServiceVersion.Status == common.StatusActive {
+			serviceVersion.Status = common.StatusInactive
 			if err := repo.serviceVersionStore.CreateNewServiceVersion(ctx, serviceVersion); err != nil {
 				return nil, common.ErrDB(err)
 			}

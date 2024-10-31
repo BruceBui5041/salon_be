@@ -48,7 +48,7 @@ func (repo *createServiceRepo) CreateNewService(
 	input *servicemodel.CreateService,
 ) (*models.Service, error) {
 	service := &models.Service{
-		SQLModel:  common.SQLModel{Status: "inactive"},
+		SQLModel:  common.SQLModel{Status: common.StatusInactive},
 		CreatorID: input.CreatorID,
 		Slug:      input.Slug,
 	}
@@ -80,7 +80,7 @@ func (repo *createServiceRepo) CreateNewService(
 		}
 
 		serviceVersion := &models.ServiceVersion{
-			SQLModel:      common.SQLModel{Status: "inactive"},
+			SQLModel:      common.SQLModel{Status: common.StatusInactive},
 			ServiceID:     service.Id,
 			Title:         input.ServiceVersion.Title,
 			Description:   input.ServiceVersion.Description,

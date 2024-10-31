@@ -43,7 +43,7 @@ func (biz *updateRoleBiz) UpdateRole(ctx context.Context, id uint32, input *role
 		return common.ErrCannotGetEntity(models.RoleEntityName, err)
 	}
 
-	if oldData.Status == "inactive" {
+	if oldData.Status == common.StatusInactive {
 		return common.ErrEntityDeleted(models.RoleEntityName, nil)
 	}
 

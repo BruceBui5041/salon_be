@@ -31,7 +31,7 @@ func (biz *categoryBiz) ListCategories(ctx context.Context,
 	moreInfo ...string,
 ) ([]*categorymodel.CategoryResponse, error) {
 	extentConds := conditions
-	extentConds["status"] = "active"
+	extentConds["status"] = common.StatusActive
 	categories, err := biz.categoryStore.FindAll(ctx, conditions, moreInfo...)
 	if err != nil {
 		return nil, common.ErrCannotListEntity(models.CategoryEntityName, err)

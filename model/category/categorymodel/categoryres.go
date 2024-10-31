@@ -22,7 +22,7 @@ type CategoryResponse struct {
 
 func (cr *CategoryResponse) CountService() {
 	cr.ServiceCount = lo.CountBy(cr.Services, func(service models.ServiceVersion) bool {
-		return service.Status == "active"
+		return service.Status == common.StatusActive
 	})
 }
 
