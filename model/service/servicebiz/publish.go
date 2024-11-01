@@ -15,6 +15,11 @@ type PublishServiceRepo interface {
 		moreInfo ...string,
 	) (*models.Service, error)
 	PublishService(ctx context.Context, serviceId uint32, versionId uint32) error
+	FindServiceVersion(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreInfo ...string,
+	) (*models.ServiceVersion, error)
 }
 
 type publishServiceBiz struct {
@@ -32,12 +37,12 @@ func (biz *publishServiceBiz) PublishService(
 ) error {
 	serviceId, err := data.GetServiceLocalId()
 	if err != nil {
-		return common.ErrInvalidRequest(err)
+		panic(err)
 	}
 
 	versionId, err := data.GetServiceVersionLocalId()
 	if err != nil {
-		return common.ErrInvalidRequest(err)
+		panic(err)
 	}
 
 	// Get service with creator info
@@ -45,17 +50,24 @@ func (biz *publishServiceBiz) PublishService(
 		ctx,
 		map[string]interface{}{"id": serviceId},
 		"Creator",
-		"ServiceVersion",
 	)
 	if err != nil {
 		return common.ErrCannotGetEntity(models.ServiceEntityName, err)
+	}
+
+	serviceVersion, err := biz.repo.FindServiceVersion( // Add code here to find the service version
+		ctx,
+		map[string]interface{}{"id": versionId},
+	)
+	if err != nil {
+		return common.ErrCannotGetEntity(models.ServiceVersionEntityName, err)
 	}
 
 	if service.CreatorID != requester.GetUserId() {
 		return common.ErrNoPermission(errors.New("you are not the creator of this service"))
 	}
 
-	if service.ServiceVersion.PublishedDate != nil {
+	if serviceVersion.PublishedDate != nil {
 		return common.ErrInvalidRequest(errors.New("service version is already published"))
 	}
 

@@ -1,6 +1,7 @@
 package servicetransport
 
 import (
+	"errors"
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
@@ -11,6 +12,7 @@ import (
 	"salon_be/model/serviceversion/serviceversionstore"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func PublishServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
@@ -21,19 +23,27 @@ func PublishServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUser).(common.Requester)
-
-		db := appCtx.GetMainDBConnection()
-		serviceStore := servicestore.NewSQLStore(db)
-		serviceVersionStore := serviceversionstore.NewSQLStore(db)
-
-		repo := servicerepo.NewPublishServiceRepo(serviceStore, serviceVersionStore)
-		business := servicebiz.NewPublishServiceBiz(repo)
-
-		if err := business.PublishService(c.Request.Context(), requester, &data); err != nil {
-			panic(err)
+		requester, ok := c.MustGet(common.CurrentUser).(common.Requester)
+		if !ok {
+			panic(common.ErrInvalidRequest(errors.New("user not authenticated")))
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
+		db := appCtx.GetMainDBConnection()
+		if err := db.Transaction(func(tx *gorm.DB) error {
+			serviceStore := servicestore.NewSQLStore(tx)
+			serviceVersionStore := serviceversionstore.NewSQLStore(tx)
+
+			repo := servicerepo.NewPublishServiceRepo(serviceStore, serviceVersionStore)
+			business := servicebiz.NewPublishServiceBiz(repo)
+
+			if err := business.PublishService(c.Request.Context(), requester, &data); err != nil {
+				panic(err)
+			}
+
+			c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
+			return nil
+		}); err != nil {
+			panic(err)
+		}
 	}
 }

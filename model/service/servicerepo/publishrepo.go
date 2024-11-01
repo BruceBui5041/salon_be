@@ -48,6 +48,14 @@ func (repo *publishServiceRepo) FindService(
 	return repo.serviceStore.FindOne(ctx, conditions, moreInfo...)
 }
 
+func (repo *publishServiceRepo) FindServiceVersion(
+	ctx context.Context,
+	conditions map[string]interface{},
+	moreInfo ...string,
+) (*models.ServiceVersion, error) {
+	return repo.serviceVersionStore.FindOne(ctx, conditions, moreInfo...)
+}
+
 func (repo *publishServiceRepo) PublishService(
 	ctx context.Context,
 	serviceId uint32,
@@ -62,21 +70,21 @@ func (repo *publishServiceRepo) PublishService(
 		return err
 	}
 
-	// Set service and version status to active if inactive
-	if version.Status == common.StatusInactive {
-		// Update service status
-		if err := repo.serviceStore.Update(
-			ctx,
-			serviceId,
-			&models.Service{
-				SQLModel: common.SQLModel{
-					Status: common.StatusActive,
-				},
+	// Update service status
+	if err := repo.serviceStore.Update(
+		ctx,
+		serviceId,
+		&models.Service{
+			SQLModel: common.SQLModel{
+				Status: common.StatusActive,
 			},
-		); err != nil {
-			return err
-		}
+			ServiceVersionID: &versionId,
+		},
+	); err != nil {
+		return err
+	}
 
+	if version.PublishedDate == nil {
 		// Update version status and set published date
 		now := time.Now().UTC()
 		if err := repo.serviceVersionStore.Update(
