@@ -7,9 +7,11 @@ import (
 	"salon_be/common"
 	"salon_be/component/logger"
 	models "salon_be/model"
+	"salon_be/model/service/serviceerror"
 	"salon_be/model/service/servicemodel"
 	"salon_be/utils/customtypes"
 
+	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"go.uber.org/zap"
 )
@@ -70,7 +72,11 @@ func (repo *updateServiceRepo) UpdateService(
 	}
 
 	// Find existing service to get creator_id
-	existingService, err := repo.serviceStore.FindOne(ctx, map[string]interface{}{"id": serviceID})
+	existingService, err := repo.serviceStore.FindOne(
+		ctx,
+		map[string]interface{}{"id": serviceID},
+		"Versions",
+	)
 	if err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -150,7 +156,17 @@ func (repo *updateServiceRepo) UpdateService(
 		}
 
 		// create new version as draft if the service and current version were published
-		if existingService.Status == common.StatusActive && existingServiceVersion.Status == common.StatusActive {
+		if existingService.Status == common.StatusActive &&
+			existingServiceVersion.Status == common.StatusActive &&
+			existingServiceVersion.PublishedDate != nil {
+			_, hasDraft := lo.Find(existingService.Versions, func(version models.ServiceVersion) bool {
+				return version.PublishedDate != nil
+			})
+
+			if hasDraft {
+				return nil, serviceerror.ErrServiceDraftExisting(errors.New("service draft already existing"))
+			}
+
 			serviceVersion.Status = common.StatusInactive
 			if err := repo.serviceVersionStore.CreateNewServiceVersion(ctx, serviceVersion); err != nil {
 				return nil, common.ErrDB(err)

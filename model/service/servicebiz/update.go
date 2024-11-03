@@ -75,7 +75,7 @@ func (biz *updateServiceBiz) UpdateService(ctx context.Context, input *servicemo
 
 	updatedService, err := biz.repo.UpdateService(ctx, input)
 	if err != nil {
-		return common.ErrCannotUpdateEntity(models.ServiceEntityName, err)
+		return err
 	}
 
 	if updatedService.ServiceVersionID == nil {
