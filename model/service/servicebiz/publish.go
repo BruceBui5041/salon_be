@@ -49,26 +49,17 @@ func (biz *publishServiceBiz) PublishService(
 	service, err := biz.repo.FindService(
 		ctx,
 		map[string]interface{}{"id": serviceId},
-		"Creator",
 	)
 	if err != nil {
 		return common.ErrCannotGetEntity(models.ServiceEntityName, err)
 	}
 
-	serviceVersion, err := biz.repo.FindServiceVersion( // Add code here to find the service version
-		ctx,
-		map[string]interface{}{"id": versionId},
-	)
-	if err != nil {
-		return common.ErrCannotGetEntity(models.ServiceVersionEntityName, err)
+	if service.ServiceVersionID == &versionId {
+		return common.ErrInvalidRequest(errors.New("this version currently has been published"))
 	}
 
 	if service.CreatorID != requester.GetUserId() {
 		return common.ErrNoPermission(errors.New("you are not the creator of this service"))
-	}
-
-	if serviceVersion.PublishedDate != nil {
-		return common.ErrInvalidRequest(errors.New("service version is already published"))
 	}
 
 	if err := biz.repo.PublishService(ctx, serviceId, versionId); err != nil {

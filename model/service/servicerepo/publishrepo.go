@@ -61,7 +61,14 @@ func (repo *publishServiceRepo) PublishService(
 	serviceId uint32,
 	versionId uint32,
 ) error {
-	// Get service version to check status
+	service, err := repo.serviceStore.FindOne(
+		ctx,
+		map[string]interface{}{"id": serviceId},
+	)
+	if err != nil {
+		return err
+	}
+
 	version, err := repo.serviceVersionStore.FindOne(
 		ctx,
 		map[string]interface{}{"id": versionId},
@@ -70,7 +77,6 @@ func (repo *publishServiceRepo) PublishService(
 		return err
 	}
 
-	// Update service status
 	if err := repo.serviceStore.Update(
 		ctx,
 		serviceId,
@@ -84,8 +90,29 @@ func (repo *publishServiceRepo) PublishService(
 		return err
 	}
 
+	if err := repo.serviceVersionStore.Update(ctx, versionId, &models.ServiceVersion{
+		SQLModel: common.SQLModel{
+			Status: common.StatusActive,
+		},
+	}); err != nil {
+		return err
+	}
+
+	if service.ServiceVersionID != nil {
+		if err := repo.serviceVersionStore.Update(
+			ctx,
+			*service.ServiceVersionID,
+			&models.ServiceVersion{
+				SQLModel: common.SQLModel{
+					Status: common.StatusInactive,
+				},
+			},
+		); err != nil {
+			return err
+		}
+	}
+
 	if version.PublishedDate == nil {
-		// Update version status and set published date
 		now := time.Now().UTC()
 		if err := repo.serviceVersionStore.Update(
 			ctx,
