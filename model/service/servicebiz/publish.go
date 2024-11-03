@@ -54,7 +54,7 @@ func (biz *publishServiceBiz) PublishService(
 		return common.ErrCannotGetEntity(models.ServiceEntityName, err)
 	}
 
-	if service.ServiceVersionID == &versionId {
+	if service.ServiceVersionID != nil && *service.ServiceVersionID == versionId {
 		return common.ErrInvalidRequest(errors.New("this version currently has been published"))
 	}
 

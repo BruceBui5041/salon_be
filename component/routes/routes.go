@@ -59,6 +59,7 @@ func setupServiceRoutes(r *gin.Engine, appCtx component.AppContext) {
 		// service.PATCH("/:id", permissiontransport.UpdatePermissionHandler(appCtx))
 		service.PUT("/:id", servicetransport.UpdateServiceHandler(appCtx))
 		service.PATCH("/publish/:id", servicetransport.PublishServiceHandler(appCtx))
+		service.PATCH("/uploadimages", servicetransport.UploadImagesHandler(appCtx))
 	}
 }
 
