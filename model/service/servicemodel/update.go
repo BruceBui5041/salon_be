@@ -34,6 +34,17 @@ type UpdateServiceVersion struct {
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty" form:"discounted_price,omitempty"`
 	Duration        uint32                         `json:"duration" form:"duration"`
 	Images          []*multipart.FileHeader        `json:"images" form:"images"`
+	MainImageID     *string                        `json:"main_image_id,omitempty" form:"main_image_id,omitempty"`
+}
+
+func (us *UpdateServiceVersion) GetMainImageLocalId(ctx context.Context) (uint32, error) {
+	mainImageUID, err := common.FromBase58(*us.MainImageID)
+	if err != nil {
+		logger.AppLogger.Error(ctx, "invalid main image ID", zap.Error(err))
+		return 0, common.ErrInvalidRequest(errors.New("invalid main image ID"))
+	}
+
+	return mainImageUID.GetLocalID(), nil
 }
 
 func (ui *UpdateService) GetServiceVersionLocalId() (uint32, error) {

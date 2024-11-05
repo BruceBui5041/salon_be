@@ -33,6 +33,8 @@ type ServiceVersion struct {
 	SubCategory     *Category            `json:"sub_category,omitempty" gorm:"foreignKey:SubCategoryID;references:Id;constraint:OnDelete:SET NULL;"`
 	Enrollments     []*Enrollment        `json:"enrollments,omitempty" gorm:"foreignKey:ServiceVersionID;references:Id"`
 	Images          []*Image             `json:"images,omitempty" gorm:"many2many:service_version_images;foreignKey:Id;joinForeignKey:ServiceVersionID;References:Id;joinReferences:ImageID;constraint:OnDelete:CASCADE;"`
+	MainImageID     uint32               `json:"-" gorm:"column:main_image_id;index"`
+	MainImage       *Image               `json:"main_image,omitempty" gorm:"foreignKey:MainImageID;references:Id;constraint:OnDelete:SET NULL"`
 	Title           string               `json:"title" gorm:"column:title;not null;size:255"`
 	Description     string               `json:"description" gorm:"column:description;type:text"`
 	ServiceMen      []User               `json:"service_men" gorm:"many2many:user_service;"`

@@ -76,6 +76,7 @@ func (repo *updateServiceRepo) UpdateService(
 		ctx,
 		map[string]interface{}{"id": serviceID},
 		"Versions",
+		"Images",
 	)
 	if err != nil {
 		return nil, common.ErrDB(err)
@@ -105,7 +106,10 @@ func (repo *updateServiceRepo) UpdateService(
 			introVideoUID = &introVideoID
 		}
 
-		existingServiceVersion, err := repo.serviceVersionStore.FindOne(ctx, map[string]interface{}{"id": serviceVersionId})
+		existingServiceVersion, err := repo.serviceVersionStore.FindOne(
+			ctx,
+			map[string]interface{}{"id": serviceVersionId},
+		)
 		if err != nil {
 			logger.AppLogger.Error(ctx, "version not found", zap.Error(err))
 			return nil, err
@@ -153,6 +157,21 @@ func (repo *updateServiceRepo) UpdateService(
 
 				serviceVersion.Images = append(serviceVersion.Images, img)
 			}
+		}
+
+		if input.ServiceVersion.MainImageID != nil {
+			mainImageID, err := input.ServiceVersion.GetMainImageLocalId(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			if _, hasThisImg := lo.Find(existingService.Images, func(img models.Image) bool {
+				return img.Id == mainImageID
+			}); !hasThisImg {
+				return nil, common.ErrInvalidRequest(errors.New("main image not found"))
+			}
+
+			serviceVersion.MainImageID = mainImageID
 		}
 
 		// create new version as draft if the service and current version were published
