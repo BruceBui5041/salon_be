@@ -9,6 +9,7 @@ import (
 	"salon_be/component/logger"
 	"salon_be/model/image/imagerepo"
 	"salon_be/model/image/imagestore"
+	"salon_be/model/m2mserviceversionimage/m2mserviceversionimagestore"
 	"salon_be/model/service/servicebiz"
 	"salon_be/model/service/servicemodel"
 	"salon_be/model/service/servicerepo"
@@ -59,9 +60,15 @@ func UpdateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 			serviceStore := servicestore.NewSQLStore(tx)
 			serviceVersionStore := serviceversionstore.NewSQLStore(tx)
 			imageStore := imagestore.NewSQLStore(tx)
+			m2mVersionImageStore := m2mserviceversionimagestore.NewSQLStore(tx)
 
-			imageRepo := imagerepo.NewCreateImageRepo(imageStore, appCtx.GetS3Client())
-			repo := servicerepo.NewUpdateServiceRepo(serviceStore, serviceVersionStore, imageRepo)
+			imageRepo := imagerepo.NewUpdateImageRepo(imageStore, appCtx.GetS3Client())
+			repo := servicerepo.NewUpdateServiceRepo(
+				serviceStore,
+				serviceVersionStore,
+				imageRepo,
+				m2mVersionImageStore,
+			)
 			business := servicebiz.NewUpdateServiceBiz(repo)
 
 			if err := business.UpdateService(ctx.Request.Context(), &serviceData); err != nil {

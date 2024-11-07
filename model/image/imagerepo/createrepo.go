@@ -11,17 +11,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-type ImageStore interface {
+type CreateImageStore interface {
 	Create(ctx context.Context, data *models.Image) error
 }
 
 type createImageRepo struct {
-	store    ImageStore
+	store    CreateImageStore
 	s3Client *s3.S3
 }
 
 func NewCreateImageRepo(
-	store ImageStore,
+	store CreateImageStore,
 	s3Client *s3.S3,
 ) *createImageRepo {
 	return &createImageRepo{

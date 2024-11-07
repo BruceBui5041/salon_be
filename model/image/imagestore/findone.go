@@ -5,21 +5,21 @@ import (
 	models "salon_be/model"
 )
 
-func (s *sqlStore) List(
+func (s *sqlStore) FindOne(
 	ctx context.Context,
-	conditions []interface{},
+	conditions map[string]interface{},
 	moreKeys ...string,
-) ([]*models.Image, error) {
-	var result []*models.Image
+) (*models.Image, error) {
+	var result models.Image
 	db := s.db
 
 	for i := range moreKeys {
 		db = db.Preload(moreKeys[i])
 	}
 
-	if err := db.Find(&result, conditions...).Error; err != nil {
+	if err := db.Where(conditions).First(&result).Error; err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }

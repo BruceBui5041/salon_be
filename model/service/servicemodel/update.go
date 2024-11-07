@@ -22,6 +22,21 @@ type UpdateService struct {
 	ServiceVersion *UpdateServiceVersion `json:"service_version,omitempty" form:"service_version,omitempty"`
 }
 
+type UpdateVersionImages struct {
+	ImageID string  `json:"image_id" form:"image_id"`
+	Order   *uint32 `json:"order" form:"order"`
+}
+
+func (vi *UpdateVersionImages) GetLocalID(ctx context.Context) (uint32, error) {
+	imageUID, err := common.FromBase58(vi.ImageID)
+	if err != nil {
+		logger.AppLogger.Error(ctx, "invalid image ID", zap.Error(err))
+		return 0, common.ErrInvalidRequest(errors.New("invalid image ID"))
+	}
+
+	return imageUID.GetLocalID(), nil
+}
+
 type UpdateServiceVersion struct {
 	ID              string                         `json:"id" form:"id"`
 	Title           string                         `json:"title" form:"title"`
@@ -35,6 +50,7 @@ type UpdateServiceVersion struct {
 	Duration        uint32                         `json:"duration" form:"duration"`
 	Images          []*multipart.FileHeader        `json:"images" form:"images"`
 	MainImageID     *string                        `json:"main_image_id,omitempty" form:"main_image_id,omitempty"`
+	VersionImages   []*UpdateVersionImages         `json:"version_images" form:"version_images"`
 }
 
 func (us *UpdateServiceVersion) GetMainImageLocalId(ctx context.Context) (uint32, error) {

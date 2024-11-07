@@ -37,23 +37,42 @@ type UpdateServiceVersionStore interface {
 
 type UpdateImageRepo interface {
 	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+	FindOne(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreKeys ...string,
+	) (*models.Image, error)
+	List(
+		ctx context.Context,
+		conditions []interface{},
+		moreKeys ...string,
+	) ([]*models.Image, error)
+}
+
+type UpdateM2MVersionImageStore interface {
+	Delete(ctx context.Context, conditions map[string]interface{}) error
+	Create(ctx context.Context, data *models.M2MServiceVersionImage) error
+	Update(ctx context.Context, updates *models.M2MServiceVersionImage) error
 }
 
 type updateServiceRepo struct {
 	serviceStore        UpdateServiceStore
 	serviceVersionStore UpdateServiceVersionStore
 	imageRepo           UpdateImageRepo
+	m2mVersionImages    UpdateM2MVersionImageStore
 }
 
 func NewUpdateServiceRepo(
 	serviceStore UpdateServiceStore,
 	serviceVersionStore UpdateServiceVersionStore,
 	imageRepo UpdateImageRepo,
+	m2mVersionImages UpdateM2MVersionImageStore,
 ) *updateServiceRepo {
 	return &updateServiceRepo{
 		serviceStore:        serviceStore,
 		serviceVersionStore: serviceVersionStore,
 		imageRepo:           imageRepo,
+		m2mVersionImages:    m2mVersionImages,
 	}
 }
 
@@ -109,6 +128,7 @@ func (repo *updateServiceRepo) UpdateService(
 		existingServiceVersion, err := repo.serviceVersionStore.FindOne(
 			ctx,
 			map[string]interface{}{"id": serviceVersionId},
+			"Images",
 		)
 		if err != nil {
 			logger.AppLogger.Error(ctx, "version not found", zap.Error(err))
@@ -159,6 +179,28 @@ func (repo *updateServiceRepo) UpdateService(
 			}
 		}
 
+		if len(input.ServiceVersion.VersionImages) > 0 {
+			imageIDs := make([]uint32, len(input.ServiceVersion.VersionImages))
+			for _, versionImage := range input.ServiceVersion.VersionImages {
+				imageID, err := versionImage.GetLocalID(ctx)
+				if err != nil {
+					return nil, err
+				}
+				imageIDs = append(imageIDs, imageID)
+			}
+
+			images, err := repo.imageRepo.List(
+				ctx,
+				[]interface{}{imageIDs},
+			)
+			if err != nil {
+				logger.AppLogger.Error(ctx, "version image not found", zap.Error(err))
+				return nil, err
+			}
+
+			serviceVersion.Images = append(serviceVersion.Images, images...)
+		}
+
 		if input.ServiceVersion.MainImageID != nil {
 			mainImageID, err := input.ServiceVersion.GetMainImageLocalId(ctx)
 			if err != nil {
@@ -193,6 +235,30 @@ func (repo *updateServiceRepo) UpdateService(
 		} else {
 			if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {
 				return nil, common.ErrDB(err)
+			}
+		}
+
+		if len(input.ServiceVersion.VersionImages) > 0 {
+			for _, versionImage := range input.ServiceVersion.VersionImages {
+				if versionImage.Order == nil {
+					continue
+				}
+
+				imageID, err := versionImage.GetLocalID(ctx)
+				if err != nil {
+					return nil, err
+				}
+				if err := repo.m2mVersionImages.Update(
+					ctx,
+					&models.M2MServiceVersionImage{
+						ServiceVersionID: serviceVersion.Id,
+						ImageID:          imageID,
+						Order:            versionImage.Order,
+					},
+				); err != nil {
+					logger.AppLogger.Error(ctx, "failed to create service version image", zap.Error(err))
+					return nil, common.ErrDB(err)
+				}
 			}
 		}
 

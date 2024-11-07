@@ -14,7 +14,11 @@ import (
 
 type UploadImagesStore interface {
 	Create(ctx context.Context, data *models.Image) error
-	ListImagesByServiceVersionID(ctx context.Context, serviceVersionID uint32, moreKeys ...string) ([]models.Image, error)
+	List(
+		ctx context.Context,
+		conditions []interface{},
+		moreKeys ...string,
+	) ([]*models.Image, error)
 }
 
 type M2MServiceVersionImageStore interface {
