@@ -13,6 +13,11 @@ import (
 
 type CreateImageStore interface {
 	Create(ctx context.Context, data *models.Image) error
+	FindOne(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreKeys ...string,
+	) (*models.Image, error)
 }
 
 type createImageRepo struct {
@@ -60,5 +65,10 @@ func (repo *createImageRepo) CreateImage(
 		return nil, err
 	}
 
-	return img, nil
+	res, err := repo.store.FindOne(ctx, map[string]interface{}{"id": img.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

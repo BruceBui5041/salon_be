@@ -19,7 +19,9 @@ func (s *sqlStore) Update(
 
 	if updates.Images != nil {
 		if err := s.db.
-			Model(&models.ServiceVersion{}).
+			Model(&models.ServiceVersion{
+				SQLModel: common.SQLModel{Id: versionID},
+			}).
 			Association("Images").
 			Replace(updates.Images); err != nil {
 			return common.ErrDB(err)

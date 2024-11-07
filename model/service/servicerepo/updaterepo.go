@@ -136,6 +136,7 @@ func (repo *updateServiceRepo) UpdateService(
 		}
 
 		serviceVersion := &models.ServiceVersion{
+			SQLModel:      common.SQLModel{Id: serviceVersionId},
 			ServiceID:     serviceID,
 			Title:         input.ServiceVersion.Title,
 			Description:   input.ServiceVersion.Description,
@@ -175,30 +176,36 @@ func (repo *updateServiceRepo) UpdateService(
 					return nil, common.ErrDB(err)
 				}
 
+				img.ServiceVersions = append(img.ServiceVersions, serviceVersion)
 				serviceVersion.Images = append(serviceVersion.Images, img)
 			}
 		}
 
-		if len(input.ServiceVersion.VersionImages) > 0 {
-			imageIDs := make([]uint32, len(input.ServiceVersion.VersionImages))
-			for _, versionImage := range input.ServiceVersion.VersionImages {
-				imageID, err := versionImage.GetLocalID(ctx)
+		if input.ServiceVersion.VersionImages != nil {
+			if len(*input.ServiceVersion.VersionImages) == 0 {
+				serviceVersion.Images = []*models.Image{}
+			} else {
+				imageIDs := make([]uint32, len(*input.ServiceVersion.VersionImages))
+				for _, versionImage := range *input.ServiceVersion.VersionImages {
+					imageID, err := versionImage.GetLocalID(ctx)
+					if err != nil {
+						return nil, err
+					}
+					imageIDs = append(imageIDs, imageID)
+				}
+
+				images, err := repo.imageRepo.List(
+					ctx,
+					[]interface{}{imageIDs},
+				)
 				if err != nil {
+					logger.AppLogger.Error(ctx, "version image not found", zap.Error(err))
 					return nil, err
 				}
-				imageIDs = append(imageIDs, imageID)
+
+				serviceVersion.Images = append(serviceVersion.Images, images...)
 			}
 
-			images, err := repo.imageRepo.List(
-				ctx,
-				[]interface{}{imageIDs},
-			)
-			if err != nil {
-				logger.AppLogger.Error(ctx, "version image not found", zap.Error(err))
-				return nil, err
-			}
-
-			serviceVersion.Images = append(serviceVersion.Images, images...)
 		}
 
 		if input.ServiceVersion.MainImageID != nil {
@@ -235,30 +242,6 @@ func (repo *updateServiceRepo) UpdateService(
 		} else {
 			if err := repo.serviceVersionStore.Update(ctx, serviceVersionId, serviceVersion); err != nil {
 				return nil, common.ErrDB(err)
-			}
-		}
-
-		if len(input.ServiceVersion.VersionImages) > 0 {
-			for _, versionImage := range input.ServiceVersion.VersionImages {
-				if versionImage.Order == nil {
-					continue
-				}
-
-				imageID, err := versionImage.GetLocalID(ctx)
-				if err != nil {
-					return nil, err
-				}
-				if err := repo.m2mVersionImages.Update(
-					ctx,
-					&models.M2MServiceVersionImage{
-						ServiceVersionID: serviceVersion.Id,
-						ImageID:          imageID,
-						Order:            versionImage.Order,
-					},
-				); err != nil {
-					logger.AppLogger.Error(ctx, "failed to create service version image", zap.Error(err))
-					return nil, common.ErrDB(err)
-				}
 			}
 		}
 
