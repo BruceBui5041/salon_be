@@ -3,6 +3,7 @@ package component
 import (
 	"context"
 	"salon_be/component/cache"
+	"salon_be/component/sms"
 	models "salon_be/model"
 	pb "salon_be/proto/salon_be/salon_be"
 
@@ -22,6 +23,7 @@ type AppContext interface {
 	GetAppQueue() AppQueue
 	GetS3Client() *s3.S3
 	GetCronJob() CronJob
+	GetSMSClient() SMSClient
 }
 
 type DBInstances interface {
@@ -70,6 +72,10 @@ type LocalPubSub interface {
 	GetBlockPubSub() *gochannel.GoChannel
 }
 
+type SMSClient interface {
+	SendOTP(ctx context.Context, otpMessage sms.OTPMessage) error
+}
+
 type appCtx struct {
 	dbInstances        DBInstances
 	localPubSub        LocalPubSub
@@ -80,6 +86,7 @@ type appCtx struct {
 	s3Client           *s3.S3
 	appqueue           AppQueue
 	cron               CronJob
+	smsClient          SMSClient
 }
 
 func NewAppContext(
@@ -92,6 +99,7 @@ func NewAppContext(
 	appqueue AppQueue,
 	cron CronJob,
 	s3Client *s3.S3,
+	smsClient SMSClient,
 ) *appCtx {
 
 	return &appCtx{
@@ -104,6 +112,7 @@ func NewAppContext(
 		appqueue:           appqueue,
 		cron:               cron,
 		s3Client:           s3Client,
+		smsClient:          smsClient,
 	}
 }
 
@@ -137,4 +146,8 @@ func (ctx *appCtx) GetAppQueue() AppQueue {
 
 func (ctx *appCtx) GetCronJob() CronJob {
 	return ctx.cron
+}
+
+func (ctx *appCtx) GetSMSClient() SMSClient {
+	return ctx.smsClient
 }

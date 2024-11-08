@@ -10,6 +10,7 @@ import (
 	"salon_be/component/db"
 	"salon_be/component/logger"
 	"salon_be/component/server"
+	"salon_be/component/sms"
 	"salon_be/component/telemetry"
 	"salon_be/watermill"
 
@@ -83,6 +84,7 @@ func main() {
 		// cronjob.CreateCron(),
 		nil,
 		config.CreateS3Client(awsSession),
+		sms.NewSMSClient(),
 	)
 
 	appCache := appContext.GetAppCache()
