@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
+	"salon_be/common"
 	"salon_be/component/logger"
 
 	"github.com/spf13/viper"
@@ -18,12 +21,19 @@ type OTPPayload struct {
 	SecretKey   string `json:"SecretKey"`
 	Brandname   string `json:"Brandname"`
 	SmsType     string `json:"SmsType"`
-	IsUnicode   bool   `json:"IsUnicode"`
-	Sandbox     bool   `json:"Sandbox"`
+	IsUnicode   string `json:"IsUnicode"`
+	Sandbox     string `json:"Sandbox"`
 	CampaignID  string `json:"campaignid"`
 	RequestID   string `json:"RequestId"`
 	CallbackUrl string `json:"CallbackUrl"`
-	SendDate    int64  `json:"SendDate"`
+	SendDate    string `json:"SendDate"`
+}
+
+type ESMSResponse struct {
+	CodeResult      string `json:"CodeResult"`
+	SMSID           string `json:"SMSID"`
+	CountRegenerate int    `json:"CountRegenerate"`
+	ErrorMessage    string `json:"ErrorMessage"`
 }
 
 type eSMS struct {
@@ -39,8 +49,11 @@ func NewESMSClient() *eSMS {
 func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) error {
 	eSMSRestAPI := viper.GetString("OTP_SMS_REST_API")
 	otpPayload.ApiKey = viper.GetString("OTP_SMS_API_KEY")
-	otpPayload.SecretKey = viper.GetString("OTP_SMS_SECRET_KEY")
+	otpPayload.SecretKey = viper.GetString("OTP_SMS_API_SECRET_KEY")
 	otpPayload.Brandname = viper.GetString("OTP_SMS_BRANDNAME")
+	otpPayload.SmsType = "2"
+	otpPayload.IsUnicode = "0"
+	otpPayload.Sandbox = "0"
 
 	payloadJSON, err := json.Marshal(otpPayload)
 	if err != nil {
@@ -53,6 +66,7 @@ func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) error
 		logger.AppLogger.Error(ctx, "Failed to create request", zap.Error(err))
 		return err
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := esms.httpClient.Do(req)
 	if err != nil {
@@ -60,5 +74,25 @@ func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) error
 	}
 
 	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.AppLogger.Error(ctx, "Failed to read response body", zap.Error(err))
+		return err
+	}
+
+	otpResponse := &ESMSResponse{}
+	err = json.Unmarshal(body, &otpResponse)
+	if err != nil {
+		logger.AppLogger.Error(ctx, "Failed to unmarshal response", zap.Error(err))
+		return err
+	}
+
+	if otpResponse.CodeResult != "100" {
+		logger.AppLogger.Error(ctx, "Failed to send OTP", zap.Any("response", otpResponse))
+		return common.ErrInternal(errors.New(otpResponse.ErrorMessage))
+	}
+
+	logger.AppLogger.Info(ctx, "Send OTP successful", zap.Any("response", otpResponse))
 	return nil
 }

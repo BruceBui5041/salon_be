@@ -54,13 +54,23 @@ func (registerBiz *registerBiz) RegisterUser(
 	if inputData.FirstName == "" {
 		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("firstname is required"))
 	}
+
 	if inputData.LastName == "" {
 		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("lastname is required"))
+	}
+
+	if inputData.AuthType == "" {
+		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("auth_type is required"))
 	}
 
 	if inputData.AuthType == authconst.AuthTypeEmail {
 		if inputData.Email == "" {
 			return nil, nil, usererror.ErrUserMissionRequireField(errors.New("email is required"))
+		}
+		// Validate email format
+		emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+		if !emailRegex.MatchString(inputData.Email) {
+			return nil, nil, common.ErrInvalidRequest(errors.New("invalid email format"))
 		}
 	} else if inputData.AuthType == authconst.AuthTypePhone {
 		if inputData.PhoneNumber == "" {
@@ -68,17 +78,6 @@ func (registerBiz *registerBiz) RegisterUser(
 		}
 	}
 
-	if inputData.Password != "" {
-		inputData.AuthType = "password"
-	}
-
-	// Validate email format
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !emailRegex.MatchString(inputData.Email) {
-		return nil, nil, common.ErrInvalidRequest(errors.New("invalid email format"))
-	}
-
-	// Validate auth type and corresponding fields
 	switch inputData.AuthType {
 	case authconst.AuthTypePassword:
 		if inputData.Password == "" {

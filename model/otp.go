@@ -11,12 +11,12 @@ const OTPEntityName = "OTP"
 
 type OTP struct {
 	common.SQLModel `json:",inline"`
-	UserID          uint32    `json:"-" gorm:"column:user_id;not null;index"`
-	User            *User     `json:"user,omitempty" gorm:"foreignKey:UserID;references:Id;constraint:OnDelete:SET NULL;"`
-	OTP             string    `json:"otp" gorm:"column:otp;type:varchar(6);uniqueIndex"`
-	TTL             uint16    `json:"ttl" gorm:"column:ttl;type:smallint;not null"`
-	ExpiresAt       time.Time `json:"expires_at" gorm:"column:expires_at;type:timestamp"`
-	PassedAt        time.Time `json:"passed_at" gorm:"column:passed_at;type:timestamp"`
+	UserID          uint32     `json:"-" gorm:"column:user_id;not null;index"`
+	User            *User      `json:"user,omitempty" gorm:"foreignKey:UserID;references:Id;constraint:OnDelete:SET NULL;"`
+	OTP             string     `json:"otp" gorm:"column:otp;type:varchar(6);uniqueIndex"`
+	TTL             uint16     `json:"ttl" gorm:"column:ttl;type:smallint;not null"`
+	ExpiresAt       time.Time  `json:"expires_at" gorm:"column:expires_at;type:timestamp"`
+	PassedAt        *time.Time `json:"passed_at" gorm:"column:passed_at;type:timestamp"`
 }
 
 func (OTP) TableName() string {
@@ -33,8 +33,9 @@ func (otp *OTP) AfterFind(tx *gorm.DB) (err error) {
 }
 
 func (otp *OTP) IsPassed(inputOTP string) bool {
-	if inputOTP == otp.OTP && !time.Now().UTC().After(otp.ExpiresAt) {
-		otp.PassedAt = time.Now().UTC()
+	utcTime := time.Now().UTC()
+	if inputOTP == otp.OTP && !utcTime.After(otp.ExpiresAt) {
+		otp.PassedAt = &utcTime
 		return true
 	}
 	return false
