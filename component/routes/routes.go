@@ -13,6 +13,7 @@ import (
 	"salon_be/middleware"
 	"salon_be/model/category/categorytransport"
 	"salon_be/model/comment/commenttransport"
+	"salon_be/model/otp/otptransport"
 	"salon_be/model/payment/paymenttransport"
 	"salon_be/model/permission/permissiontransport"
 	"salon_be/model/role/roletransport"
@@ -49,6 +50,13 @@ func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
 	genAPIs := r.Group("/")
 	{
 		genAPIs.POST("search", genTransport.Search())
+	}
+}
+
+func setupOTPRoutes(r *gin.Engine, appCtx component.AppContext) {
+	service := r.Group("/otp", middleware.RequiredAuth(appCtx))
+	{
+		service.POST("/verify", otptransport.VerifyOTP(appCtx))
 	}
 }
 
