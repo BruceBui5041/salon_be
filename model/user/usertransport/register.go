@@ -7,6 +7,8 @@ import (
 	"salon_be/component"
 	"salon_be/component/hasher"
 	"salon_be/component/tokenprovider/jwt"
+	"salon_be/model/otp/otpbiz"
+	"salon_be/model/otp/otpstore"
 	"salon_be/model/user/userbiz"
 	"salon_be/model/user/usermodel"
 	"salon_be/model/user/userstore"
@@ -30,13 +32,18 @@ func Register(appCtx component.AppContext) func(*gin.Context) {
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			store := userstore.NewSQLStore(tx)
+			otpStore := otpstore.NewSQLStore(tx)
+			useStore := userstore.NewSQLStore(tx)
+
 			md5 := hasher.NewMD5Hash()
 			tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+			otpBiz := otpbiz.NewCreateOTPBiz(otpStore, useStore, appCtx.GetSMSClient())
 
 			business := userbiz.NewRegisterBusiness(
 				store,
 				md5,
 				tokenProvider,
+				otpBiz,
 			)
 
 			account, user, err := business.RegisterUser(ctx.Request.Context(), &data, appconst.TokenExpiry)

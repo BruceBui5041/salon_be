@@ -8,6 +8,9 @@ import (
 	"salon_be/component/hasher"
 	"salon_be/component/tokenprovider"
 	models "salon_be/model"
+	"salon_be/model/auth/authconst"
+	"salon_be/model/otp/otpmodel"
+	"salon_be/model/user/usererror"
 	"salon_be/model/user/usermodel"
 )
 
@@ -16,21 +19,28 @@ type RegisterStorage interface {
 	FindOne(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*models.User, error)
 }
 
+type OTPBiz interface {
+	CreateOTP(ctx context.Context, data *otpmodel.CreateOTPInput) error
+}
+
 type registerBiz struct {
 	registerStorage RegisterStorage
 	hasher          hasher.Hasher
 	tokenProvider   tokenprovider.Provider
+	otpBiz          OTPBiz
 }
 
 func NewRegisterBusiness(
 	registerStorage RegisterStorage,
 	hasher hasher.Hasher,
 	tokenProvider tokenprovider.Provider,
+	otpBiz OTPBiz,
 ) *registerBiz {
 	return &registerBiz{
 		registerStorage: registerStorage,
 		hasher:          hasher,
 		tokenProvider:   tokenProvider,
+		otpBiz:          otpBiz,
 	}
 }
 
@@ -42,14 +52,20 @@ func (registerBiz *registerBiz) RegisterUser(
 ) (*tokenprovider.Token, *models.User, error) {
 	// Validate required fields
 	if inputData.FirstName == "" {
-		return nil, nil, errors.New("first name is required")
+		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("firstname is required"))
 	}
 	if inputData.LastName == "" {
-		return nil, nil, errors.New("last name is required")
+		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("lastname is required"))
 	}
 
-	if inputData.Email == "" {
-		return nil, nil, errors.New("email is required")
+	if inputData.AuthType == authconst.AuthTypeEmail {
+		if inputData.Email == "" {
+			return nil, nil, usererror.ErrUserMissionRequireField(errors.New("email is required"))
+		}
+	} else if inputData.AuthType == authconst.AuthTypePhone {
+		if inputData.PhoneNumber == "" {
+			return nil, nil, usererror.ErrUserMissionRequireField(errors.New("phonenumber is required"))
+		}
 	}
 
 	if inputData.Password != "" {
@@ -59,12 +75,12 @@ func (registerBiz *registerBiz) RegisterUser(
 	// Validate email format
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !emailRegex.MatchString(inputData.Email) {
-		return nil, nil, errors.New("invalid email format")
+		return nil, nil, common.ErrInvalidRequest(errors.New("invalid email format"))
 	}
 
 	// Validate auth type and corresponding fields
 	switch inputData.AuthType {
-	case "password":
+	case authconst.AuthTypePassword:
 		if inputData.Password == "" {
 			return nil, nil, errors.New("password is required for password auth type")
 		}
@@ -77,6 +93,8 @@ func (registerBiz *registerBiz) RegisterUser(
 		if inputData.AuthProviderID == "" || inputData.AuthProviderToken == "" {
 			return nil, nil, errors.New("auth provider ID and token are required for oauth auth type")
 		}
+	case authconst.AuthTypePhone:
+		inputData.SQLModel.Status = "inactive"
 	default:
 		return nil, nil, errors.New("invalid auth type")
 	}
@@ -90,6 +108,13 @@ func (registerBiz *registerBiz) RegisterUser(
 	user, err := registerBiz.registerStorage.FindOne(ctx, map[string]interface{}{"email": inputData.Email})
 	if err != nil {
 		return nil, nil, common.ErrInternal(err)
+	}
+
+	if inputData.AuthType == authconst.AuthTypePhone {
+		err := registerBiz.otpBiz.CreateOTP(ctx, &otpmodel.CreateOTPInput{UserID: user.Id})
+		if err != nil {
+			return nil, nil, common.ErrInternal(err)
+		}
 	}
 
 	user.Mask(false)

@@ -32,9 +32,9 @@ func (otp *OTP) AfterFind(tx *gorm.DB) (err error) {
 	return
 }
 
-func (otp *OTP) IsPassed(inputOTP string, now time.Time) bool {
-	if inputOTP == otp.OTP && !now.After(otp.ExpiresAt) {
-		otp.PassedAt = now
+func (otp *OTP) IsPassed(inputOTP string) bool {
+	if inputOTP == otp.OTP && !time.Now().UTC().After(otp.ExpiresAt) {
+		otp.PassedAt = time.Now().UTC()
 		return true
 	}
 	return false
