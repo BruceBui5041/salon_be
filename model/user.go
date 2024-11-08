@@ -22,7 +22,8 @@ type User struct {
 	common.SQLModel `json:",inline"`
 	LastName        string        `json:"lastname" gorm:"column:lastname;"`
 	FirstName       string        `json:"firstname" gorm:"column:firstname;"`
-	Email           string        `json:"email" gorm:"column:email;uniqueIndex;not null;size:100"`
+	Email           string        `json:"email" gorm:"column:email;uniqueIndex;size:100"`
+	PhoneNumber     string        `json:"phone_number" gorm:"column:phone_number;uniqueIndex;size:20"`
 	Roles           []*Role       `json:"roles" gorm:"many2many:user_role;joinForeignKey:UserID;joinReferences:RoleID"`
 	Auths           []UserAuth    `json:"auths" gorm:"foreignKey:UserID"`
 	CreatedServices []Service     `json:"created_services" gorm:"foreignKey:CreatorID"`
@@ -32,6 +33,7 @@ type User struct {
 	Password        string        `json:"-" gorm:"column:password;"`
 	UserProfile     *UserProfile  `json:"user_profile,omitempty" gorm:"foreignKey:UserID"`
 	Comments        []*Comment    `json:"comments,omitempty" gorm:"foreignKey:UserID"`
+	OTPs            []*OTP        `json:"otp,omitempty" gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {

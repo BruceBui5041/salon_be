@@ -85,6 +85,8 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.M2MServiceVersionImage{},
 		&models.Comment{},
 		&models.Image{},
+
+		&models.OTP{},
 	}
 
 	for _, table := range tables {

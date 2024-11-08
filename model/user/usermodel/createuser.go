@@ -8,6 +8,7 @@ type CreateUser struct {
 	LastName          string `json:"lastname"`
 	FirstName         string `json:"firstname"`
 	Email             string `json:"email"`
+	PhoneNumber       string `json:"phone_number"`
 	Password          string `json:"password,omitempty"`
 	Salt              string `json:"salt,omitempty"`
 	AuthType          string `json:"auth_type"`

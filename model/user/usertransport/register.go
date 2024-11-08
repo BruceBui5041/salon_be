@@ -49,7 +49,7 @@ func Register(appCtx component.AppContext) func(*gin.Context) {
 				appCtx.GetLocalPubSub().GetUnblockPubSub(),
 				&messagemodel.UserUpdatedMessage{UserId: user.GetFakeId()},
 			); err != nil {
-				return common.ErrInternal(err)
+				return err
 			}
 
 			utils.WriteServerJWTTokenCookie(ctx, account.Token)

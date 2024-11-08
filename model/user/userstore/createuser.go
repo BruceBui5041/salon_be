@@ -20,11 +20,12 @@ func (s *sqlStore) CreateNewUser(ctx context.Context, input *user.CreateUser) er
 
 	// Create new user
 	newUser := models.User{
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     input.Email,
-		Password:  input.Password,
-		Salt:      input.Salt,
+		FirstName:   input.FirstName,
+		LastName:    input.LastName,
+		Email:       input.Email,
+		PhoneNumber: input.PhoneNumber,
+		Password:    input.Password,
+		Salt:        input.Salt,
 	}
 
 	if err := s.db.Create(&newUser).Error; err != nil {
