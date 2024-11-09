@@ -40,6 +40,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupPaymentRoutes(r, appCtx)
 	setupCategoryRoutes(r, appCtx)
 	setupServiceRoutes(r, appCtx)
+	setupOTPRoutes(r, appCtx)
 
 	setupAuthRoutes(r, appCtx)
 	setupUtilityRoutes(r, appCtx)
@@ -54,9 +55,10 @@ func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
 }
 
 func setupOTPRoutes(r *gin.Engine, appCtx component.AppContext) {
-	service := r.Group("/otp", middleware.RequiredAuth(appCtx))
+	otpGroup := r.Group("/otp", middleware.RequiredAuth(appCtx))
 	{
-		service.POST("/verify", otptransport.VerifyOTP(appCtx))
+		otpGroup.POST("/verify", otptransport.VerifyOTP(appCtx))
+		otpGroup.POST("/resend", otptransport.ResendOTP(appCtx))
 	}
 }
 
