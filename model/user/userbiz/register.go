@@ -95,7 +95,6 @@ func (registerBiz *registerBiz) RegisterUser(
 			return nil, nil, errors.New("auth provider ID and token are required for oauth auth type")
 		}
 	case authconst.AuthTypePhone:
-		inputData.SQLModel = &common.SQLModel{Status: "inactive"}
 	default:
 		return nil, nil, errors.New("invalid auth type")
 	}

@@ -40,6 +40,11 @@ func (User) TableName() string {
 	return "user"
 }
 
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+	u.Status = "inactive"
+	return nil
+}
+
 func (u *User) Mask(isAdmin bool) {
 	u.GenUID(common.DbTypeUser)
 }

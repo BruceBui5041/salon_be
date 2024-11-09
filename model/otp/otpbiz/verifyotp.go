@@ -9,10 +9,7 @@ import (
 	models "salon_be/model"
 	"salon_be/model/otp/otperror"
 	"salon_be/model/otp/otpmodel"
-	"salon_be/watermill"
-	"salon_be/watermill/messagemodel"
 
-	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/jinzhu/copier"
 )
 
@@ -23,11 +20,10 @@ type VerifyRepository interface {
 }
 
 type verifyBiz struct {
-	repo           VerifyRepository
-	tokenProvider  tokenprovider.Provider
-	hasher         hasher.Hasher
-	expiry         int
-	localPublisher *gochannel.GoChannel
+	repo          VerifyRepository
+	tokenProvider tokenprovider.Provider
+	hasher        hasher.Hasher
+	expiry        int
 }
 
 func NewVerifyBiz(
@@ -35,14 +31,12 @@ func NewVerifyBiz(
 	tokenProvider tokenprovider.Provider,
 	hasher hasher.Hasher,
 	expiry int,
-	localPublisher *gochannel.GoChannel,
 ) *verifyBiz {
 	return &verifyBiz{
-		repo:           repo,
-		tokenProvider:  tokenProvider,
-		hasher:         hasher,
-		expiry:         expiry,
-		localPublisher: localPublisher,
+		repo:          repo,
+		tokenProvider: tokenProvider,
+		hasher:        hasher,
+		expiry:        expiry,
 	}
 }
 
@@ -74,15 +68,6 @@ func (biz *verifyBiz) VerifyOTP(ctx context.Context, input *otpmodel.VerifyOTPIn
 
 	accessToken, err := biz.tokenProvider.Generate(payload, biz.expiry)
 	if err != nil {
-		return nil, common.ErrInternal(err)
-	}
-
-	// Publish user updated event
-	if err := watermill.PublishUserUpdated(
-		ctx,
-		biz.localPublisher,
-		&messagemodel.UserUpdatedMessage{UserId: user.GetFakeId()},
-	); err != nil {
 		return nil, common.ErrInternal(err)
 	}
 

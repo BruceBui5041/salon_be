@@ -14,6 +14,8 @@ import (
 	"salon_be/model/otp/otpstore"
 	"salon_be/model/user/userstore"
 	"salon_be/utils"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,6 +35,7 @@ func VerifyOTP(appCtx component.AppContext) gin.HandlerFunc {
 		input.UserID = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection()
+		var result *otpmodel.VerifyOTPResponse
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			optStore := otpstore.NewSQLStore(tx)
 			userStore := userstore.NewSQLStore(tx)
@@ -46,19 +49,29 @@ func VerifyOTP(appCtx component.AppContext) gin.HandlerFunc {
 				tokenProvider,
 				md5,
 				appconst.TokenExpiry,
-				appCtx.GetLocalPubSub().GetBlockPubSub(),
 			)
 
-			result, err := biz.VerifyOTP(c.Request.Context(), &input)
+			res, err := biz.VerifyOTP(c.Request.Context(), &input)
 			if err != nil {
 				return err
 			}
-
-			utils.WriteServerJWTTokenCookie(c, result.Token.Token)
-			c.JSON(http.StatusOK, common.SimpleSuccessResponse(result))
+			result = res
+			utils.WriteServerJWTTokenCookie(c, res.Token.Token)
 			return nil
 		}); err != nil {
 			panic(err)
 		}
+
+		requester.Mask(false)
+		if err := watermill.PublishUserUpdated(
+			c.Request.Context(),
+			appCtx.GetLocalPubSub().GetBlockPubSub(),
+			&messagemodel.UserUpdatedMessage{UserId: requester.GetFakeId()},
+		); err != nil {
+			panic(common.ErrInternal(err))
+		}
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(result))
+
 	}
 }
