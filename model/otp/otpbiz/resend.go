@@ -12,6 +12,7 @@ import (
 	"salon_be/model/otp/otpmodel"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -20,6 +21,7 @@ type ResendOTPRepo interface {
 	GetActiveOTP(ctx context.Context, userId uint32) (*models.OTP, error)
 	GetUser(ctx context.Context, userId uint32) (*models.User, error)
 	Create(ctx context.Context, data *models.OTP) error
+	Update(ctx context.Context, data *models.OTP) error
 }
 
 type resendOTPBiz struct {
@@ -38,13 +40,11 @@ func NewResendOTPBiz(
 }
 
 func (biz *resendOTPBiz) ResendOTP(ctx context.Context, data *otpmodel.ResendOTPInput) error {
-	// Check for active OTP
 	activeOTP, err := biz.repo.GetActiveOTP(ctx, data.UserID)
 	if err == nil && activeOTP != nil {
 		return otperror.ErrActiveOTPExists(errors.New("an active OTP already exists"))
 	}
 
-	// Check OTP attempts in last hour
 	recentOTPs, err := biz.repo.GetRecentOTPs(ctx, data.UserID, time.Hour)
 	if err != nil {
 		return common.ErrDB(err)
@@ -54,19 +54,18 @@ func (biz *resendOTPBiz) ResendOTP(ctx context.Context, data *otpmodel.ResendOTP
 		return otperror.ErrOTPLimitExceeded(errors.New("exceeded maximum OTP attempts for this hour"))
 	}
 
-	// Get user info for phone number
 	user, err := biz.repo.GetUser(ctx, data.UserID)
 	if err != nil {
 		logger.AppLogger.Error(ctx, "get user error", zap.Error(err))
 		return common.ErrDB(err)
 	}
 
-	// Generate new OTP
 	newOTP := &models.OTP{
 		UserID: data.UserID,
-		TTL:    5, // 5 minutes
+		TTL:    5,
 	}
 
+	newOTP.UUID = uuid.NewString()
 	newOTP.ExpiresAt = time.Now().UTC().Add(5 * time.Minute)
 
 	otp, err := generateOTP()
@@ -76,20 +75,24 @@ func (biz *resendOTPBiz) ResendOTP(ctx context.Context, data *otpmodel.ResendOTP
 
 	newOTP.OTP = otp
 
-	// Create OTP record
 	if err := biz.repo.Create(ctx, newOTP); err != nil {
 		logger.AppLogger.Error(ctx, "create OTP record failed", zap.Error(err))
 		return common.ErrDB(err)
 	}
 
-	// Send OTP via SMS
-	err = biz.smsClient.SendOTP(ctx, sms.OTPMessage{
+	otpRes, err := biz.smsClient.SendOTP(ctx, sms.OTPMessage{
 		Content:     "Your OTP is: " + otp,
 		PhoneNumber: user.PhoneNumber,
 	})
 	if err != nil {
 		logger.AppLogger.Error(ctx, "cannot send OTP", zap.Error(err))
 		return common.ErrInternal(err)
+	}
+
+	newOTP.ESMSID = otpRes.SMSID
+	if err := biz.repo.Update(ctx, newOTP); err != nil {
+		logger.AppLogger.Error(ctx, "update OTP ESMSID failed", zap.Error(err))
+		return err
 	}
 
 	return nil

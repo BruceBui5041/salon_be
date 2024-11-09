@@ -46,31 +46,31 @@ func NewESMSClient() *eSMS {
 	}
 }
 
-func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) error {
+func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) (*ESMSResponse, error) {
 	eSMSRestAPI := viper.GetString("OTP_SMS_REST_API")
 	otpPayload.ApiKey = viper.GetString("OTP_SMS_API_KEY")
 	otpPayload.SecretKey = viper.GetString("OTP_SMS_API_SECRET_KEY")
 	otpPayload.Brandname = viper.GetString("OTP_SMS_BRANDNAME")
 	otpPayload.SmsType = "2"
 	otpPayload.IsUnicode = "0"
-	otpPayload.Sandbox = "0"
+	otpPayload.Sandbox = "1"
 
 	payloadJSON, err := json.Marshal(otpPayload)
 	if err != nil {
 		logger.AppLogger.Error(ctx, "Failed to marshal payload", zap.Error(err))
-		return err
+		return nil, err
 	}
 
 	req, err := http.NewRequest("POST", eSMSRestAPI, bytes.NewBuffer(payloadJSON))
 	if err != nil {
 		logger.AppLogger.Error(ctx, "Failed to create request", zap.Error(err))
-		return err
+		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := esms.httpClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer resp.Body.Close()
@@ -78,21 +78,21 @@ func (esms *eSMS) ESMSSendOTP(ctx context.Context, otpPayload *OTPPayload) error
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.AppLogger.Error(ctx, "Failed to read response body", zap.Error(err))
-		return err
+		return nil, err
 	}
 
 	otpResponse := &ESMSResponse{}
 	err = json.Unmarshal(body, &otpResponse)
 	if err != nil {
 		logger.AppLogger.Error(ctx, "Failed to unmarshal response", zap.Error(err))
-		return err
+		return nil, err
 	}
 
 	if otpResponse.CodeResult != "100" {
 		logger.AppLogger.Error(ctx, "Failed to send OTP", zap.Any("response", otpResponse))
-		return common.ErrInternal(errors.New(otpResponse.ErrorMessage))
+		return nil, common.ErrInternal(errors.New(otpResponse.ErrorMessage))
 	}
 
 	logger.AppLogger.Info(ctx, "Send OTP successful", zap.Any("response", otpResponse))
-	return nil
+	return otpResponse, nil
 }

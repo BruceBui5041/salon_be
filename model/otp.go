@@ -11,6 +11,8 @@ const OTPEntityName = "OTP"
 
 type OTP struct {
 	common.SQLModel `json:",inline"`
+	UUID            string     `json:"uuid" gorm:"column:uuid;type:varchar(50);uniqueIndex"`
+	ESMSID          string     `json:"esmsid" gorm:"column:esmsid;type:varchar(50);not null"`
 	UserID          uint32     `json:"-" gorm:"column:user_id;not null;index"`
 	User            *User      `json:"user,omitempty" gorm:"foreignKey:UserID;references:Id;constraint:OnDelete:SET NULL;"`
 	OTP             string     `json:"otp" gorm:"column:otp;type:varchar(6);uniqueIndex"`

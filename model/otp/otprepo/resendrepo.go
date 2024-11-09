@@ -18,6 +18,7 @@ type ResendOTPStore interface {
 		moreKeys ...string,
 	) (*models.OTP, error)
 	Create(ctx context.Context, data *models.OTP) error
+	Update(ctx context.Context, updates *models.OTP) error
 }
 
 type UserStore interface {
@@ -83,4 +84,8 @@ func (repo *resendRepo) GetUser(
 
 func (repo *resendRepo) Create(ctx context.Context, data *models.OTP) error {
 	return repo.store.Create(ctx, data)
+}
+
+func (repo *resendRepo) Update(ctx context.Context, data *models.OTP) error {
+	return repo.store.Update(ctx, data)
 }

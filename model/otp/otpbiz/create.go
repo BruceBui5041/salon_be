@@ -12,6 +12,7 @@ import (
 	"salon_be/model/otp/otpmodel"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -21,6 +22,7 @@ type CreateOTPUserStore interface {
 
 type CreateOTPStore interface {
 	Create(ctx context.Context, data *models.OTP) error
+	Update(ctx context.Context, updates *models.OTP) error
 }
 
 type createOTPBiz struct {
@@ -50,6 +52,7 @@ func (biz *createOTPBiz) CreateOTP(ctx context.Context, data *otpmodel.CreateOTP
 		UserID: data.UserID,
 	}
 
+	newOTP.UUID = uuid.NewString()
 	newOTP.ExpiresAt = time.Now().UTC().Add(5 * time.Minute)
 
 	otp, err := generateOTP()
@@ -70,12 +73,18 @@ func (biz *createOTPBiz) CreateOTP(ctx context.Context, data *otpmodel.CreateOTP
 		return common.ErrDB(err)
 	}
 
-	err = biz.smsClient.SendOTP(ctx, sms.OTPMessage{
+	otpRes, err := biz.smsClient.SendOTP(ctx, sms.OTPMessage{
 		Content:     "Your OTP is: " + otp,
 		PhoneNumber: user.PhoneNumber,
 	})
 	if err != nil {
 		logger.AppLogger.Error(ctx, "cannot send OTP", zap.Error(err))
+		return err
+	}
+
+	newOTP.ESMSID = otpRes.SMSID
+	if err := biz.optStore.Update(ctx, newOTP); err != nil {
+		logger.AppLogger.Error(ctx, "update OTP ESMSID failed", zap.Error(err))
 		return err
 	}
 

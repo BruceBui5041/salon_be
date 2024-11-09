@@ -6,7 +6,7 @@ import (
 )
 
 type ESMS interface {
-	ESMSSendOTP(ctx context.Context, otpPayload *esms.OTPPayload) error
+	ESMSSendOTP(ctx context.Context, otpPayload *esms.OTPPayload) (*esms.ESMSResponse, error)
 }
 
 type smsClient struct {
@@ -14,6 +14,7 @@ type smsClient struct {
 }
 
 type OTPMessage struct {
+	UUID        string
 	Content     string
 	PhoneNumber string
 }
@@ -24,10 +25,11 @@ func NewSMSClient() *smsClient {
 	}
 }
 
-func (client *smsClient) SendOTP(ctx context.Context, otpMessage OTPMessage) error {
+func (client *smsClient) SendOTP(ctx context.Context, otpMessage OTPMessage) (*esms.ESMSResponse, error) {
 	otpPayload := &esms.OTPPayload{
-		Content: otpMessage.Content,
-		Phone:   otpMessage.PhoneNumber,
+		RequestID: otpMessage.UUID,
+		Content:   otpMessage.Content,
+		Phone:     otpMessage.PhoneNumber,
 	}
 
 	return client.eSMS.ESMSSendOTP(ctx, otpPayload)

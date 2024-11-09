@@ -4,6 +4,7 @@ import (
 	"context"
 	"salon_be/component/cache"
 	"salon_be/component/sms"
+	"salon_be/component/sms/esms"
 	models "salon_be/model"
 	pb "salon_be/proto/salon_be/salon_be"
 
@@ -73,7 +74,7 @@ type LocalPubSub interface {
 }
 
 type SMSClient interface {
-	SendOTP(ctx context.Context, otpMessage sms.OTPMessage) error
+	SendOTP(ctx context.Context, otpMessage sms.OTPMessage) (*esms.ESMSResponse, error)
 }
 
 type appCtx struct {
