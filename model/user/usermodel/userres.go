@@ -14,8 +14,8 @@ type GetUserResponse struct {
 	Email             string                      `json:"email"`
 	ProfilePictureURL string                      `json:"profile_picture_url"`
 	Roles             []GetUserRoleResponse       `json:"roles"`
-	Enrollments       []GetUserEnrollmentResponse `json:"enrollments"`
-	Auths             []models.UserAuth           `json:"auths"`
+	Enrollments       []GetUserEnrollmentResponse `json:"-"`
+	Auths             []models.UserAuth           `json:"-"`
 }
 
 func (u *GetUserResponse) Mask(isAdmin bool) {

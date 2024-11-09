@@ -1,15 +1,15 @@
 package usermodel
 
 import (
-	"errors"
-	"salon_be/common"
 	"salon_be/component/tokenprovider"
 	models "salon_be/model"
 )
 
 type UserLogin struct {
-	Email    string `json:"email" form:"email" gorm:"column:email;"`
-	Password string `json:"password" form:"password" gorm:"column:password;"`
+	AuthType    string `json:"auth_type" form:"auth_type"`
+	PhoneNumber string `json:"phone_number" form:"phone_number"`
+	Email       string `json:"email" form:"email"`
+	Password    string `json:"password" form:"password"`
 }
 
 func (UserLogin) TableName() string {
@@ -27,17 +27,3 @@ func NewAccount(atok, rtok *tokenprovider.Token) *Account {
 		RefreshToken: rtok,
 	}
 }
-
-var (
-	ErrUsernameOrPasswordInvalid = common.NewCustomError(
-		errors.New("username or password is invalid"),
-		"username or password is invalid",
-		"ErrUsernameOrPasswordInvalid",
-	)
-
-	ErrEmailIsAlreadyExisted = common.NewCustomError(
-		errors.New("email is alread existed"),
-		"email is alread existed",
-		"ErrEmailIsAlreadyExisted",
-	)
-)

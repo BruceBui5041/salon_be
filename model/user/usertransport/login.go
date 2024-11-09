@@ -19,7 +19,6 @@ import (
 func Login(appCtx component.AppContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var loginUserData usermodel.UserLogin
-
 		if err := ctx.ShouldBind(&loginUserData); err != nil {
 			panic(err)
 		}

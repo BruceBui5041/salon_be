@@ -59,11 +59,9 @@ func Register(appCtx component.AppContext) func(*gin.Context) {
 				return err
 			}
 
-			utils.WriteServerJWTTokenCookie(ctx, account.Token)
+			utils.WriteServerJWTTokenCookie(ctx, account.Token.Token)
 
-			data.Mask(false)
-
-			ctx.JSON(http.StatusCreated, common.SimpleSuccessResponse(data.FakeId.String()))
+			ctx.JSON(http.StatusCreated, common.SimpleSuccessResponse(user.GetFakeId()))
 			return nil
 		}); err != nil {
 			panic(err)

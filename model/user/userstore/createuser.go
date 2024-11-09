@@ -3,6 +3,7 @@ package userstore
 import (
 	"context"
 	"errors"
+	"salon_be/common"
 	models "salon_be/model"
 	user "salon_be/model/user/usermodel"
 
@@ -20,6 +21,7 @@ func (s *sqlStore) CreateNewUser(ctx context.Context, input *user.CreateUser) er
 
 	// Create new user
 	newUser := models.User{
+		SQLModel:    common.SQLModel{Status: input.Status},
 		FirstName:   input.FirstName,
 		LastName:    input.LastName,
 		Email:       input.Email,

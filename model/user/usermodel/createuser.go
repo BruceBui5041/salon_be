@@ -1,10 +1,13 @@
 package usermodel
 
-import "salon_be/common"
+import (
+	"salon_be/common"
+	"salon_be/component/tokenprovider"
+)
 
 // CreateUser represents the data needed to create a new user
 type CreateUser struct {
-	common.SQLModel   `json:",inline"`
+	*common.SQLModel  `json:",inline"`
 	LastName          string `json:"lastname"`
 	FirstName         string `json:"firstname"`
 	Email             string `json:"email"`
@@ -19,4 +22,10 @@ type CreateUser struct {
 
 func (u *CreateUser) Mask(isAdmin bool) {
 	u.GenUID(common.DbTypeUser)
+}
+
+type RegisterResponse struct {
+	Token     *tokenprovider.Token `json:"token"`
+	User      GetUserResponse      `json:"user"`
+	Challenge string               `json:"challenge"`
 }
