@@ -25,6 +25,7 @@ type CacheUser struct {
 	FirstName         string              `json:"firstname" gorm:"column:firstname;"`
 	Email             string              `json:"email"`
 	ProfilePictureURL string              `json:"profile_picture_url"`
+	PhoneNumber       string              `json:"phone_number"`
 	Roles             []CacheRoleRes      `json:"roles"`
 	Enrollments       []CacheEnrollment   `json:"enrollments"`
 	Auths             []models.UserAuth   `json:"auths"`

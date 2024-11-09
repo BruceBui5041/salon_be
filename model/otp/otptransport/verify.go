@@ -3,12 +3,17 @@ package otptransport
 import (
 	"errors"
 	"net/http"
+	"salon_be/appconst"
 	"salon_be/common"
 	"salon_be/component"
+	"salon_be/component/hasher"
+	"salon_be/component/tokenprovider/jwt"
 	"salon_be/model/otp/otpbiz"
 	"salon_be/model/otp/otpmodel"
 	"salon_be/model/otp/otprepo"
 	"salon_be/model/otp/otpstore"
+	"salon_be/model/user/userstore"
+	"salon_be/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -29,15 +34,28 @@ func VerifyOTP(appCtx component.AppContext) gin.HandlerFunc {
 
 		db := appCtx.GetMainDBConnection()
 		if err := db.Transaction(func(tx *gorm.DB) error {
-			store := otpstore.NewSQLStore(tx)
-			repo := otprepo.NewVerifyRepo(store)
-			biz := otpbiz.NewVerifyBiz(repo)
+			optStore := otpstore.NewSQLStore(tx)
+			userStore := userstore.NewSQLStore(tx)
+			tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+			md5 := hasher.NewMD5Hash()
 
-			if err := biz.VerifyOTP(c.Request.Context(), &input); err != nil {
-				panic(err)
+			repo := otprepo.NewVerifyRepo(optStore, userStore)
+
+			biz := otpbiz.NewVerifyBiz(
+				repo,
+				tokenProvider,
+				md5,
+				appconst.TokenExpiry,
+				appCtx.GetLocalPubSub().GetBlockPubSub(),
+			)
+
+			result, err := biz.VerifyOTP(c.Request.Context(), &input)
+			if err != nil {
+				return err
 			}
 
-			c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
+			utils.WriteServerJWTTokenCookie(c, result.Token.Token)
+			c.JSON(http.StatusOK, common.SimpleSuccessResponse(result))
 			return nil
 		}); err != nil {
 			panic(err)

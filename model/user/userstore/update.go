@@ -22,3 +22,9 @@ func (s *sqlStore) UpdateUser(ctx context.Context, tx *gorm.DB, user *models.Use
 
 	return nil
 }
+
+func (s *sqlStore) Update(ctx context.Context, userID uint32, data *models.User) error {
+	return s.db.Model(&models.User{}).
+		Where("id = ?", userID).
+		Updates(data).Error
+}
