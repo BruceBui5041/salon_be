@@ -22,15 +22,18 @@ func RequiredAuth(appCtx component.AppContext) func(ctx *gin.Context) {
 	jwtProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
 	return func(ctx *gin.Context) {
 		token, err := ctx.Cookie(appconst.AccessTokenName)
-
 		if err != nil {
 			panic(ErrWrongAuthHeader(errors.New("access_token cookie not found")))
 		}
 
 		payload, err := jwtProvider.Validate(token)
-
 		if err != nil {
 			panic(err)
+		}
+
+		isChallengeAPI := ctx.GetBool("isChallengeAPI")
+		if !isChallengeAPI && payload.Challenge != "" {
+			panic(ErrWrongAuthHeader(errors.New("have to passed authentication challenges")))
 		}
 
 		// Try to get user from cache
@@ -54,7 +57,7 @@ func RequiredAuth(appCtx component.AppContext) func(ctx *gin.Context) {
 			user = nil
 		}
 
-		if user.Status != common.StatusActive {
+		if payload.Challenge == "" && user.Status != common.StatusActive {
 			panic(common.ErrNoPermission(errors.New("account unavailable")))
 		}
 

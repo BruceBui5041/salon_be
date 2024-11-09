@@ -55,7 +55,12 @@ func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
 }
 
 func setupOTPRoutes(r *gin.Engine, appCtx component.AppContext) {
-	otpGroup := r.Group("/otp", middleware.RequiredAuth(appCtx))
+	setContextData := func(c *gin.Context) {
+		c.Set("isChallengeAPI", true)
+		c.Next()
+	}
+
+	otpGroup := r.Group("/otp", setContextData, middleware.RequiredAuth(appCtx))
 	{
 		otpGroup.POST("/verify", otptransport.VerifyOTP(appCtx))
 		otpGroup.POST("/resend", otptransport.ResendOTP(appCtx))

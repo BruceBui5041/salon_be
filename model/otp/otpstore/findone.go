@@ -17,9 +17,16 @@ func (s *sqlStore) FindOne(
 		db = db.Preload(moreKeys[i])
 	}
 
-	if err := db.Where(conditions).First(&result).Error; err != nil {
+	query := db
+	if expiresAtCond, exists := conditions["expires_at > ?"]; exists {
+		query = query.Where("expires_at > ?", expiresAtCond)
+		delete(conditions, "expires_at > ?")
+	}
+
+	if err := query.Where(conditions).First(&result).Error; err != nil {
 		return nil, err
 	}
 
 	return &result, nil
+
 }

@@ -12,6 +12,8 @@ import (
 	"salon_be/model/otp/otpmodel"
 	"salon_be/model/user/usererror"
 	"salon_be/model/user/usermodel"
+
+	"github.com/jinzhu/copier"
 )
 
 type RegisterStorage interface {
@@ -49,7 +51,7 @@ func (registerBiz *registerBiz) RegisterUser(
 	ctx context.Context,
 	inputData *usermodel.CreateUser,
 	tokenExpiry int,
-) (*tokenprovider.Token, *models.User, error) {
+) (*usermodel.RegisterResponse, *models.User, error) {
 	// Validate required fields
 	if inputData.FirstName == "" {
 		return nil, nil, usererror.ErrUserMissionRequireField(errors.New("firstname is required"))
@@ -93,7 +95,7 @@ func (registerBiz *registerBiz) RegisterUser(
 			return nil, nil, errors.New("auth provider ID and token are required for oauth auth type")
 		}
 	case authconst.AuthTypePhone:
-		inputData.SQLModel.Status = "inactive"
+		inputData.SQLModel = &common.SQLModel{Status: "inactive"}
 	default:
 		return nil, nil, errors.New("invalid auth type")
 	}
@@ -116,11 +118,10 @@ func (registerBiz *registerBiz) RegisterUser(
 		}
 	}
 
-	user.Mask(false)
-
 	payload := tokenprovider.TokenPayload{
-		UserId: int(user.Id),
-		Roles:  user.Roles,
+		UserId:    int(user.Id),
+		Roles:     user.Roles,
+		Challenge: "otp",
 	}
 
 	accessToken, err := registerBiz.tokenProvider.Generate(payload, tokenExpiry)
@@ -128,5 +129,11 @@ func (registerBiz *registerBiz) RegisterUser(
 		return nil, nil, common.ErrInternal(err)
 	}
 
-	return accessToken, user, nil
+	var userRes usermodel.GetUserResponse
+	copier.Copy(&userRes, user)
+	return &usermodel.RegisterResponse{
+		Token:     accessToken,
+		User:      userRes,
+		Challenge: "otp",
+	}, user, nil
 }

@@ -19,8 +19,9 @@ type Token struct {
 }
 
 type TokenPayload struct {
-	UserId int            `json:"user_id"`
-	Roles  []*models.Role `json:"roles"`
+	UserId    int            `json:"user_id"`
+	Roles     []*models.Role `json:"roles"`
+	Challenge string         `json:"challenge"`
 }
 
 var (

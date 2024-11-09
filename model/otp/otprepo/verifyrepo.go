@@ -2,6 +2,7 @@ package otprepo
 
 import (
 	"context"
+	"errors"
 	"salon_be/common"
 	models "salon_be/model"
 	"time"
@@ -26,9 +27,8 @@ func NewVerifyRepo(store VerifyOTPStore) *verifyRepo {
 
 func (r *verifyRepo) FindOTPByUserID(ctx context.Context, userID uint32) (*models.OTP, error) {
 	conditions := map[string]interface{}{
-		"user_id":        userID,
-		"passed_at":      nil,
-		"expires_at > ?": time.Now().UTC(),
+		"user_id":   userID,
+		"passed_at": nil,
 	}
 
 	otp, err := r.store.FindOne(ctx, conditions)
@@ -37,6 +37,10 @@ func (r *verifyRepo) FindOTPByUserID(ctx context.Context, userID uint32) (*model
 			return nil, common.ErrEntityNotFound(models.OTPEntityName, err)
 		}
 		return nil, common.ErrDB(err)
+	}
+
+	if otp.ExpiresAt.Before(time.Now().UTC()) {
+		return nil, common.ErrInvalidRequest(errors.New("OTP expired"))
 	}
 
 	return otp, nil
