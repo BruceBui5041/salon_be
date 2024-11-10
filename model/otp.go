@@ -4,6 +4,7 @@ import (
 	"salon_be/common"
 	"time"
 
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -32,6 +33,11 @@ func (otp *OTP) Mask(isAdmin bool) {
 func (otp *OTP) AfterFind(tx *gorm.DB) (err error) {
 	otp.Mask(false)
 	return
+}
+
+func (otp *OTP) BeforeCreate(tx *gorm.DB) error {
+	otp.TTL = uint16(viper.GetInt("OTP_TTL"))
+	return nil
 }
 
 func (otp *OTP) IsPassed(inputOTP string) bool {

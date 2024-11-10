@@ -60,10 +60,7 @@ func (biz *resendOTPBiz) ResendOTP(ctx context.Context, data *otpmodel.ResendOTP
 		return common.ErrDB(err)
 	}
 
-	newOTP := &models.OTP{
-		UserID: data.UserID,
-		TTL:    5,
-	}
+	newOTP := &models.OTP{UserID: data.UserID}
 
 	newOTP.UUID = uuid.NewString()
 	newOTP.ExpiresAt = time.Now().UTC().Add(5 * time.Minute)
