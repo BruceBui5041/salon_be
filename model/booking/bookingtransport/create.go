@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
+	models "salon_be/model"
 	"salon_be/model/booking/bookingbiz"
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
-	"salon_be/model/serviceversion/serviceversionstore"
-	"salon_be/model/user/userstore"
+	"salon_be/model/service/servicestore"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -28,19 +28,24 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 		if !ok {
 			panic(common.ErrNoPermission(errors.New("requester not found")))
 		}
+
+		user, ok := requester.(*models.User)
+		if !ok {
+			panic(common.ErrNoPermission(errors.New("invalid user type")))
+		}
+
 		data.UserID = requester.GetUserId()
+		data.IsUserRole = user.IsUser()
 
 		db := appCtx.GetMainDBConnection()
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			bookingStore := bookingstore.NewSQLStore(tx)
-			serviceVersionStore := serviceversionstore.NewSQLStore(tx)
-			serviceManStore := userstore.NewSQLStore(tx)
+			serviceStore := servicestore.NewSQLStore(tx)
 
 			repo := bookingrepo.NewCreateBookingRepo(
 				bookingStore,
-				serviceVersionStore,
-				serviceManStore,
+				serviceStore,
 			)
 
 			business := bookingbiz.NewCreateBookingBiz(repo)

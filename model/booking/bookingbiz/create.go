@@ -1,3 +1,5 @@
+// booking/bookingbiz/create.go
+
 package bookingbiz
 
 import (
@@ -11,8 +13,6 @@ import (
 
 type BookingRepo interface {
 	CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error
-	GetServiceVersion(ctx context.Context, id uint32) (*models.ServiceVersion, error)
-	GetServiceMan(ctx context.Context, id uint32) (*models.User, error)
 }
 
 type createBookingBiz struct {
@@ -24,12 +24,8 @@ func NewCreateBookingBiz(repo BookingRepo) *createBookingBiz {
 }
 
 func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error {
-	if data.ServiceVersionID == 0 {
-		return common.ErrInvalidRequest(errors.New("service version ID is required"))
-	}
-
-	if data.ServiceManID == 0 {
-		return common.ErrInvalidRequest(errors.New("service man ID is required"))
+	if data.ServiceID == "" {
+		return common.ErrInvalidRequest(errors.New("service ID is required"))
 	}
 
 	if data.BookingDate.IsZero() {

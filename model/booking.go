@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"salon_be/common"
 	"salon_be/component/genericapi/modelhelper"
 	"time"
@@ -54,20 +55,25 @@ func (Booking) TableName() string {
 }
 
 func (b *Booking) CalculateDiscountedPrice() error {
+	if b.ServiceVersion == nil {
+		return errors.New("service version is required")
+	}
+
+	if b.ServiceVersion.DiscountedPrice != nil {
+		b.Price = b.ServiceVersion.DiscountedPrice.Decimal
+	}
+
 	if b.Coupon == nil {
 		return nil
 	}
 
-	// Validate coupon
 	if err := b.Coupon.IsValid(b.Price); err != nil {
 		return err
 	}
 
-	// Calculate discount amount
 	discountAmount := b.Coupon.CalculateDiscount(b.Price)
 	b.DiscountAmount = discountAmount
 
-	// Calculate final price
 	finalPrice := b.Price.Sub(discountAmount)
 	b.DiscountedPrice = &finalPrice
 
