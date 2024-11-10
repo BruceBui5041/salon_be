@@ -11,6 +11,7 @@ import (
 	"salon_be/component/genericapi/generictransport"
 	"salon_be/component/ws"
 	"salon_be/middleware"
+	"salon_be/model/booking/bookingtransport"
 	"salon_be/model/category/categorytransport"
 	"salon_be/model/comment/commenttransport"
 	"salon_be/model/otp/otptransport"
@@ -44,6 +45,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 
 	setupAuthRoutes(r, appCtx)
 	setupUtilityRoutes(r, appCtx)
+	setupBookingRoutes(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -51,6 +53,13 @@ func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
 	genAPIs := r.Group("/")
 	{
 		genAPIs.POST("search", genTransport.Search())
+	}
+}
+
+func setupBookingRoutes(r *gin.Engine, appCtx component.AppContext) {
+	bookingGroup := r.Group("/booking", middleware.RequiredAuth(appCtx))
+	{
+		bookingGroup.POST("", bookingtransport.CreateBookingHandler(appCtx))
 	}
 }
 

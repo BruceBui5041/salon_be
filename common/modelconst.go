@@ -23,6 +23,8 @@ const (
 	DBTypeNote             = 14
 	DBTypePermission       = 15
 	DBTypeProgress         = 16
+	DBTypeBooking          = 17
+	DBTypeCoupon           = 18
 )
 
 const (
