@@ -38,14 +38,7 @@ func (repo *cancelBookingRepo) CancelBooking(ctx context.Context, bookingId uint
 	}
 
 	// Check if the requester is either the service man or the booking user
-	isAuthorized := false
-	if data.IsUserRole && booking.UserID == data.UserID {
-		isAuthorized = true
-	} else if !data.IsUserRole && booking.ServiceManID == data.UserID {
-		isAuthorized = true
-	}
-
-	if !isAuthorized {
+	if booking.UserID != data.UserID && booking.ServiceManID != data.UserID {
 		return common.ErrNoPermission(errors.New("only the service provider or the customer can cancel this booking"))
 	}
 

@@ -56,6 +56,15 @@ func (Booking) TableName() string {
 	return "booking"
 }
 
+func (b *Booking) Mask(isAdmin bool) {
+	b.GenUID(common.DBTypeBooking)
+}
+
+func (b *Booking) AfterFind(tx *gorm.DB) (err error) {
+	b.Mask(false)
+	return
+}
+
 func (b *Booking) CalculateDiscountedPrice() error {
 	if b.ServiceVersion == nil {
 		return errors.New("service version is required")
