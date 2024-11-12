@@ -60,6 +60,7 @@ func setupBookingRoutes(r *gin.Engine, appCtx component.AppContext) {
 	bookingGroup := r.Group("/booking", middleware.RequiredAuth(appCtx))
 	{
 		bookingGroup.POST("", bookingtransport.CreateBookingHandler(appCtx))
+		bookingGroup.PATCH("cancel/:id", bookingtransport.CancelBookingHandler(appCtx))
 	}
 }
 

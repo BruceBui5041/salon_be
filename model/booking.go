@@ -45,6 +45,8 @@ type Booking struct {
 	DiscountedPrice    *decimal.Decimal `json:"discounted_price" gorm:"column:discounted_price;type:decimal(10,2)"`
 	DiscountAmount     decimal.Decimal  `json:"discount_amount" gorm:"column:discount_amount;type:decimal(10,2)"`
 	Notes              string           `json:"notes" gorm:"column:notes;type:text"`
+	CancelledByID      *uint32          `json:"-" gorm:"column:cancelled_by_id;index"`
+	CancelledBy        *User            `json:"cancelled_by,omitempty" gorm:"foreignKey:CancelledByID"`
 	CancellationReason string           `json:"cancellation_reason,omitempty" gorm:"column:cancellation_reason;type:text"`
 	CancelledAt        *time.Time       `json:"cancelled_at,omitempty" gorm:"column:cancelled_at;type:datetime"`
 	CompletedAt        *time.Time       `json:"completed_at,omitempty" gorm:"column:completed_at;type:datetime"`
