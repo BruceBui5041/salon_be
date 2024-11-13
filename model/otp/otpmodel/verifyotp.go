@@ -1,6 +1,7 @@
 package otpmodel
 
 import (
+	"salon_be/common"
 	"salon_be/component/tokenprovider"
 	models "salon_be/model"
 )
@@ -11,14 +12,14 @@ type VerifyOTPInput struct {
 }
 
 type GetUserResponse struct {
-	Id          int                 `json:"id"`
-	Email       string              `json:"email"`
-	PhoneNumber string              `json:"phone_number"`
-	UserProfile *models.UserProfile `json:"user_profile"`
-	Roles       []models.Role       `json:"roles"`
-	Status      int                 `json:"status"`
-	CreatedAt   string              `json:"created_at"`
-	UpdatedAt   string              `json:"updated_at"`
+	common.SQLModel `json:",inline"`
+	Email           string              `json:"email"`
+	PhoneNumber     string              `json:"phone_number"`
+	UserProfile     *models.UserProfile `json:"user_profile"`
+	Roles           []models.Role       `json:"roles"`
+	Status          int                 `json:"status"`
+	CreatedAt       string              `json:"created_at"`
+	UpdatedAt       string              `json:"updated_at"`
 }
 
 type VerifyOTPResponse struct {

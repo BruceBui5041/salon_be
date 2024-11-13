@@ -42,6 +42,10 @@ func (User) TableName() string {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	u.Status = "inactive"
+	if u.Email == "" && u.PhoneNumber != "" {
+		u.Email = u.PhoneNumber
+	}
+
 	return nil
 }
 

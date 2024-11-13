@@ -18,6 +18,7 @@ import (
 	"salon_be/watermill/messagemodel"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +36,7 @@ func VerifyOTP(appCtx component.AppContext) gin.HandlerFunc {
 		input.UserID = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection()
-		var result *otpmodel.VerifyOTPResponse
+		result := otpmodel.VerifyOTPResponse{}
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			optStore := otpstore.NewSQLStore(tx)
 			userStore := userstore.NewSQLStore(tx)
@@ -55,7 +56,11 @@ func VerifyOTP(appCtx component.AppContext) gin.HandlerFunc {
 			if err != nil {
 				return err
 			}
-			result = res
+
+			err = copier.Copy(&result, res)
+			if err != nil {
+				return common.ErrInternal(err)
+			}
 			utils.WriteServerJWTTokenCookie(c, res.Token.Token)
 			return nil
 		}); err != nil {
