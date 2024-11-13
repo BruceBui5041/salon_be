@@ -20,7 +20,7 @@ func (s *sqlStore) FindOne(
 	user := &models.User{}
 
 	if err := db.Where(conditions).First(&user).Error; err != nil {
-		return nil, common.ErrCannotListEntity(models.UserEntityName, err)
+		return nil, common.ErrEntityNotFound(models.UserEntityName, err)
 	}
 
 	return user, nil

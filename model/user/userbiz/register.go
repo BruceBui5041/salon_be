@@ -14,6 +14,7 @@ import (
 	"salon_be/model/user/usermodel"
 
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 )
 
 type RegisterStorage interface {
@@ -100,14 +101,29 @@ func (registerBiz *registerBiz) RegisterUser(
 	}
 
 	err := registerBiz.registerStorage.CreateNewUser(ctx, inputData)
-
 	if err != nil {
+		if err == gorm.ErrDuplicatedKey {
+			return nil, nil, common.ErrEntityExisted(models.UserEntityName, err)
+		}
 		return nil, nil, err
 	}
 
-	user, err := registerBiz.registerStorage.FindOne(ctx, map[string]interface{}{"email": inputData.Email})
-	if err != nil {
-		return nil, nil, common.ErrInternal(err)
+	var user *models.User
+	switch inputData.AuthType {
+	case authconst.AuthTypePassword:
+		user, err = registerBiz.registerStorage.FindOne(ctx, map[string]interface{}{"email": inputData.Email})
+		if err != nil {
+			return nil, nil, err
+		}
+	// case "oauth":
+
+	case authconst.AuthTypePhone:
+		user, err = registerBiz.registerStorage.FindOne(ctx, map[string]interface{}{"phone_number": inputData.PhoneNumber})
+		if err != nil {
+			return nil, nil, err
+		}
+	default:
+		return nil, nil, errors.New("invalid auth type")
 	}
 
 	if inputData.AuthType == authconst.AuthTypePhone {

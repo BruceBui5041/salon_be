@@ -61,7 +61,7 @@ func setupBookingRoutes(r *gin.Engine, appCtx component.AppContext) {
 	{
 		bookingGroup.POST("", bookingtransport.CreateBookingHandler(appCtx))
 		bookingGroup.PATCH("cancel/:id", bookingtransport.CancelBookingHandler(appCtx))
-		bookingGroup.PATCH("/accept/:id", bookingtransport.AcceptBookingHandler(appCtx))
+		bookingGroup.PATCH("accept/:id", bookingtransport.AcceptBookingHandler(appCtx))
 	}
 }
 

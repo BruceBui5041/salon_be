@@ -34,6 +34,30 @@ func WriteServerJWTTokenCookie(ctx *gin.Context, accessToken string) {
 		SameSite: http.SameSiteLaxMode,
 		// SameSite: http.SameSiteStrictMode,
 		Path:    "/",
+		Domain:  "provider.salon-be.com",
+		Expires: time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     appconst.AccessTokenName,
+		Value:    accessToken,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		// SameSite: http.SameSiteStrictMode,
+		Path:    "/",
+		Domain:  "customer.salon-be.com",
+		Expires: time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     appconst.AccessTokenName,
+		Value:    accessToken,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		// SameSite: http.SameSiteStrictMode,
+		Path:    "/",
 		Domain:  "localhost",
 		Expires: time.Now().Add(7 * 24 * time.Hour),
 	})
