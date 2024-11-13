@@ -73,9 +73,9 @@ func (u *User) IsUser() bool {
 	return has
 }
 
-func (u *User) IsInstructor() bool {
+func (u *User) IsProvider() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
-		return role.Code == "INSTRUCTOR"
+		return role.Code == "PROVIDER"
 	})
 
 	return has

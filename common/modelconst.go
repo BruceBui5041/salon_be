@@ -49,7 +49,7 @@ type Requester interface {
 	IsAdmin() bool
 	IsUser() bool
 	IsSuperAdmin() bool
-	IsInstructor() bool
+	IsProvider() bool
 }
 
 type SQLModel struct {

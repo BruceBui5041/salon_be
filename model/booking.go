@@ -39,6 +39,7 @@ type Booking struct {
 	CouponID           *uint32          `json:"-" gorm:"column:coupon_id;index"`
 	Coupon             *Coupon          `json:"coupon,omitempty" gorm:"foreignKey:CouponID"`
 	BookingStatus      BookingStatus    `json:"booking_status" gorm:"column:booking_status;type:ENUM('pending','confirmed','in_progress','completed','cancelled','no_show');default:pending"`
+	ConfirmedDate      *time.Time       `json:"confirmed_date,omitempty" gorm:"column:confirmed_date;type:datetime"`
 	BookingDate        time.Time        `json:"booking_date" gorm:"column:booking_date;type:datetime;not null"`
 	Duration           uint32           `json:"duration" gorm:"column:duration;not null"`
 	Price              decimal.Decimal  `json:"price" gorm:"column:price;type:decimal(10,2);not null"`

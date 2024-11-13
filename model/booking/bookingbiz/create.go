@@ -33,7 +33,7 @@ func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmod
 	}
 
 	// Check if booking date is in the future
-	if data.BookingDate.Before(time.Now()) {
+	if data.BookingDate.Before(time.Now().UTC()) {
 		return common.ErrInvalidRequest(errors.New("booking date must be in the future"))
 	}
 
