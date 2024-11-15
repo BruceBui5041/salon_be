@@ -6,6 +6,7 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingmodel"
+	"salon_be/model/payment/paymentconst"
 
 	"github.com/shopspring/decimal"
 )
@@ -72,7 +73,7 @@ func (repo *createBookingRepo) createPayment(
 		Amount:            amount.InexactFloat64(),
 		Currency:          "VND",
 		PaymentMethod:     paymentMethod,
-		TransactionStatus: "pending",
+		TransactionStatus: paymentconst.TransactionStatusPending,
 	}
 
 	paymentID, err := repo.paymentStore.Create(ctx, payment)

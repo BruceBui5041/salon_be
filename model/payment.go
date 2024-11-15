@@ -2,6 +2,7 @@ package models
 
 import (
 	"salon_be/common"
+	"salon_be/model/payment/paymentconst"
 
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ func (p *Payment) AfterFind(tx *gorm.DB) (err error) {
 // BeforeCreate hook to calculate discounted price
 func (p *Payment) BeforeCreate(tx *gorm.DB) error {
 	if p.TransactionStatus == "" {
-		p.TransactionStatus = "pending"
+		p.TransactionStatus = paymentconst.TransactionStatusPending
 	}
 
 	return nil
