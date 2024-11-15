@@ -29,7 +29,7 @@ func Register(appCtx component.AppContext) func(*gin.Context) {
 		if err := ctx.ShouldBind(&data); err != nil {
 			panic(err)
 		}
-
+		var userID string
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			store := userstore.NewSQLStore(tx)
 			otpStore := otpstore.NewSQLStore(tx)
@@ -51,19 +51,21 @@ func Register(appCtx component.AppContext) func(*gin.Context) {
 				return err
 			}
 
-			if err := watermill.PublishUserUpdated(
-				ctx.Request.Context(),
-				appCtx.GetLocalPubSub().GetUnblockPubSub(),
-				&messagemodel.UserUpdatedMessage{UserId: user.GetFakeId()},
-			); err != nil {
-				return err
-			}
+			userID = user.GetFakeId()
 
 			utils.WriteServerJWTTokenCookie(ctx, account.Token.Token)
 
 			ctx.JSON(http.StatusCreated, common.SimpleSuccessResponse(user.GetFakeId()))
 			return nil
 		}); err != nil {
+			panic(err)
+		}
+
+		if err := watermill.PublishUserUpdated(
+			ctx.Request.Context(),
+			appCtx.GetLocalPubSub().GetUnblockPubSub(),
+			&messagemodel.UserUpdatedMessage{UserId: userID},
+		); err != nil {
 			panic(err)
 		}
 	}

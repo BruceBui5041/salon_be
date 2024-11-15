@@ -71,8 +71,9 @@ func (b *Booking) CalculateDiscountedPrice() error {
 		return errors.New("service version is required")
 	}
 
+	b.Price = b.ServiceVersion.Price
 	if b.ServiceVersion.DiscountedPrice != nil {
-		b.Price = b.ServiceVersion.DiscountedPrice.Decimal
+		b.DiscountedPrice = &b.ServiceVersion.DiscountedPrice.Decimal
 	}
 
 	if b.Coupon == nil {
