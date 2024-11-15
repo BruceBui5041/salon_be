@@ -33,3 +33,12 @@ func (p *Payment) AfterFind(tx *gorm.DB) (err error) {
 	p.Mask(false)
 	return
 }
+
+// BeforeCreate hook to calculate discounted price
+func (p *Payment) BeforeCreate(tx *gorm.DB) error {
+	if p.TransactionStatus == "" {
+		p.TransactionStatus = "pending"
+	}
+
+	return nil
+}

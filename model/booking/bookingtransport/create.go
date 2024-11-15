@@ -10,6 +10,7 @@ import (
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
+	"salon_be/model/payment/paymentstore"
 	"salon_be/model/service/servicestore"
 
 	"github.com/gin-gonic/gin"
@@ -42,10 +43,12 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			bookingStore := bookingstore.NewSQLStore(tx)
 			serviceStore := servicestore.NewSQLStore(tx)
+			paymentStore := paymentstore.NewSQLStore(tx)
 
 			repo := bookingrepo.NewCreateBookingRepo(
 				bookingStore,
 				serviceStore,
+				paymentStore,
 			)
 
 			business := bookingbiz.NewCreateBookingBiz(repo)

@@ -19,18 +19,25 @@ type ServiceStore interface {
 	FindOne(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*models.Service, error)
 }
 
+type PaymentStore interface {
+	Create(ctx context.Context, data *models.Payment) (uint32, error)
+}
+
 type createBookingRepo struct {
 	bookingStore BookingStore
 	serviceStore ServiceStore
+	paymentStore PaymentStore
 }
 
 func NewCreateBookingRepo(
 	bookingStore BookingStore,
 	serviceStore ServiceStore,
+	paymentStore PaymentStore,
 ) *createBookingRepo {
 	return &createBookingRepo{
 		bookingStore: bookingStore,
 		serviceStore: serviceStore,
+		paymentStore: paymentStore,
 	}
 }
 
@@ -54,6 +61,29 @@ func (repo *createBookingRepo) checkUserPendingBookings(ctx context.Context, use
 	return nil
 }
 
+func (repo *createBookingRepo) createPayment(
+	ctx context.Context,
+	userID uint32,
+	amount decimal.Decimal,
+	paymentMethod string,
+) (*models.Payment, error) {
+	payment := &models.Payment{
+		UserID:            userID,
+		Amount:            amount.InexactFloat64(),
+		Currency:          "VND",
+		PaymentMethod:     paymentMethod,
+		TransactionStatus: "pending",
+	}
+
+	paymentID, err := repo.paymentStore.Create(ctx, payment)
+	if err != nil {
+		return nil, common.ErrCannotCreateEntity(models.PaymentEntityName, err)
+	}
+
+	payment.Id = paymentID
+	return payment, nil
+}
+
 func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error {
 	if !data.IsUserRole {
 		return common.ErrNoPermission(errors.New("only users can create bookings"))
@@ -63,7 +93,6 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		return err
 	}
 
-	// Get service with its current version and creator
 	serviceID, err := data.GetVersionLocalId(ctx)
 	if err != nil {
 		return err
@@ -87,6 +116,17 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		return common.ErrEntityNotFound(models.UserEntityName, errors.New("service creator not found"))
 	}
 
+	// Create payment record
+	finalPrice := service.ServiceVersion.Price
+	if service.ServiceVersion.DiscountedPrice != nil {
+		finalPrice = service.ServiceVersion.DiscountedPrice.Decimal
+	}
+
+	payment, err := repo.createPayment(ctx, data.UserID, finalPrice, data.PaymentMethod)
+	if err != nil {
+		return err
+	}
+
 	booking := &models.Booking{
 		UserID:           data.UserID,
 		ServiceVersionID: service.ServiceVersion.Id,
@@ -95,6 +135,8 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		Price:            service.ServiceVersion.Price,
 		Notes:            data.Notes,
 		ServiceVersion:   service.ServiceVersion,
+		PaymentID:        &payment.Id,
+		Payment:          payment,
 	}
 
 	booking.DiscountAmount = decimal.NewFromInt(0)

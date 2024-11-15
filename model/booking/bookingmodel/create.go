@@ -11,12 +11,13 @@ import (
 )
 
 type CreateBooking struct {
-	ServiceID   string    `json:"service_id"`
-	CouponID    *string   `json:"coupon_id"`
-	BookingDate time.Time `json:"booking_date"`
-	Notes       string    `json:"notes"`
-	UserID      uint32    `json:"-"`
-	IsUserRole  bool      `json:"-"`
+	ServiceID     string    `json:"service_id"`
+	CouponID      *string   `json:"coupon_id"`
+	BookingDate   time.Time `json:"booking_date"`
+	Notes         string    `json:"notes"`
+	PaymentMethod string    `json:"payment_method"`
+	UserID        uint32    `json:"-"`
+	IsUserRole    bool      `json:"-"`
 }
 
 func (cb *CreateBooking) GetVersionLocalId(ctx context.Context) (uint32, error) {

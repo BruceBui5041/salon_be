@@ -1,5 +1,3 @@
-// booking/bookingbiz/create.go
-
 package bookingbiz
 
 import (
@@ -8,7 +6,10 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingmodel"
+	"salon_be/model/payment/paymentconst"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type BookingRepo interface {
@@ -30,6 +31,14 @@ func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmod
 
 	if data.BookingDate.IsZero() {
 		return common.ErrInvalidRequest(errors.New("booking date is required"))
+	}
+
+	if data.PaymentMethod == "" {
+		return common.ErrInvalidRequest(errors.New("payment method is required"))
+	}
+
+	if lo.IndexOf(paymentconst.PaymentMethods, data.PaymentMethod) == -1 {
+		return common.ErrInvalidRequest(errors.New("invalid payment method"))
 	}
 
 	// Check if booking date is in the future
