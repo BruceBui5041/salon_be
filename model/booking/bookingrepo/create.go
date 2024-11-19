@@ -8,6 +8,7 @@ import (
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/payment/paymentconst"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
 
@@ -74,6 +75,7 @@ func (repo *createBookingRepo) createPayment(
 		Currency:          "VND",
 		PaymentMethod:     paymentMethod,
 		TransactionStatus: paymentconst.TransactionStatusPending,
+		TransactionID:     uuid.New().String(),
 	}
 
 	paymentID, err := repo.paymentStore.Create(ctx, payment)

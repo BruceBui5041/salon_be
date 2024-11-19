@@ -6,6 +6,7 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingmodel"
+	"salon_be/model/payment/paymentconst"
 	"time"
 )
 
@@ -14,12 +15,20 @@ type CompleteBookingStore interface {
 	Update(ctx context.Context, id uint32, data *models.Booking) error
 }
 
-type completeBookingRepo struct {
-	bookingStore CompleteBookingStore
+type CompleteBookingPaymentStore interface {
+	Update(ctx context.Context, id uint32, data *models.Payment) error
 }
 
-func NewCompleteBookingRepo(bookingStore CompleteBookingStore) *completeBookingRepo {
-	return &completeBookingRepo{bookingStore: bookingStore}
+type completeBookingRepo struct {
+	bookingStore CompleteBookingStore
+	paymentStore CompleteBookingPaymentStore
+}
+
+func NewCompleteBookingRepo(bookingStore CompleteBookingStore, paymentStore CompleteBookingPaymentStore) *completeBookingRepo {
+	return &completeBookingRepo{
+		bookingStore: bookingStore,
+		paymentStore: paymentStore,
+	}
 }
 
 func (repo *completeBookingRepo) CompleteBooking(ctx context.Context, bookingId uint32, data *bookingmodel.CompleteBooking) error {
@@ -27,17 +36,16 @@ func (repo *completeBookingRepo) CompleteBooking(ctx context.Context, bookingId 
 		ctx,
 		map[string]interface{}{"id": bookingId},
 		"ServiceMan",
+		"Payment",
 	)
 	if err != nil {
 		return common.ErrEntityNotFound(models.BookingEntityName, err)
 	}
 
-	// Check if the requester is the service man of the booking
 	if booking.ServiceManID != data.UserID {
 		return common.ErrNoPermission(errors.New("only service man of the booking can complete it"))
 	}
 
-	// Check if booking is in confirmed status
 	if booking.BookingStatus != models.BookingStatusConfirmed {
 		return common.ErrInvalidRequest(errors.New("only confirmed bookings can be completed"))
 	}
@@ -45,6 +53,13 @@ func (repo *completeBookingRepo) CompleteBooking(ctx context.Context, bookingId 
 	now := time.Now().UTC()
 	booking.BookingStatus = models.BookingStatusCompleted
 	booking.CompletedAt = &now
+
+	if booking.Payment != nil {
+		updatePayment := &models.Payment{TransactionStatus: paymentconst.TransactionStatusCompleted}
+		if err := repo.paymentStore.Update(ctx, *booking.PaymentID, updatePayment); err != nil {
+			return common.ErrCannotUpdateEntity(models.PaymentEntityName, err)
+		}
+	}
 
 	if err := repo.bookingStore.Update(ctx, bookingId, booking); err != nil {
 		return common.ErrCannotUpdateEntity(models.BookingEntityName, err)

@@ -10,6 +10,7 @@ import (
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
+	"salon_be/model/payment/paymentstore"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -41,8 +42,9 @@ func CompleteBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			bookingStore := bookingstore.NewSQLStore(tx)
+			paymentStore := paymentstore.NewSQLStore(tx)
 
-			repo := bookingrepo.NewCompleteBookingRepo(bookingStore)
+			repo := bookingrepo.NewCompleteBookingRepo(bookingStore, paymentStore)
 			business := bookingbiz.NewCompleteBookingBiz(repo)
 
 			if err := business.CompleteBooking(c.Request.Context(), uid.GetLocalID(), &data); err != nil {
