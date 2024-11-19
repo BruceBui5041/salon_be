@@ -9,6 +9,7 @@ import (
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
+	"salon_be/model/payment/paymentstore"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -36,8 +37,9 @@ func CancelBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection()
 
 		if err := db.Transaction(func(tx *gorm.DB) error {
-			store := bookingstore.NewSQLStore(tx)
-			repo := bookingrepo.NewCancelBookingRepo(store)
+			bookingStore := bookingstore.NewSQLStore(tx)
+			paymentStore := paymentstore.NewSQLStore(tx)
+			repo := bookingrepo.NewCancelBookingRepo(bookingStore, paymentStore)
 			business := bookingbiz.NewCancelBookingBiz(repo)
 
 			if err := business.CancelBooking(c.Request.Context(), uid.GetLocalID(), &data); err != nil {

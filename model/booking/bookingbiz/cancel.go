@@ -20,7 +20,11 @@ func NewCancelBookingBiz(repo CancelBookingRepo) *cancelBookingBiz {
 	return &cancelBookingBiz{repo: repo}
 }
 
-func (biz *cancelBookingBiz) CancelBooking(ctx context.Context, bookingId uint32, data *bookingmodel.CancelBooking) error {
+func (biz *cancelBookingBiz) CancelBooking(
+	ctx context.Context,
+	bookingId uint32,
+	data *bookingmodel.CancelBooking,
+) error {
 	if bookingId == 0 {
 		return common.ErrInvalidRequest(errors.New("booking ID is required"))
 	}

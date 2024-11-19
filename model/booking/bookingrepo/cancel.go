@@ -1,4 +1,3 @@
-// booking/bookingrepo/cancel.go
 package bookingrepo
 
 import (
@@ -7,6 +6,7 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingmodel"
+	"salon_be/model/payment/paymentconst"
 	"time"
 )
 
@@ -15,16 +15,25 @@ type CancelBookingStore interface {
 	Update(ctx context.Context, id uint32, data *models.Booking) error
 }
 
-type cancelBookingRepo struct {
-	store CancelBookingStore
+type CancelBookingPaymentStore interface {
+	FindOne(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*models.Payment, error)
+	Update(ctx context.Context, id uint32, data *models.Payment) error
 }
 
-func NewCancelBookingRepo(store CancelBookingStore) *cancelBookingRepo {
-	return &cancelBookingRepo{store: store}
+type cancelBookingRepo struct {
+	store        CancelBookingStore
+	paymentStore CancelBookingPaymentStore
+}
+
+func NewCancelBookingRepo(store CancelBookingStore, paymentStore CancelBookingPaymentStore) *cancelBookingRepo {
+	return &cancelBookingRepo{
+		store:        store,
+		paymentStore: paymentStore,
+	}
 }
 
 func (repo *cancelBookingRepo) CancelBooking(ctx context.Context, bookingId uint32, data *bookingmodel.CancelBooking) error {
-	booking, err := repo.store.FindOne(ctx, map[string]interface{}{"id": bookingId})
+	booking, err := repo.store.FindOne(ctx, map[string]interface{}{"id": bookingId}, "Payment")
 	if err != nil {
 		return common.ErrEntityNotFound(models.BookingEntityName, err)
 	}
@@ -51,6 +60,16 @@ func (repo *cancelBookingRepo) CancelBooking(ctx context.Context, bookingId uint
 
 	if err := repo.store.Update(ctx, bookingId, booking); err != nil {
 		return common.ErrCannotUpdateEntity(models.BookingEntityName, err)
+	}
+
+	if booking.PaymentID != nil {
+		payment := &models.Payment{
+			TransactionStatus: paymentconst.TransactionStatusCancelled,
+		}
+
+		if err := repo.paymentStore.Update(ctx, *booking.PaymentID, payment); err != nil {
+			return common.ErrCannotUpdateEntity(models.PaymentEntityName, err)
+		}
 	}
 
 	return nil
