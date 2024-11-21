@@ -89,6 +89,9 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.OTP{},
 		&models.Booking{},
 		&models.Coupon{},
+
+		&models.Notification{},
+		&models.NotificationDetail{},
 	}
 
 	for _, table := range tables {

@@ -8,23 +8,25 @@ import (
 )
 
 const (
-	DbTypeVideo            = 1
-	DbTypeServiceVersion   = 2
-	DbTypeTag              = 3
-	DbTypeUser             = 4
-	DBTypeCategory         = 5
-	DBTypeService          = 6
-	DBTypeVideoProcessInfo = 8
-	DBTypeEnrollment       = 9
-	DBTypePayment          = 10
-	DBTypeUserProfile      = 11
-	DBTypeComment          = 12
-	DBTypeRate             = 13
-	DBTypeNote             = 14
-	DBTypePermission       = 15
-	DBTypeProgress         = 16
-	DBTypeBooking          = 17
-	DBTypeCoupon           = 18
+	DbTypeVideo              = 1
+	DbTypeServiceVersion     = 2
+	DbTypeTag                = 3
+	DbTypeUser               = 4
+	DBTypeCategory           = 5
+	DBTypeService            = 6
+	DBTypeVideoProcessInfo   = 8
+	DBTypeEnrollment         = 9
+	DBTypePayment            = 10
+	DBTypeUserProfile        = 11
+	DBTypeComment            = 12
+	DBTypeRate               = 13
+	DBTypeNote               = 14
+	DBTypePermission         = 15
+	DBTypeProgress           = 16
+	DBTypeBooking            = 17
+	DBTypeCoupon             = 18
+	DBTypeNotification       = 19
+	DBTypeNotificationDetail = 20
 )
 
 const (
