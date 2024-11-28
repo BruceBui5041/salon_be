@@ -17,6 +17,7 @@ type NotificationDetail struct {
 	Error           string    `json:"error,omitempty" gorm:"column:error;type:text"`
 	ReadAt          time.Time `json:"read_at,omitempty" gorm:"column:read_at"`
 	User            *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	MessageID       string    `json:"message_id,omitempty" gorm:"column:message_id"`
 }
 
 func (NotificationDetail) TableName() string {
