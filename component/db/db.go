@@ -90,6 +90,7 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.Booking{},
 		&models.Coupon{},
 
+		&models.UserDevice{},
 		&models.Notification{},
 		&models.NotificationDetail{},
 	}

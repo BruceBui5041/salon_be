@@ -34,6 +34,7 @@ type User struct {
 	UserProfile     *UserProfile  `json:"user_profile,omitempty" gorm:"foreignKey:UserID"`
 	Comments        []*Comment    `json:"comments,omitempty" gorm:"foreignKey:UserID"`
 	OTPs            []*OTP        `json:"otp,omitempty" gorm:"foreignKey:UserID"`
+	UserDevice      *UserDevice   `json:"user_device,omitempty" gorm:"foreignKey:UserID"`
 }
 
 func (User) TableName() string {

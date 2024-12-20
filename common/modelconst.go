@@ -27,6 +27,7 @@ const (
 	DBTypeCoupon             = 18
 	DBTypeNotification       = 19
 	DBTypeNotificationDetail = 20
+	DBTypeUserDevice         = 21
 )
 
 const (

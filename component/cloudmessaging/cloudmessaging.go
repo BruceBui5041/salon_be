@@ -89,8 +89,8 @@ func (f *fcmClient) SendNotification(ctx context.Context, notification *models.N
 
 	// Send to each recipient in notification details
 	for _, detail := range notification.Details {
-		if detail.User.DeviceInfo.FCMToken != "" {
-			message.Token = detail.User.DeviceInfo.FCMToken
+		if detail.User.UserDevice.FCMToken != "" {
+			message.Token = detail.User.UserDevice.FCMToken
 
 			// Send message
 			result, err := f.client.Send(ctx, message)

@@ -20,6 +20,7 @@ import (
 	"salon_be/model/role/roletransport"
 	"salon_be/model/service/servicetransport"
 	"salon_be/model/user/usertransport"
+	"salon_be/model/userdevice/userdevicetransport"
 	"salon_be/model/userprofile/userprofiletransport"
 	"salon_be/model/video/videotransport"
 
@@ -46,6 +47,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupAuthRoutes(r, appCtx)
 	setupUtilityRoutes(r, appCtx)
 	setupBookingRoutes(r, appCtx)
+	setupUserDeviceRoutes(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -163,6 +165,16 @@ func setupCategoryRoutes(r *gin.Engine, appCtx component.AppContext) {
 		categoryGroup.GET("", categorytransport.ListCategories(appCtx))
 		categoryGroup.PATCH("/:id", middleware.RequiredAuth(appCtx), categorytransport.UpdateCategoryHandler(appCtx))
 		categoryGroup.POST("", middleware.RequiredAuth(appCtx), categorytransport.CreateCategoryHandler(appCtx))
+	}
+}
+
+func setupUserDeviceRoutes(r *gin.Engine, appCtx component.AppContext) {
+	userdeviceGroup := r.Group("/userdevice")
+	{
+		userdeviceGroup.POST("",
+			middleware.RequiredAuth(appCtx),
+			userdevicetransport.CreateUserDevice(appCtx),
+		)
 	}
 }
 
