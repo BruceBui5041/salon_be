@@ -228,7 +228,7 @@ func (repo *updateServiceRepo) UpdateService(
 			existingServiceVersion.Status == common.StatusActive &&
 			existingServiceVersion.PublishedDate != nil {
 			_, hasDraft := lo.Find(existingService.Versions, func(version models.ServiceVersion) bool {
-				return version.PublishedDate != nil
+				return version.PublishedDate == nil
 			})
 
 			if hasDraft {

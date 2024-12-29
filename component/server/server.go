@@ -19,7 +19,7 @@ func StartHTTPServer(appCtx component.AppContext) {
 	// Configure CORS
 	config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
-	config.AllowOrigins = []string{"http://localhost:8200"}
+	config.AllowOrigins = []string{"*"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 	config.AllowCredentials = true
 	config.ExposeHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
