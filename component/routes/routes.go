@@ -175,6 +175,10 @@ func setupUserDeviceRoutes(r *gin.Engine, appCtx component.AppContext) {
 			middleware.RequiredAuth(appCtx),
 			userdevicetransport.CreateUserDevice(appCtx),
 		)
+		userdeviceGroup.PATCH("",
+			middleware.RequiredAuth(appCtx),
+			userdevicetransport.CreateUserDevice(appCtx),
+		)
 	}
 }
 
