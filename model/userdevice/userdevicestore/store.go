@@ -53,18 +53,18 @@ func (s *sqlStore) FindOne(
 	conditions map[string]interface{},
 	moreInfo ...string,
 ) (*models.UserDevice, error) {
-	var userDevice models.UserDevice
+	var userDevice *models.UserDevice
 	db := s.db
 	for i := range moreInfo {
 		db = db.Preload(moreInfo[i])
 	}
-	if err := db.Where(conditions).Find(&userDevice).Error; err != nil {
+	if err := db.Where(conditions).First(&userDevice).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, common.RecordNotFound
 		}
 		return nil, common.ErrDB(err)
 	}
-	return &userDevice, nil
+	return userDevice, nil
 }
 
 type sqlStore struct {

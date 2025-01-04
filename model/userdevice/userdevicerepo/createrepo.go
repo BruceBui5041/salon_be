@@ -5,6 +5,8 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/userdevice/userdevicemodel"
+
+	"gorm.io/gorm"
 )
 
 type CreateUserDeviceStore interface {
@@ -27,10 +29,14 @@ func NewCreateUserDeviceRepo(store CreateUserDeviceStore) *createUserDeviceRepo 
 
 func (repo *createUserDeviceRepo) CreateUserDevice(ctx context.Context, input *userdevicemodel.CreateUserDevice) (*models.UserDevice, error) {
 	// Check if device already exists for this user
-	existing, _ := repo.store.FindOne(ctx, map[string]interface{}{
+	existing, err := repo.store.FindOne(ctx, map[string]interface{}{
 		"user_id":  input.UserID,
 		"platform": input.Platform,
 	})
+
+	if err != nil && err.Error() != gorm.ErrRecordNotFound.Error() {
+		return nil, common.ErrDB(err)
+	}
 
 	if existing != nil {
 		if existing.FCMToken != input.FCMToken {
@@ -52,11 +58,6 @@ func (repo *createUserDeviceRepo) CreateUserDevice(ctx context.Context, input *u
 		FCMToken: input.FCMToken,
 		Platform: input.Platform,
 		UserID:   input.UserID,
-	}
-
-	_, err := repo.store.Create(ctx, userDevice)
-	if err != nil {
-		return nil, common.ErrDB(err)
 	}
 
 	newUserDevice, err := repo.store.Create(ctx, userDevice)
