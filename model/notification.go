@@ -49,12 +49,12 @@ func (j *Metadata) Scan(value interface{}) error {
 // Notification model
 type Notification struct {
 	common.SQLModel `json:",inline"`
-	Title           string               `json:"title" gorm:"column:title;type:varchar(255)"`
-	Content         string               `json:"content" gorm:"column:content;type:text"`
-	Type            string               `json:"type" gorm:"column:type;type:varchar(50);index"`
-	Scheduled       *time.Time           `json:"scheduled" gorm:"column:scheduled;type:datetime"`
-	Metadata        Metadata             `json:"metadata" gorm:"column:metadata;type:json"`
-	Details         []NotificationDetail `json:"details" gorm:"foreignKey:NotificationID"`
+	Title           string                `json:"title" gorm:"column:title;type:varchar(255)"`
+	Content         string                `json:"content" gorm:"column:content;type:text"`
+	Type            string                `json:"type" gorm:"column:type;type:varchar(50);index"`
+	Scheduled       *time.Time            `json:"scheduled" gorm:"column:scheduled;type:datetime"`
+	Metadata        Metadata              `json:"metadata" gorm:"column:metadata;type:json"`
+	Details         []*NotificationDetail `json:"details" gorm:"foreignKey:NotificationID"`
 }
 
 func (Notification) TableName() string {
