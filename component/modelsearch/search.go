@@ -372,7 +372,7 @@ func buildCondition(ctx context.Context, db *gorm.DB, m map[string]interface{}, 
 	column := getColumn(db, source, model)
 
 	// Special handling for "id" source
-	if strings.HasSuffix(strings.ToLower(source), "id") {
+	if strings.HasSuffix(strings.ToLower(source), "id") && target != nil {
 		return buildIDCondition(ctx, db, source, model, column, operator, target)
 	}
 
