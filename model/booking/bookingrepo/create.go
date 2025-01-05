@@ -13,7 +13,7 @@ import (
 )
 
 type BookingStore interface {
-	Create(ctx context.Context, data *models.Booking) error
+	Create(ctx context.Context, data *models.Booking) (uint32, error)
 	Find(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) ([]models.Booking, error)
 }
 
@@ -87,18 +87,18 @@ func (repo *createBookingRepo) createPayment(
 	return payment, nil
 }
 
-func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error {
+func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) (uint32, error) {
 	if !data.IsUserRole {
-		return common.ErrNoPermission(errors.New("only users can create bookings"))
+		return 0, common.ErrNoPermission(errors.New("only users can create bookings"))
 	}
 
 	if err := repo.checkUserPendingBookings(ctx, data.UserID); err != nil {
-		return err
+		return 0, err
 	}
 
 	serviceID, err := data.GetVersionLocalId(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	service, err := repo.serviceStore.FindOne(
@@ -108,15 +108,15 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		"Creator",
 	)
 	if err != nil {
-		return common.ErrEntityNotFound(models.ServiceEntityName, err)
+		return 0, common.ErrEntityNotFound(models.ServiceEntityName, err)
 	}
 
 	if service.ServiceVersion == nil {
-		return common.ErrEntityNotFound(models.ServiceVersionEntityName, errors.New("service version not found"))
+		return 0, common.ErrEntityNotFound(models.ServiceVersionEntityName, errors.New("service version not found"))
 	}
 
 	if service.Creator == nil {
-		return common.ErrEntityNotFound(models.UserEntityName, errors.New("service creator not found"))
+		return 0, common.ErrEntityNotFound(models.UserEntityName, errors.New("service creator not found"))
 	}
 
 	// Create payment record
@@ -127,7 +127,7 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 
 	payment, err := repo.createPayment(ctx, data.UserID, finalPrice, data.PaymentMethod)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	booking := &models.Booking{
@@ -144,9 +144,10 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 
 	booking.DiscountAmount = decimal.NewFromInt(0)
 
-	if err := repo.bookingStore.Create(ctx, booking); err != nil {
-		return common.ErrCannotCreateEntity(models.BookingEntityName, err)
+	id, err := repo.bookingStore.Create(ctx, booking)
+	if err != nil {
+		return 0, common.ErrCannotCreateEntity(models.BookingEntityName, err)
 	}
 
-	return nil
+	return id, nil
 }

@@ -17,6 +17,7 @@ func StartSubscribers(appCtx component.AppContext) {
 		appconst.TopicEnrollmentChange: EnrollmentChangeHandler,
 		appconst.TopicUserUpdated:      UserUpdatedHandler,
 		appconst.TopicReceivedWSMsg:    ReceivedWSMsgHandler,
+		appconst.TopicBookingEvent:     BookingEventHandler,
 		// Add more topics and handlers as needed
 	}
 
@@ -64,6 +65,8 @@ func processMessages(
 			topicHandlers[appconst.TopicUserUpdated](appCtx, msg)
 		case msg := <-messageChannels[appconst.TopicReceivedWSMsg]:
 			topicHandlers[appconst.TopicReceivedWSMsg](appCtx, msg)
+		case msg := <-messageChannels[appconst.TopicBookingEvent]:
+			topicHandlers[appconst.TopicBookingEvent](appCtx, msg)
 			// Add more cases for additional topics
 		}
 	}

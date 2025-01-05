@@ -15,6 +15,7 @@ const (
 	TopicEnrollmentChange           = "enrollment_change"
 	TopicUserUpdated                = "user_updated"
 	TopicReceivedWSMsg              = "revevied_ws_msg"
+	TopicBookingEvent               = "booking_event"
 )
 
 // sqs message group id

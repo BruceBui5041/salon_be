@@ -13,7 +13,7 @@ import (
 )
 
 type BookingRepo interface {
-	CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error
+	CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) (uint32, error)
 }
 
 type createBookingBiz struct {
@@ -24,31 +24,32 @@ func NewCreateBookingBiz(repo BookingRepo) *createBookingBiz {
 	return &createBookingBiz{repo: repo}
 }
 
-func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) error {
+func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) (uint32, error) {
 	if data.ServiceID == "" {
-		return common.ErrInvalidRequest(errors.New("service ID is required"))
+		return 0, common.ErrInvalidRequest(errors.New("service ID is required"))
 	}
 
 	if data.BookingDate.IsZero() {
-		return common.ErrInvalidRequest(errors.New("booking date is required"))
+		return 0, common.ErrInvalidRequest(errors.New("booking date is required"))
 	}
 
 	if data.PaymentMethod == "" {
-		return common.ErrInvalidRequest(errors.New("payment method is required"))
+		return 0, common.ErrInvalidRequest(errors.New("payment method is required"))
 	}
 
 	if lo.IndexOf(paymentconst.PaymentMethods, data.PaymentMethod) == -1 {
-		return common.ErrInvalidRequest(errors.New("invalid payment method"))
+		return 0, common.ErrInvalidRequest(errors.New("invalid payment method"))
 	}
 
 	// Check if booking date is in the future
 	if data.BookingDate.Before(time.Now().UTC()) {
-		return common.ErrInvalidRequest(errors.New("booking date must be in the future"))
+		return 0, common.ErrInvalidRequest(errors.New("booking date must be in the future"))
 	}
 
-	if err := biz.repo.CreateBooking(ctx, data); err != nil {
-		return common.ErrCannotCreateEntity(models.BookingEntityName, err)
+	id, err := biz.repo.CreateBooking(ctx, data)
+	if err != nil {
+		return 0, common.ErrCannotCreateEntity(models.BookingEntityName, err)
 	}
 
-	return nil
+	return id, nil
 }

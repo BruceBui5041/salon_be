@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingbiz"
 	"salon_be/model/booking/bookingmodel"
@@ -12,8 +13,11 @@ import (
 	"salon_be/model/booking/bookingstore"
 	"salon_be/model/payment/paymentstore"
 	"salon_be/model/service/servicestore"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +43,7 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 		data.IsUserRole = user.IsUser()
 
 		db := appCtx.GetMainDBConnection()
-
+		var newBookingId uint32
 		if err := db.Transaction(func(tx *gorm.DB) error {
 			bookingStore := bookingstore.NewSQLStore(tx)
 			serviceStore := servicestore.NewSQLStore(tx)
@@ -53,13 +57,27 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 
 			business := bookingbiz.NewCreateBookingBiz(repo)
 
-			if err := business.CreateBooking(c.Request.Context(), &data); err != nil {
+			id, err := business.CreateBooking(c.Request.Context(), &data)
+			if err != nil {
 				return err
 			}
+
+			newBookingId = id
 
 			return nil
 		}); err != nil {
 			panic(err)
+		}
+
+		if err := watermill.PublishBookingEvent(
+			c.Request.Context(),
+			appCtx.GetLocalPubSub().GetUnblockPubSub(),
+			&messagemodel.BookingEventMsg{
+				BookingID: newBookingId,
+				Event:     messagemodel.BookingCreatedEvent,
+			},
+		); err != nil {
+			logger.AppLogger.Error(c.Request.Context(), "error publishing booking event", zap.Error(err))
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
