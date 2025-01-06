@@ -66,6 +66,7 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 
 			return nil
 		}); err != nil {
+			logger.AppLogger.Error(c.Request.Context(), "error creating booking", zap.Error(err))
 			panic(err)
 		}
 
