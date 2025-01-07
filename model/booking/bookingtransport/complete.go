@@ -5,20 +5,24 @@ import (
 	"net/http"
 	"salon_be/common"
 	"salon_be/component"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingbiz"
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
 	"salon_be/model/payment/paymentstore"
+	"salon_be/watermill"
+	"salon_be/watermill/messagemodel"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 func CompleteBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uid, err := common.FromBase58(c.Param("id"))
+		bookingUid, err := common.FromBase58(c.Param("id"))
 		if err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
@@ -47,13 +51,35 @@ func CompleteBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 			repo := bookingrepo.NewCompleteBookingRepo(bookingStore, paymentStore)
 			business := bookingbiz.NewCompleteBookingBiz(repo)
 
-			if err := business.CompleteBooking(c.Request.Context(), uid.GetLocalID(), &data); err != nil {
+			if err := business.CompleteBooking(
+				c.Request.Context(),
+				bookingUid.GetLocalID(),
+				&data,
+			); err != nil {
 				return err
 			}
 
 			return nil
 		}); err != nil {
 			panic(err)
+		}
+
+		bookingEvenMsg := &messagemodel.BookingEventMsg{
+			BookingID: bookingUid.GetLocalID(),
+			Event:     messagemodel.BookingCompletedEvent,
+		}
+
+		if err := watermill.PublishBookingEvent(
+			c.Request.Context(),
+			appCtx.GetLocalPubSub().GetUnblockPubSub(),
+			bookingEvenMsg,
+		); err != nil {
+			logger.AppLogger.Error(
+				c.Request.Context(),
+				"error publishing booking event",
+				zap.Error(err),
+				zap.Any("bookingEvenMsg", bookingEvenMsg),
+			)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))

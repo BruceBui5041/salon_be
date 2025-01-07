@@ -47,7 +47,7 @@ func (repo *completeBookingRepo) CompleteBooking(ctx context.Context, bookingId 
 	}
 
 	if booking.BookingStatus != models.BookingStatusConfirmed {
-		return common.ErrInvalidRequest(errors.New("only confirmed bookings can be completed"))
+		return common.ErrInvalidRequest(errors.New("only accepted bookings can be completed"))
 	}
 
 	now := time.Now().UTC()
