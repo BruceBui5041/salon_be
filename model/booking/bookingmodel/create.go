@@ -11,7 +11,7 @@ import (
 )
 
 type CreateBooking struct {
-	ServiceID     string    `json:"service_id"`
+	ServiceIDs    []string  `json:"service_ids"` // Changed from ServiceID to ServiceIDs
 	CouponID      *string   `json:"coupon_id"`
 	BookingDate   time.Time `json:"booking_date"`
 	Notes         string    `json:"notes"`
@@ -20,24 +20,16 @@ type CreateBooking struct {
 	IsUserRole    bool      `json:"-"`
 }
 
-func (cb *CreateBooking) GetVersionLocalId(ctx context.Context) (uint32, error) {
-	serviceUID, err := common.FromBase58(cb.ServiceID)
-	if err != nil {
-		logger.AppLogger.Error(ctx, "invalid service ID", zap.Error(err))
-		return 0, common.ErrInvalidRequest(errors.New("invalid service ID"))
+// Add new method to get multiple version local IDs
+func (cb *CreateBooking) GetVersionLocalIds(ctx context.Context) ([]uint32, error) {
+	var localIds []uint32
+	for _, serviceID := range cb.ServiceIDs {
+		serviceUID, err := common.FromBase58(serviceID)
+		if err != nil {
+			logger.AppLogger.Error(ctx, "invalid service ID", zap.Error(err))
+			return nil, common.ErrInvalidRequest(errors.New("invalid service ID"))
+		}
+		localIds = append(localIds, serviceUID.GetLocalID())
 	}
-	return serviceUID.GetLocalID(), nil
-}
-
-func (cb *CreateBooking) GetCouponLocalId(ctx context.Context) (uint32, error) {
-	if cb.CouponID == nil {
-		return 0, nil
-	}
-
-	couponUID, err := common.FromBase58(*cb.CouponID)
-	if err != nil {
-		logger.AppLogger.Error(ctx, "invalid coupon ID", zap.Error(err))
-		return 0, common.ErrInvalidRequest(errors.New("invalid coupon ID"))
-	}
-	return couponUID.GetLocalID(), nil
+	return localIds, nil
 }

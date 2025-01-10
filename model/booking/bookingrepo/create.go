@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"salon_be/common"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/payment/paymentconst"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"go.uber.org/zap"
 )
 
 type BookingStore interface {
@@ -19,6 +21,11 @@ type BookingStore interface {
 
 type ServiceStore interface {
 	FindOne(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*models.Service, error)
+	Find(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreInfo ...string,
+	) ([]*models.Service, error)
 }
 
 type PaymentStore interface {
@@ -93,17 +100,20 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 	}
 
 	if err := repo.checkUserPendingBookings(ctx, data.UserID); err != nil {
+		logger.AppLogger.Error(ctx, "cannot create booking", zap.Error(err), zap.Any("data", data))
 		return 0, err
 	}
 
-	serviceID, err := data.GetVersionLocalId(ctx)
+	serviceIds, err := data.GetVersionLocalIds(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	service, err := repo.serviceStore.FindOne(
+	services, err := repo.serviceStore.Find(
 		ctx,
-		map[string]interface{}{"id": serviceID},
+		map[string]interface{}{
+			"id": serviceIds,
+		},
 		"ServiceVersion",
 		"Creator",
 	)
@@ -111,35 +121,67 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		return 0, common.ErrEntityNotFound(models.ServiceEntityName, err)
 	}
 
-	if service.ServiceVersion == nil {
-		return 0, common.ErrEntityNotFound(models.ServiceVersionEntityName, errors.New("service version not found"))
+	if len(services) != len(serviceIds) {
+		logger.AppLogger.Error(
+			ctx,
+			"some services not found",
+			zap.Error(err),
+			zap.Any("service_ids", serviceIds),
+			zap.Any("found services", services),
+		)
+		return 0, common.ErrEntityNotFound(models.ServiceEntityName, errors.New("some services not found"))
 	}
 
-	if service.Creator == nil {
-		return 0, common.ErrEntityNotFound(models.UserEntityName, errors.New("service creator not found"))
+	var serviceVersions []*models.ServiceVersion
+	var totalDuration uint32
+	var totalPrice decimal.Decimal
+	var serviceManID uint32
+
+	// Process all services
+	for _, service := range services {
+		if service.ServiceVersion == nil {
+			logger.AppLogger.Error(ctx, "service version not found", zap.Any("service", service))
+			return 0, common.ErrEntityNotFound(models.ServiceVersionEntityName, errors.New("service version not found"))
+		}
+
+		if service.Creator == nil {
+			logger.AppLogger.Error(ctx, "service creator not found", zap.Any("service", service))
+			return 0, common.ErrEntityNotFound(models.UserEntityName, errors.New("service creator not found"))
+		}
+
+		// Use the first service's creator as the service man
+		if serviceManID == 0 {
+			serviceManID = service.Creator.Id
+		}
+
+		serviceVersions = append(serviceVersions, service.ServiceVersion)
+		totalDuration += service.ServiceVersion.Duration
+
+		// Add to total price
+		if service.ServiceVersion.DiscountedPrice != nil {
+			totalPrice = totalPrice.Add(service.ServiceVersion.DiscountedPrice.Decimal)
+		} else {
+			totalPrice = totalPrice.Add(service.ServiceVersion.Price)
+		}
 	}
 
 	// Create payment record
-	finalPrice := service.ServiceVersion.Price
-	if service.ServiceVersion.DiscountedPrice != nil {
-		finalPrice = service.ServiceVersion.DiscountedPrice.Decimal
-	}
-
-	payment, err := repo.createPayment(ctx, data.UserID, finalPrice, data.PaymentMethod)
+	payment, err := repo.createPayment(ctx, data.UserID, totalPrice, data.PaymentMethod)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "cannot create payment", zap.Error(err), zap.Any("data", data))
 		return 0, err
 	}
 
 	booking := &models.Booking{
-		UserID:           data.UserID,
-		ServiceVersionID: service.ServiceVersion.Id,
-		ServiceManID:     service.Creator.Id,
-		BookingDate:      data.BookingDate,
-		Price:            service.ServiceVersion.Price,
-		Notes:            data.Notes,
-		ServiceVersion:   service.ServiceVersion,
-		PaymentID:        &payment.Id,
-		Payment:          payment,
+		UserID:          data.UserID,
+		ServiceVersions: serviceVersions,
+		ServiceManID:    serviceManID,
+		BookingDate:     data.BookingDate,
+		Duration:        totalDuration,
+		Price:           totalPrice,
+		Notes:           data.Notes,
+		PaymentID:       &payment.Id,
+		Payment:         payment,
 	}
 
 	booking.DiscountAmount = decimal.NewFromInt(0)

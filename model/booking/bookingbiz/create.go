@@ -25,8 +25,8 @@ func NewCreateBookingBiz(repo BookingRepo) *createBookingBiz {
 }
 
 func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmodel.CreateBooking) (uint32, error) {
-	if data.ServiceID == "" {
-		return 0, common.ErrInvalidRequest(errors.New("service ID is required"))
+	if len(data.ServiceIDs) == 0 {
+		return 0, common.ErrInvalidRequest(errors.New("at least one service ID is required"))
 	}
 
 	if data.BookingDate.IsZero() {

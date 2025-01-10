@@ -56,13 +56,13 @@ func handleBookingNotification(
 ) error {
 	db := appCtx.GetMainDBConnection()
 
-	// Get booking details
+	// Get booking details with preloaded relationships
 	bookingStore := bookingstore.NewSQLStore(db)
 	booking, err := bookingStore.FindOne(
 		ctx,
 		map[string]interface{}{"id": bookingEvent.BookingID},
-		"ServiceVersion",
-		"ServiceVersion.Service",
+		"ServiceVersions",
+		"ServiceVersions.Service",
 		"User",
 		"ServiceMan",
 	)
@@ -77,47 +77,29 @@ func handleBookingNotification(
 	repo := notificationrepo.NewCreateNotificationRepo(notificationStore, notificationDetailStore)
 	biz := notificationbiz.NewCreateNotificationBiz(repo, repo)
 
-	// Create notification based on event type
-	var title, content string
 	var recipientID uint32
+
+	// Collect service slugs and service version IDs
+	var serviceVersionIDs []uint32
+	for _, sv := range booking.ServiceVersions {
+		serviceVersionIDs = append(serviceVersionIDs, sv.Id)
+	}
+
+	var serviceIDs []uint32
+	for _, sv := range booking.ServiceVersions {
+		serviceIDs = append(serviceIDs, sv.ServiceID)
+	}
 	metadata := models.Metadata{
-		"booking_id": bookingEvent.BookingID,
-		"event":      bookingEvent.Event,
+		"booking_id":          bookingEvent.BookingID,
+		"event":               bookingEvent.Event,
+		"service_version_ids": serviceVersionIDs,
+		"service_ids":         serviceIDs,
 	}
 
 	recipientID = booking.UserID
 	scheduled := time.Now()
-	switch bookingEvent.Event {
-	case messagemodel.BookingCreatedEvent:
-		title = "New Booking Request"
-		content = fmt.Sprintf("New booking request for service: %s", booking.ServiceVersion.Service.Slug)
-		metadata["service_id"] = booking.ServiceVersion.ServiceID
-
-	case messagemodel.BookingAcceptedEvent:
-		title = "Booking Accepted"
-		content = fmt.Sprintf("Your booking for %s has been accepted", booking.ServiceVersion.Service.Slug)
-
-	case messagemodel.BookingCompletedEvent:
-		title = "Booking Completed"
-		content = fmt.Sprintf("Your booking for %s has been completed", booking.ServiceVersion.Service.Slug)
-
-	case messagemodel.BookingCancelledEvent:
-		if *booking.CancelledByID == booking.UserID {
-			title = "Booking Cancelled by Customer"
-			content = fmt.Sprintf("Booking for %s has been cancelled by the customer", booking.ServiceVersion.Service.Slug)
-		} else {
-			title = "Booking Cancelled by Service Provider"
-			content = fmt.Sprintf("Your booking for %s has been cancelled by the service provider", booking.ServiceVersion.Service.Slug)
-		}
-
-	default:
-		logger.AppLogger.Error(ctx, "Unknown booking event", zap.Any("bookingEvent", bookingEvent))
-		return fmt.Errorf("unknown booking event: %s", bookingEvent.Event)
-	}
 
 	notification := &models.Notification{
-		Title:     title,
-		Content:   content,
 		Type:      NotificationTypeBooking,
 		BookingID: bookingEvent.BookingID,
 		Metadata:  metadata,

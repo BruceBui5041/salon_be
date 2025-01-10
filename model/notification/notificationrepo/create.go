@@ -38,8 +38,6 @@ func (repo *createNotificationRepo) CreateNotification(
 	input *models.Notification,
 ) (*models.Notification, error) {
 	notification := &models.Notification{
-		Title:     input.Title,
-		Content:   input.Content,
 		Type:      input.Type,
 		Scheduled: input.Scheduled,
 		Metadata:  input.Metadata,

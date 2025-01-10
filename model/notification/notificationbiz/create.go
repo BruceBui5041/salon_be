@@ -36,24 +36,6 @@ func (biz *createNotificationBiz) CreateNotification(
 	ctx context.Context,
 	input *models.Notification,
 ) error {
-	if input.Title == "" {
-		return notificationerror.ErrNotificationTitleEmpty(
-			errors.New("title is required"),
-		)
-	}
-
-	if len(input.Title) > 255 {
-		return notificationerror.ErrNotificationTitleTooLong(
-			errors.New("title must not exceed 255 characters"),
-		)
-	}
-
-	if input.Content == "" {
-		return notificationerror.ErrNotificationContentEmpty(
-			errors.New("content is required"),
-		)
-	}
-
 	if input.Type == "" {
 		return notificationerror.ErrNotificationTypeEmpty(
 			errors.New("type is required"),

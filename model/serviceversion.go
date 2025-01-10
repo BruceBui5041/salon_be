@@ -23,6 +23,7 @@ type ReviewInfo struct {
 
 type ServiceVersion struct {
 	common.SQLModel `json:",inline"`
+	Bookings        []*Booking           `json:"bookings,omitempty" gorm:"many2many:m2mbooking_service_version;foreignKey:Id;joinForeignKey:ServiceVersionID;References:Id;joinReferences:BookingID"`
 	ServiceID       uint32               `json:"-" gorm:"column:service_id;not null;index"`
 	Service         *Service             `json:"service,omitempty" gorm:"foreignKey:ServiceID;references:Id"`
 	IntroVideoID    *uint32              `json:"-" gorm:"column:intro_video_id;index"`
