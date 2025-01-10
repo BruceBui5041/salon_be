@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"time"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
+	"go.uber.org/zap"
 	"google.golang.org/api/option"
 )
 
@@ -59,11 +61,22 @@ func (f *fcmClient) SendNotification(ctx context.Context, notification *models.N
 		}
 	}
 
+	jsonMetadata, err := json.Marshal(notification.Metadata)
+	if err != nil {
+		logger.AppLogger.Error(
+			ctx,
+			"Error marshalling notification metadata",
+			zap.Error(err),
+			zap.Any("notification", notification),
+		)
+		return err
+	}
+
 	// Create FCM message
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
-			Title: notification.Title,
-			Body:  notification.Content,
+			// Title: notification.Title,
+			Body: string(jsonMetadata),
 		},
 		Data: metadata,
 		Android: &messaging.AndroidConfig{

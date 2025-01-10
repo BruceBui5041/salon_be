@@ -42,6 +42,7 @@ func (repo *createNotificationRepo) CreateNotification(
 		Scheduled: input.Scheduled,
 		Metadata:  input.Metadata,
 		BookingID: input.BookingID,
+		Details:   input.Details,
 	}
 
 	newNotification, err := repo.store.Create(ctx, notification)

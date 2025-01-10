@@ -77,8 +77,6 @@ func handleBookingNotification(
 	repo := notificationrepo.NewCreateNotificationRepo(notificationStore, notificationDetailStore)
 	biz := notificationbiz.NewCreateNotificationBiz(repo, repo)
 
-	var recipientID uint32
-
 	// Collect service slugs and service version IDs
 	var serviceVersionIDs []uint32
 	for _, sv := range booking.ServiceVersions {
@@ -94,9 +92,10 @@ func handleBookingNotification(
 		"event":               bookingEvent.Event,
 		"service_version_ids": serviceVersionIDs,
 		"service_ids":         serviceIDs,
+		"user_id":             booking.UserID,
+		"service_man_id":      booking.ServiceMan.Id,
 	}
 
-	recipientID = booking.UserID
 	scheduled := time.Now()
 
 	notification := &models.Notification{
@@ -106,7 +105,11 @@ func handleBookingNotification(
 		Scheduled: &scheduled,
 		Details: []*models.NotificationDetail{
 			{
-				UserID: recipientID,
+				UserID: booking.ServiceMan.Id,
+				State:  models.NotificationStatePending,
+			},
+			{
+				UserID: booking.UserID,
 				State:  models.NotificationStatePending,
 			},
 		},
