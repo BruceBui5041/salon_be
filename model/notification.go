@@ -53,7 +53,7 @@ type Notification struct {
 	Scheduled       *time.Time            `json:"scheduled" gorm:"column:scheduled;type:datetime"`
 	Metadata        Metadata              `json:"metadata" gorm:"column:metadata;type:json"`
 	Details         []*NotificationDetail `json:"details" gorm:"foreignKey:NotificationID"`
-	BookingID       uint32                `json:"booking_id" gorm:"column:booking_id;index"`
+	BookingID       uint32                `json:"-" gorm:"column:booking_id;index"`
 	Booking         *Booking              `json:"booking,omitempty" gorm:"foreignKey:BookingID"`
 }
 

@@ -50,6 +50,7 @@ type Booking struct {
 	CancellationReason string            `json:"cancellation_reason,omitempty" gorm:"column:cancellation_reason;type:text"`
 	CancelledAt        *time.Time        `json:"cancelled_at,omitempty" gorm:"column:cancelled_at;type:datetime"`
 	CompletedAt        *time.Time        `json:"completed_at,omitempty" gorm:"column:completed_at;type:datetime"`
+	Notifications      []*Notification   `json:"notifications,omitempty" gorm:"foreignKey:BookingID"`
 }
 
 func (Booking) TableName() string {

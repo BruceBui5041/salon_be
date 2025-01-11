@@ -78,22 +78,22 @@ func handleBookingNotification(
 	biz := notificationbiz.NewCreateNotificationBiz(repo, repo)
 
 	// Collect service slugs and service version IDs
-	var serviceVersionIDs []uint32
+	var serviceVersionIDs []string
 	for _, sv := range booking.ServiceVersions {
-		serviceVersionIDs = append(serviceVersionIDs, sv.Id)
+		serviceVersionIDs = append(serviceVersionIDs, sv.GetFakeId())
 	}
 
-	var serviceIDs []uint32
+	var serviceIDs []string
 	for _, sv := range booking.ServiceVersions {
-		serviceIDs = append(serviceIDs, sv.ServiceID)
+		serviceIDs = append(serviceIDs, sv.GetFakeId())
 	}
 	metadata := models.Metadata{
-		"booking_id":          bookingEvent.BookingID,
+		"booking_id":          booking.GetFakeId(),
 		"event":               bookingEvent.Event,
 		"service_version_ids": serviceVersionIDs,
 		"service_ids":         serviceIDs,
-		"user_id":             booking.UserID,
-		"service_man_id":      booking.ServiceMan.Id,
+		"user_id":             booking.User.GetFakeId(),
+		"service_man_id":      booking.ServiceMan.GetFakeId(),
 	}
 
 	scheduled := time.Now()
@@ -105,11 +105,11 @@ func handleBookingNotification(
 		Scheduled: &scheduled,
 		Details: []*models.NotificationDetail{
 			{
-				UserID: booking.ServiceMan.Id,
+				UserID: booking.ServiceMan.GetUserId(),
 				State:  models.NotificationStatePending,
 			},
 			{
-				UserID: booking.UserID,
+				UserID: booking.User.GetUserId(),
 				State:  models.NotificationStatePending,
 			},
 		},

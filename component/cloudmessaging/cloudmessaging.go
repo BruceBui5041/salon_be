@@ -100,6 +100,8 @@ func (f *fcmClient) SendNotification(ctx context.Context, notification *models.N
 		},
 	}
 
+	now := time.Now().UTC()
+
 	// Send to each recipient in notification details
 	for _, detail := range notification.Details {
 		if detail.User.UserDevice.FCMToken != "" {
@@ -113,7 +115,7 @@ func (f *fcmClient) SendNotification(ctx context.Context, notification *models.N
 			} else {
 				detail.Status = models.NotificationStateSent
 				detail.MessageID = result
-				detail.SentAt = time.Now().UTC()
+				detail.SentAt = &now
 			}
 		}
 	}
