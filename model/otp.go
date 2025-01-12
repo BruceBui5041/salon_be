@@ -2,11 +2,16 @@ package models
 
 import (
 	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
 	"time"
 
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
+
+func init() {
+	modelhelper.RegisterModel(OTP{})
+}
 
 const OTPEntityName = "OTP"
 
