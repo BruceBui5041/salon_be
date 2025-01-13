@@ -42,9 +42,34 @@ func (r *providerEarningsRepo) CalculateEarnings(
 	providerID uint32,
 	fromDate, toDate time.Time,
 ) (*usermodel.EarningsSummary, error) {
-	var summary usermodel.EarningsSummary
+	summary := usermodel.EarningsSummary{}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// Get bookings count by status
+		var statusCounts struct {
+			PendingBookings   int
+			CancelledBookings int
+			ConfirmedBookings int
+		}
+
+		err := tx.Model(&models.Booking{}).
+			Select(`
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as pending_bookings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as cancelled_bookings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as confirmed_bookings
+			`, models.BookingStatusPending, models.BookingStatusCancelled, models.BookingStatusConfirmed).
+			Where("service_man_id = ?", providerID).
+			Where("booking_date BETWEEN ? AND ?", fromDate, toDate).
+			Scan(&statusCounts).Error
+
+		if err != nil {
+			return common.ErrDB(err)
+		}
+
+		summary.PendingBookings = statusCounts.PendingBookings
+		summary.CancelledBookings = statusCounts.CancelledBookings
+		summary.ConfirmedBookings = statusCounts.ConfirmedBookings
+
 		// First get the provider's completed bookings
 		providerBookings := tx.Model(&models.Booking{}).
 			Select("payment_id").
@@ -71,7 +96,7 @@ func (r *providerEarningsRepo) CalculateEarnings(
 			TotalHours        float64
 		}
 
-		err := baseQuery.Select(`
+		err = baseQuery.Select(`
 			COALESCE(SUM(CASE 
 				WHEN discounted_price IS NOT NULL THEN discounted_price 
 				ELSE price 
@@ -88,24 +113,40 @@ func (r *providerEarningsRepo) CalculateEarnings(
 		summary.CompletedBookings = totalResult.CompletedBookings
 		summary.TotalHours = totalResult.TotalHours
 
-		// Get monthly breakdown
+		// Get monthly breakdown with status counts
 		var monthlyResults []struct {
 			Month             string
 			Earnings          decimal.Decimal
 			CompletedBookings int
+			PendingBookings   int
+			CancelledBookings int
+			ConfirmedBookings int
 			Hours             float64
 		}
 
-		err = baseQuery.Select(`
-			DATE_FORMAT(completed_at, '%Y-%m') as month,
-			COALESCE(SUM(CASE 
-				WHEN discounted_price IS NOT NULL THEN discounted_price 
-				ELSE price 
-			END), 0) as earnings,
-			COUNT(*) as completed_bookings,
-			COALESCE(SUM(duration), 0) / 60.0 as hours
-		`).
-			Group("DATE_FORMAT(completed_at, '%Y-%m')").
+		err = tx.Model(&models.Booking{}).
+			Select(`
+				DATE_FORMAT(booking_date, '%Y-%m') as month,
+				COALESCE(SUM(CASE 
+					WHEN booking_status = ? AND discounted_price IS NOT NULL THEN discounted_price 
+					WHEN booking_status = ? THEN price 
+					ELSE 0 
+				END), 0) as earnings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as completed_bookings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as pending_bookings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as cancelled_bookings,
+				COUNT(CASE WHEN booking_status = ? THEN 1 END) as confirmed_bookings,
+				COALESCE(SUM(CASE WHEN booking_status = ? THEN duration ELSE 0 END), 0) / 60.0 as hours
+			`,
+				models.BookingStatusCompleted, models.BookingStatusCompleted,
+				models.BookingStatusCompleted,
+				models.BookingStatusPending,
+				models.BookingStatusCancelled,
+				models.BookingStatusConfirmed,
+				models.BookingStatusCompleted).
+			Where("service_man_id = ?", providerID).
+			Where("booking_date BETWEEN ? AND ?", fromDate, toDate).
+			Group("DATE_FORMAT(booking_date, '%Y-%m')").
 			Order("month ASC").
 			Scan(&monthlyResults).Error
 
@@ -119,6 +160,9 @@ func (r *providerEarningsRepo) CalculateEarnings(
 				Month:             result.Month,
 				Earnings:          result.Earnings,
 				CompletedBookings: result.CompletedBookings,
+				PendingBookings:   result.PendingBookings,
+				CancelledBookings: result.CancelledBookings,
+				ConfirmedBookings: result.ConfirmedBookings,
 				Hours:             result.Hours,
 			}
 		}
