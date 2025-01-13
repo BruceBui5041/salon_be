@@ -110,10 +110,11 @@ func setupRoleRoutes(r *gin.Engine, appCtx component.AppContext) {
 }
 
 func setupUserRoutes(r *gin.Engine, appCtx component.AppContext) {
-	user := r.Group("/user")
+	user := r.Group("/user", middleware.RequiredAuth(appCtx))
 	{
-		user.GET("", middleware.RequiredAuth(appCtx), usertransport.GetUser(appCtx))
-		user.PATCH("/:id", middleware.RequiredAuth(appCtx), usertransport.UpdateUser(appCtx))
+		user.GET("", usertransport.GetUser(appCtx))
+		user.GET("/provider-earnings", usertransport.GetProviderEarnings(appCtx))
+		user.PATCH("/:id", usertransport.UpdateUser(appCtx))
 	}
 }
 
