@@ -38,7 +38,7 @@ type Coupon struct {
 	EndDate         time.Time       `json:"end_date" gorm:"column:end_date;type:datetime;not null"`
 	UsageLimit      *int            `json:"usage_limit" gorm:"column:usage_limit"` // nil means unlimited
 	UsageCount      int             `json:"usage_count" gorm:"column:usage_count;default:0"`
-	Bookings        []Booking       `json:"bookings,omitempty" gorm:"foreignKey:CouponID"`
+	Bookings        []*Booking      `json:"bookings,omitempty" gorm:"foreignKey:CouponID"`
 	CreatorID       uint32          `json:"-" gorm:"column:creator_id;not null;index"`
 	Creator         *User           `json:"creator,omitempty" gorm:"foreignKey:CreatorID"`
 }

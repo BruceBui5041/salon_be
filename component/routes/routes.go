@@ -14,6 +14,7 @@ import (
 	"salon_be/model/booking/bookingtransport"
 	"salon_be/model/category/categorytransport"
 	"salon_be/model/comment/commenttransport"
+	"salon_be/model/coupon/coupontransport"
 	"salon_be/model/otp/otptransport"
 	"salon_be/model/payment/paymenttransport"
 	"salon_be/model/permission/permissiontransport"
@@ -48,6 +49,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupUtilityRoutes(r, appCtx)
 	setupBookingRoutes(r, appCtx)
 	setupUserDeviceRoutes(r, appCtx)
+	setupCouponRoutes(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -180,6 +182,14 @@ func setupUserDeviceRoutes(r *gin.Engine, appCtx component.AppContext) {
 			middleware.RequiredAuth(appCtx),
 			userdevicetransport.CreateUserDevice(appCtx),
 		)
+	}
+}
+
+func setupCouponRoutes(r *gin.Engine, appCtx component.AppContext) {
+	couponGroup := r.Group("/coupon", middleware.RequiredAuth(appCtx))
+	{
+		couponGroup.POST("", coupontransport.CreateCouponHandler(appCtx))
+		// couponGroup.PATCH("/:id", usertransport.Register(appCtx))
 	}
 }
 
