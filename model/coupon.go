@@ -31,16 +31,18 @@ type Coupon struct {
 	Code            string          `json:"code" gorm:"column:code;uniqueIndex;not null;type:varchar(20)"`
 	Description     string          `json:"description" gorm:"column:description;type:text"`
 	DiscountType    DiscountType    `json:"discount_type" gorm:"column:discount_type;type:ENUM('percentage','fixed_price');not null"`
-	DiscountValue   decimal.Decimal `json:"discount_value" gorm:"column:discount_value;type:decimal(10,2);not null"` // Percentage or fixed amount
-	MinSpend        decimal.Decimal `json:"min_spend" gorm:"column:min_spend;type:decimal(10,2)"`                    // Minimum spend required
-	MaxDiscount     decimal.Decimal `json:"max_discount" gorm:"column:max_discount;type:decimal(10,2)"`              // Maximum discount amount for percentage type
+	DiscountValue   decimal.Decimal `json:"discount_value" gorm:"column:discount_value;type:decimal(10,2);not null"`
+	MinSpend        decimal.Decimal `json:"min_spend" gorm:"column:min_spend;type:decimal(10,2)"`
+	MaxDiscount     decimal.Decimal `json:"max_discount" gorm:"column:max_discount;type:decimal(10,2)"`
 	StartDate       time.Time       `json:"start_date" gorm:"column:start_date;type:datetime;not null"`
 	EndDate         time.Time       `json:"end_date" gorm:"column:end_date;type:datetime;not null"`
-	UsageLimit      *int            `json:"usage_limit" gorm:"column:usage_limit"` // nil means unlimited
+	UsageLimit      *int            `json:"usage_limit" gorm:"column:usage_limit"`
 	UsageCount      int             `json:"usage_count" gorm:"column:usage_count;default:0"`
 	Bookings        []*Booking      `json:"bookings,omitempty" gorm:"foreignKey:CouponID"`
 	CreatorID       uint32          `json:"-" gorm:"column:creator_id;not null;index"`
 	Creator         *User           `json:"creator,omitempty" gorm:"foreignKey:CreatorID"`
+	ImageID         *uint32         `json:"-" gorm:"column:image_id"`
+	Image           *Image          `json:"image,omitempty" gorm:"foreignKey:ImageID"`
 }
 
 func (Coupon) TableName() string {
