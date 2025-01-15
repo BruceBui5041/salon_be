@@ -189,7 +189,7 @@ func setupCouponRoutes(r *gin.Engine, appCtx component.AppContext) {
 	couponGroup := r.Group("/coupon", middleware.RequiredAuth(appCtx))
 	{
 		couponGroup.POST("", coupontransport.CreateCouponHandler(appCtx))
-		// couponGroup.PATCH("/:id", usertransport.Register(appCtx))
+		couponGroup.PATCH("/:id", coupontransport.UpdateCouponHandler(appCtx))
 	}
 }
 
