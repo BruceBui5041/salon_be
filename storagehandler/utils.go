@@ -77,6 +77,13 @@ func GenerateServiceImageS3Key(serviceId string, filename string) string {
 	)
 }
 
+func GenerateCouponImageS3Key(couponId string, filename string) string {
+	return fmt.Sprintf(
+		"coupon/image/%s",
+		utils.RenameFile(filename, fmt.Sprintf("%s_%s", couponId, filename)),
+	)
+}
+
 func AddPublicCloudFrontDomain(s3Key string) string {
 	return fmt.Sprintf("%s/%s", appconst.AWSCloudFrontPublicFile, s3Key)
 }

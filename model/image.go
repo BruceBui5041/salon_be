@@ -16,12 +16,14 @@ func init() {
 
 type Image struct {
 	common.SQLModel `json:",inline"`
+	Type            string            `json:"type" gorm:"column:type;type:varchar(50);index"`
 	UserID          uint32            `json:"-" gorm:"column:user_id;index"`
 	User            *User             `json:"user,omitempty" gorm:"foreignKey:UserID;references:Id;constraint:OnDelete:SET NULL;"`
 	ServiceID       uint32            `json:"-" gorm:"column:service_id;index"`
 	Service         *Service          `json:"service,omitempty" gorm:"foreignKey:ServiceID;references:Id;constraint:OnDelete:SET NULL;"`
 	URL             string            `json:"url" gorm:"column:url;type:text"`
 	ServiceVersions []*ServiceVersion `json:"service_versions,omitempty" gorm:"many2many:service_version_images;foreignKey:Id;joinForeignKey:ImageID;References:Id;joinReferences:ServiceVersionID;constraint:OnDelete:CASCADE;"`
+	Coupons         []*Coupon         `json:"coupons,omitempty" gorm:"foreignKey:ImageID"`
 }
 
 func (Image) TableName() string {

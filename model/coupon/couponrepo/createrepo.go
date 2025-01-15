@@ -17,7 +17,12 @@ type CreateCouponStore interface {
 }
 
 type CreateImageRepo interface {
-	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+	CreateImageForCoupon(
+		ctx context.Context,
+		file *multipart.FileHeader,
+		couponId uint32,
+		userID uint32,
+	) (*models.Image, error)
 }
 
 type createCouponRepo struct {
@@ -56,7 +61,7 @@ func (repo *createCouponRepo) CreateCoupon(ctx context.Context, data *couponmode
 	}
 
 	if data.Image != nil {
-		img, err := repo.imageRepo.CreateImage(ctx, data.Image, coupon.Id, data.CreatorID)
+		img, err := repo.imageRepo.CreateImageForCoupon(ctx, data.Image, coupon.Id, data.CreatorID)
 		if err != nil {
 			logger.AppLogger.Error(ctx, "failed to upload coupon image", zap.Error(err))
 			return 0, err

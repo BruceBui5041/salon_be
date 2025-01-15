@@ -37,7 +37,7 @@ func NewUpdateImageRepo(
 	}
 }
 
-func (repo *updateImageRepo) CreateImage(
+func (repo *updateImageRepo) UpdateServiceImage(
 	ctx context.Context,
 	file *multipart.FileHeader,
 	serviceID uint32,
@@ -45,6 +45,21 @@ func (repo *updateImageRepo) CreateImage(
 ) (*models.Image, error) {
 	createImageRepo := NewCreateImageRepo(repo.store, repo.s3Client)
 	image, err := createImageRepo.CreateImage(ctx, file, serviceID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return image, nil
+}
+
+func (repo *updateImageRepo) UpdateCouponImage(
+	ctx context.Context,
+	file *multipart.FileHeader,
+	couponId uint32,
+	userID uint32,
+) (*models.Image, error) {
+	createImageRepo := NewCreateImageRepo(repo.store, repo.s3Client)
+	image, err := createImageRepo.CreateImageForCoupon(ctx, file, couponId, userID)
 	if err != nil {
 		return nil, err
 	}

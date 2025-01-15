@@ -36,7 +36,12 @@ type UpdateServiceVersionStore interface {
 }
 
 type UpdateImageRepo interface {
-	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+	UpdateServiceImage(
+		ctx context.Context,
+		file *multipart.FileHeader,
+		serviceID uint32,
+		userID uint32,
+	) (*models.Image, error)
 	FindOne(
 		ctx context.Context,
 		conditions map[string]interface{},
@@ -170,7 +175,7 @@ func (repo *updateServiceRepo) UpdateService(
 		// Handle image uploads
 		if len(input.ServiceVersion.Images) > 0 {
 			for _, file := range input.ServiceVersion.Images {
-				img, err := repo.imageRepo.CreateImage(ctx, file, serviceID, existingService.CreatorID)
+				img, err := repo.imageRepo.UpdateServiceImage(ctx, file, serviceID, existingService.CreatorID)
 				if err != nil {
 					logger.AppLogger.Error(ctx, "failed to upload service image", zap.Error(err))
 					return nil, common.ErrDB(err)
