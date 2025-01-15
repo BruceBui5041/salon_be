@@ -2,8 +2,11 @@ package couponrepo
 
 import (
 	"context"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/coupon/couponmodel"
+
+	"go.uber.org/zap"
 )
 
 type CreateCouponStore interface {
@@ -34,6 +37,9 @@ func (repo *createCouponRepo) CreateCoupon(ctx context.Context, data *couponmode
 	}
 
 	if err := repo.store.Create(ctx, coupon); err != nil {
+		logger.AppLogger.Error(ctx, "Failed to create coupon in database",
+			zap.Error(err),
+			zap.String("code", data.Code))
 		return err
 	}
 
