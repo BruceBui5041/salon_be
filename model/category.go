@@ -25,6 +25,7 @@ type Category struct {
 	Parent          *Category         `json:"parent,omitempty" gorm:"foreignKey:ParentID"`
 	SubCategories   []*Category       `json:"sub_categories,omitempty" gorm:"foreignKey:ParentID"`
 	ServiceVersions []*ServiceVersion `json:"service_versions,omitempty" gorm:"foreignKey:CategoryID"`
+	Coupons         []*Coupon         `json:"coupons,omitempty" gorm:"foreignKey:CategoryID"`
 }
 
 func (Category) TableName() string {

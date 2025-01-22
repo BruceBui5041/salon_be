@@ -51,6 +51,7 @@ func (repo *createCouponRepo) CreateCoupon(ctx context.Context, data *couponmode
 		UsageLimit:    data.UsageLimit,
 		UsageCount:    0,
 		CreatorID:     data.CreatorID,
+		CategoryID:    data.CategoryID,
 	}
 
 	if err := repo.store.Create(ctx, coupon); err != nil {

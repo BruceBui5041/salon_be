@@ -7,6 +7,7 @@ import (
 	"salon_be/common"
 	"salon_be/component"
 	"salon_be/component/logger"
+	models "salon_be/model"
 	"salon_be/model/coupon/couponbiz"
 	"salon_be/model/coupon/couponerror"
 	"salon_be/model/coupon/couponmodel"
@@ -41,6 +42,15 @@ func CreateCouponHandler(appCtx component.AppContext) gin.HandlerFunc {
 		if err := json.Unmarshal([]byte(request.JSON), &data); err != nil {
 			logger.AppLogger.Error(c.Request.Context(), "failed to unmarshal JSON data", zap.Error(err))
 			panic(couponerror.ErrCouponInvalid(err))
+		}
+
+		if data.CatergoryStrId != nil {
+			cateUID, err := common.FromBase58(*data.CatergoryStrId)
+			if err != nil {
+				panic(couponerror.ErrCouponInvalid(err))
+			}
+			cateId := cateUID.GetLocalID()
+			data.CategoryID = &cateId
 		}
 
 		// Assign the uploaded image
@@ -89,8 +99,11 @@ func CreateCouponHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(map[string]uint32{
-			"id": couponId,
+		tempCoupon := &models.Coupon{SQLModel: common.SQLModel{Id: couponId}}
+		tempCoupon.Mask(false)
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(map[string]string{
+			"id": tempCoupon.GetFakeId(),
 		}))
 	}
 }
