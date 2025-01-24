@@ -14,6 +14,7 @@ import (
 	"salon_be/model/booking/bookingtransport"
 	"salon_be/model/category/categorytransport"
 	"salon_be/model/comment/commenttransport"
+	"salon_be/model/commission/commissiontransport"
 	"salon_be/model/coupon/coupontransport"
 	"salon_be/model/otp/otptransport"
 	"salon_be/model/payment/paymenttransport"
@@ -50,6 +51,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupBookingRoutes(r, appCtx)
 	setupUserDeviceRoutes(r, appCtx)
 	setupCouponRoutes(r, appCtx)
+	setupCommissionRoutes(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -190,6 +192,13 @@ func setupCouponRoutes(r *gin.Engine, appCtx component.AppContext) {
 	{
 		couponGroup.POST("", coupontransport.CreateCouponHandler(appCtx))
 		couponGroup.PATCH("/:id", coupontransport.UpdateCouponHandler(appCtx))
+	}
+}
+
+func setupCommissionRoutes(r *gin.Engine, appCtx component.AppContext) {
+	commissionGroup := r.Group("/commission", middleware.RequiredAuth(appCtx))
+	{
+		commissionGroup.POST("", commissiontransport.CreateCommissionHandler(appCtx))
 	}
 }
 

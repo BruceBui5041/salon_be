@@ -43,7 +43,7 @@ type Coupon struct {
 	Creator         *User           `json:"creator,omitempty" gorm:"foreignKey:CreatorID"`
 	ImageID         *uint32         `json:"-" gorm:"column:image_id"`
 	Image           *Image          `json:"image,omitempty" gorm:"foreignKey:ImageID"`
-	CategoryID      *uint32         `json:"category_id" gorm:"column:category_id;foreignKey:Id;constraint:OnDelete:SET NULL;"`
+	CategoryID      *uint32         `json:"-" gorm:"column:category_id;foreignKey:Id;constraint:OnDelete:SET NULL;"`
 	Category        *Category       `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
 }
 
