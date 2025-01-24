@@ -93,6 +93,7 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.UserDevice{},
 		&models.Notification{},
 		&models.NotificationDetail{},
+		&models.Commission{},
 	}
 
 	for _, table := range tables {

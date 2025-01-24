@@ -21,6 +21,7 @@ type Role struct {
 	Users           []*User           `json:"users,omitempty" gorm:"many2many:user_role;joinForeignKey:RoleID;joinReferences:UserID"`
 	Permissions     []*Permission     `json:"permissions,omitempty" gorm:"many2many:role_permission;joinForeignKey:RoleID;joinReferences:PermissionID"`
 	RolePermission  []*RolePermission `json:"role_permission,omitempty" gorm:"foreignKey:RoleID"`
+	Commission      *Commission       `json:"commission,omitempty" gorm:"foreignKey:RoleID"`
 }
 
 func (Role) TableName() string {

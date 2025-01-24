@@ -4,11 +4,17 @@ import (
 	"errors"
 	"salon_be/common"
 	"salon_be/component/genericapi/modelhelper"
+	"strings"
 	"time"
 
+	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
+
+func init() {
+	modelhelper.RegisterModel(Booking{})
+}
 
 const (
 	BookingEntityName = "Booking"
@@ -51,6 +57,8 @@ type Booking struct {
 	CancelledAt        *time.Time        `json:"cancelled_at,omitempty" gorm:"column:cancelled_at;type:datetime"`
 	CompletedAt        *time.Time        `json:"completed_at,omitempty" gorm:"column:completed_at;type:datetime"`
 	Notifications      []*Notification   `json:"notifications,omitempty" gorm:"foreignKey:BookingID"`
+	CommissionID       *uint32           `json:"-" gorm:"column:commission_id;index"`
+	Commission         *Commission       `json:"commission,omitempty" gorm:"foreignKey:CommissionID"`
 }
 
 func (Booking) TableName() string {
@@ -120,7 +128,6 @@ func (b *Booking) CalculateDiscountedPrice() error {
 	return nil
 }
 
-// BeforeCreate hook to calculate discounted price
 func (b *Booking) BeforeCreate(tx *gorm.DB) error {
 	if b.BookingStatus == "" {
 		b.BookingStatus = BookingStatusPending
@@ -131,9 +138,38 @@ func (b *Booking) BeforeCreate(tx *gorm.DB) error {
 		return err
 	}
 
-	return nil
-}
+	// Fetch commission based on service man's role
+	if b.ServiceManID != 0 {
+		var serviceMan User
+		if err := tx.Preload("Roles").First(&serviceMan, b.ServiceManID).Error; err != nil {
+			return err
+		}
 
-func init() {
-	modelhelper.RegisterModel(Booking{})
+		// Filter roles that contain "PROVIDER"
+		providerRoles := lo.Filter(serviceMan.Roles, func(role *Role, _ int) bool {
+			return strings.Contains(role.Code, "PROVIDER")
+		})
+
+		if len(providerRoles) > 0 {
+			// Get all commissions for provider roles
+			var commissions []Commission
+			if err := tx.Where(
+				"role_id IN (?) AND status = ?",
+				lo.Map(providerRoles, func(r *Role, _ int) uint32 { return r.Id }),
+				common.StatusActive,
+			).Find(&commissions).Error; err != nil {
+				return err
+			}
+
+			// Find commission with lowest percentage
+			if len(commissions) > 0 {
+				lowestCommission := lo.MinBy(commissions, func(a, b Commission) bool {
+					return a.Percentage < b.Percentage
+				})
+				b.CommissionID = &lowestCommission.Id
+			}
+		}
+	}
+
+	return nil
 }

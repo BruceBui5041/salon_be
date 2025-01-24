@@ -28,6 +28,7 @@ const (
 	DBTypeNotification       = 19
 	DBTypeNotificationDetail = 20
 	DBTypeUserDevice         = 21
+	DBTypeCommission         = 22
 )
 
 const (
