@@ -199,6 +199,7 @@ func setupCommissionRoutes(r *gin.Engine, appCtx component.AppContext) {
 	commissionGroup := r.Group("/commission", middleware.RequiredAuth(appCtx))
 	{
 		commissionGroup.POST("", commissiontransport.CreateCommissionHandler(appCtx))
+		commissionGroup.PATCH("/:id", commissiontransport.UpdateCommissionHandler(appCtx))
 	}
 }
 
