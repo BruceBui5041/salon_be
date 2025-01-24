@@ -38,8 +38,15 @@ func NewCreateCouponRepo(store CreateCouponStore, imageRepo CreateImageRepo) *cr
 }
 
 func (repo *createCouponRepo) CreateCoupon(ctx context.Context, data *couponmodel.CreateCoupon) (uint32, error) {
+	var status string
+	if data.Status == nil {
+		status = common.StatusActive
+	} else {
+		status = common.StatusInactive
+	}
+
 	coupon := &models.Coupon{
-		SQLModel:      common.SQLModel{Status: common.StatusInactive},
+		SQLModel:      common.SQLModel{Status: status},
 		Code:          data.Code,
 		Description:   data.Description,
 		DiscountType:  data.DiscountType,

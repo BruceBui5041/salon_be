@@ -14,6 +14,7 @@ type CreateCouponRequest struct {
 }
 
 type CreateCoupon struct {
+	Status         *string               `json:"status"`
 	Code           string                `json:"code" binding:"required"`
 	Description    string                `json:"description"`
 	DiscountType   models.DiscountType   `json:"discount_type" binding:"required"`

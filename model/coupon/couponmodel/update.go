@@ -14,6 +14,7 @@ type UpdateCouponRequest struct {
 }
 
 type UpdateCoupon struct {
+	Status        *string               `json:"status"`
 	Description   string                `json:"description"`
 	DiscountType  models.DiscountType   `json:"discount_type"`
 	DiscountValue decimal.Decimal       `json:"discount_value"`

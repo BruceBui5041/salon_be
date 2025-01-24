@@ -3,6 +3,7 @@ package couponrepo
 import (
 	"context"
 	"mime/multipart"
+	"salon_be/common"
 	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/coupon/couponmodel"
@@ -45,7 +46,15 @@ func (repo *updateCouponRepo) FindCoupon(
 }
 
 func (repo *updateCouponRepo) UpdateCoupon(ctx context.Context, id uint32, data *couponmodel.UpdateCoupon) error {
+	var status string
+	if data.Status == nil {
+		status = common.StatusActive
+	} else {
+		status = common.StatusInactive
+	}
+
 	coupon := &models.Coupon{
+		SQLModel:      common.SQLModel{Status: status},
 		Description:   data.Description,
 		DiscountType:  data.DiscountType,
 		DiscountValue: data.DiscountValue,
