@@ -50,7 +50,7 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 	}
 
 	commission := &models.Commission{
-		SQLModel:   common.SQLModel{Status: status},
+		SQLModel:   common.SQLModel{Id: id, Status: status},
 		Code:       data.Code,
 		RoleID:     data.RoleID,
 		Percentage: data.Percentage,

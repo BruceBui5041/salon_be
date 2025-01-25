@@ -42,6 +42,13 @@ func UpdateCommissionHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrNoPermission(err))
 		}
 
+		roleUID, err := common.FromBase58(data.RoleIDStr)
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		data.RoleID = roleUID.GetLocalID()
+
 		data.UpdaterID = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection()

@@ -54,7 +54,7 @@ func (repo *updateCouponRepo) UpdateCoupon(ctx context.Context, id uint32, data 
 	}
 
 	coupon := &models.Coupon{
-		SQLModel:      common.SQLModel{Status: status},
+		SQLModel:      common.SQLModel{Status: status, Id: id},
 		Description:   data.Description,
 		DiscountType:  data.DiscountType,
 		DiscountValue: data.DiscountValue,

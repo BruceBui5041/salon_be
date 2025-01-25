@@ -6,6 +6,7 @@ import (
 	"salon_be/common"
 	"salon_be/component"
 	"salon_be/component/logger"
+	models "salon_be/model"
 	commissionmodel "salon_be/model/commission/comissionmodel"
 	"salon_be/model/commission/commissionbiz"
 	"salon_be/model/commission/commissionrepo"
@@ -34,6 +35,12 @@ func CreateCommissionHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrNoPermission(err))
 		}
 
+		roleUID, err := common.FromBase58(data.RoleIDStr)
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		data.RoleID = roleUID.GetLocalID()
 		data.CreatorID = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection()
@@ -57,8 +64,11 @@ func CreateCommissionHandler(appCtx component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
+		tempCommission := &models.Commission{SQLModel: common.SQLModel{Id: commissionId}}
+		tempCommission.Mask(false)
+
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(map[string]interface{}{
-			"id": commissionId,
+			"id": tempCommission.GetFakeId(),
 		}))
 	}
 }
