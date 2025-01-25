@@ -49,6 +49,8 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		status = common.StatusInactive
 	}
 
+	updaterID := data.UpdaterID
+
 	commission := &models.Commission{
 		SQLModel:   common.SQLModel{Id: id, Status: status},
 		Code:       data.Code,
@@ -56,6 +58,7 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		Percentage: data.Percentage,
 		MinAmount:  data.MinAmount,
 		MaxAmount:  data.MaxAmount,
+		UpdaterID:  &updaterID,
 	}
 
 	if err := repo.store.Update(ctx, id, commission); err != nil {

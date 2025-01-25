@@ -37,6 +37,7 @@ func (repo *createCommissionRepo) CreateCommission(ctx context.Context, data *co
 		Percentage: data.Percentage,
 		MinAmount:  data.MinAmount,
 		MaxAmount:  data.MaxAmount,
+		CreatorID:  data.CreatorID,
 	}
 
 	if err := repo.store.Create(ctx, commission); err != nil {

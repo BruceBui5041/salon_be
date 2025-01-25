@@ -23,7 +23,11 @@ type Commission struct {
 	Percentage      float64    `json:"percentage" gorm:"column:percentage;not null"`
 	MinAmount       *float64   `json:"min_amount" gorm:"column:min_amount;"`
 	MaxAmount       *float64   `json:"max_amount" gorm:"column:max_amount;"`
+	CreatorID       uint32     `json:"-" gorm:"column:creator_id;not null"`
+	UpdaterID       *uint32    `json:"-" gorm:"column:updater_id;"`
 	Role            *Role      `json:"role,omitempty" gorm:"foreignKey:RoleID"`
+	Creator         *User      `json:"creator,omitempty" gorm:"foreignKey:CreatorID"`
+	Updater         *User      `json:"updater,omitempty" gorm:"foreignKey:UpdaterID"`
 }
 
 func (Commission) TableName() string {
@@ -32,6 +36,12 @@ func (Commission) TableName() string {
 
 func (c *Commission) Mask(isAdmin bool) {
 	c.GenUID(common.DBTypeCommission)
+	if c.Creator != nil {
+		c.Creator.Mask(isAdmin)
+	}
+	if c.Updater != nil {
+		c.Updater.Mask(isAdmin)
+	}
 }
 
 func (c *Commission) AfterFind(tx *gorm.DB) (err error) {
