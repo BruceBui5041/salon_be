@@ -67,14 +67,34 @@ func (c *Coupon) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (c *Coupon) BeforeUpdate(tx *gorm.DB) error {
-	if c.Status == common.StatusActive || c.Status == common.StatusSuspended {
+	if c.Status == common.StatusSuspended {
+		return nil
+	}
+
+	var existingRecord Coupon
+	if err := tx.Model(&Coupon{}).
+		Where("id = ?", c.Id).
+		First(&existingRecord).
+		Error; err != nil {
+		return err
+	}
+
+	if existingRecord.Status == common.StatusActive || existingRecord.Status == common.StatusSuspended {
 		return couponerror.ErrCouponHasBeenActivated(errors.New("coupon has been activated"))
 	}
 	return nil
 }
 
 func (c *Coupon) IsValid(originalPrice decimal.Decimal) error {
-	now := time.Now()
+	now := time.Now().UTC()
+
+	if c.Status == common.StatusInactive {
+		return errors.New("coupon is not active")
+	}
+
+	if c.Status == common.StatusSuspended {
+		return errors.New("coupon is suspended")
+	}
 
 	if now.Before(c.StartDate) {
 		return errors.New("coupon is not yet active")

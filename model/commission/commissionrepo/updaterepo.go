@@ -58,17 +58,11 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		return commissionerror.ErrCommissionPublished()
 	}
 
-	var status string
-	if data.Status == nil {
-		status = common.StatusActive
-	} else {
-		status = common.StatusInactive
-	}
-
+	status := data.Status
 	updaterID := data.UpdaterID
 
 	commission := &models.Commission{
-		SQLModel:   common.SQLModel{Id: id, Status: status},
+		SQLModel:   common.SQLModel{Id: id, Status: *status},
 		Code:       data.Code,
 		RoleID:     data.RoleID,
 		Percentage: data.Percentage,
@@ -77,7 +71,7 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		UpdaterID:  &updaterID,
 	}
 
-	if status == common.StatusActive {
+	if *status == common.StatusActive {
 		publishedAt := time.Now().UTC()
 		commission.PublishedAt = &publishedAt
 	}

@@ -56,10 +56,6 @@ func (repo *updateCouponRepo) UpdateCoupon(ctx context.Context, id uint32, data 
 		return err
 	}
 
-	if existingCoupon.Status == common.StatusActive || existingCoupon.Status == common.StatusSuspended {
-		return couponerror.ErrCouponHasBeenActivated(errors.New("coupon has been activated"))
-	}
-
 	// only allow to suspend coupon if it is active
 	if *data.Status == common.StatusSuspended && existingCoupon.Status == common.StatusActive {
 		coupon := &models.Coupon{
@@ -77,15 +73,14 @@ func (repo *updateCouponRepo) UpdateCoupon(ctx context.Context, id uint32, data 
 		return nil
 	}
 
-	var status string
-	if data.Status == nil {
-		status = common.StatusActive
-	} else {
-		status = common.StatusInactive
+	if existingCoupon.Status == common.StatusActive || existingCoupon.Status == common.StatusSuspended {
+		return couponerror.ErrCouponHasBeenActivated(errors.New("cannot update activated coupon, only allow to suspend it"))
 	}
 
+	status := data.Status
+
 	coupon := &models.Coupon{
-		SQLModel:      common.SQLModel{Status: status, Id: id},
+		SQLModel:      common.SQLModel{Status: *status, Id: id},
 		Description:   data.Description,
 		DiscountType:  data.DiscountType,
 		DiscountValue: data.DiscountValue,

@@ -39,11 +39,6 @@ func (biz *updateCouponBiz) UpdateCoupon(ctx context.Context, id string, data *c
 		return common.ErrCannotGetEntity(models.CouponEntityName, err)
 	}
 
-	// Check if coupon is inactive
-	if coupon.Status != common.StatusInactive {
-		return couponerror.ErrCouponInvalid(errors.New("can only update inactive coupons"))
-	}
-
 	// Check date conditions
 	nowUTC := time.Now().UTC()
 	if nowUTC.Before(coupon.StartDate) || nowUTC.After(coupon.EndDate) {
@@ -68,7 +63,7 @@ func (biz *updateCouponBiz) UpdateCoupon(ctx context.Context, id string, data *c
 	}
 
 	if err := biz.repo.UpdateCoupon(ctx, uid.GetLocalID(), data); err != nil {
-		return common.ErrCannotUpdateEntity(models.CouponEntityName, err)
+		return err
 	}
 
 	return nil

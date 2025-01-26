@@ -55,6 +55,13 @@ func (c *Commission) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (c *Commission) BeforeUpdate(tx *gorm.DB) (err error) {
+	if c.Status == common.StatusSuspended {
+		c = &Commission{
+			SQLModel: common.SQLModel{Status: common.StatusSuspended, Id: c.Id},
+		}
+		return nil
+	}
+
 	var existingCommission Commission
 	if err := tx.Model(&Commission{}).
 		Where("id = ?", c.Id).

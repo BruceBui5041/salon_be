@@ -101,12 +101,10 @@ func (b *Booking) CalculateDiscountedPrice() error {
 		b.DiscountedPrice = &totalDiscountedPrice
 	}
 
-	// If there's no coupon, we're done
 	if b.Coupon == nil {
 		return nil
 	}
 
-	// Validate and apply coupon to the total price
 	if err := b.Coupon.IsValid(totalPrice); err != nil {
 		return err
 	}
