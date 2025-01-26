@@ -87,6 +87,7 @@ func (b *Booking) CalculateDiscountedPrice() error {
 	b.Price = totalPrice
 
 	// Calculate total discounted price if any service versions have discounts
+	// one booking can have multiple service versions with different discounts
 	totalDiscountedPrice := decimal.Zero
 	hasDiscounts := false
 	for _, sv := range b.ServiceVersions {
@@ -105,22 +106,14 @@ func (b *Booking) CalculateDiscountedPrice() error {
 		return nil
 	}
 
-	if err := b.Coupon.IsValid(totalPrice); err != nil {
+	if err := b.Coupon.IsValid(totalDiscountedPrice); err != nil {
 		return err
 	}
 
-	discountAmount := b.Coupon.CalculateDiscount(totalPrice)
+	discountAmount := b.Coupon.CalculateDiscount(totalDiscountedPrice)
 	b.DiscountAmount = discountAmount
 
-	// Calculate final price after coupon discount
-	var finalPrice decimal.Decimal
-	if b.DiscountedPrice != nil {
-		// If there were service-level discounts, apply coupon to already discounted price
-		finalPrice = totalDiscountedPrice.Sub(discountAmount)
-	} else {
-		// If no service-level discounts, apply coupon to original price
-		finalPrice = totalPrice.Sub(discountAmount)
-	}
+	finalPrice := totalDiscountedPrice.Sub(discountAmount)
 	b.DiscountedPrice = &finalPrice
 
 	return nil

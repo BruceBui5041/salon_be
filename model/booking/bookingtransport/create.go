@@ -11,6 +11,7 @@ import (
 	"salon_be/model/booking/bookingmodel"
 	"salon_be/model/booking/bookingrepo"
 	"salon_be/model/booking/bookingstore"
+	"salon_be/model/coupon/couponstore"
 	"salon_be/model/payment/paymentstore"
 	"salon_be/model/service/servicestore"
 	"salon_be/watermill"
@@ -48,11 +49,13 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 			bookingStore := bookingstore.NewSQLStore(tx)
 			serviceStore := servicestore.NewSQLStore(tx)
 			paymentStore := paymentstore.NewSQLStore(tx)
+			couponStore := couponstore.NewSQLStore(tx)
 
 			repo := bookingrepo.NewCreateBookingRepo(
 				bookingStore,
 				serviceStore,
 				paymentStore,
+				couponStore,
 			)
 
 			business := bookingbiz.NewCreateBookingBiz(repo)

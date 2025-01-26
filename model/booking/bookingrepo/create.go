@@ -32,21 +32,28 @@ type PaymentStore interface {
 	Create(ctx context.Context, data *models.Payment) (uint32, error)
 }
 
+type CouponStore interface {
+	FindOne(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*models.Coupon, error)
+}
+
 type createBookingRepo struct {
 	bookingStore BookingStore
 	serviceStore ServiceStore
 	paymentStore PaymentStore
+	couponStore  CouponStore
 }
 
 func NewCreateBookingRepo(
 	bookingStore BookingStore,
 	serviceStore ServiceStore,
 	paymentStore PaymentStore,
+	couponStore CouponStore,
 ) *createBookingRepo {
 	return &createBookingRepo{
 		bookingStore: bookingStore,
 		serviceStore: serviceStore,
 		paymentStore: paymentStore,
+		couponStore:  couponStore,
 	}
 }
 
@@ -165,26 +172,69 @@ func (repo *createBookingRepo) CreateBooking(ctx context.Context, data *bookingm
 		}
 	}
 
-	// Create payment record
-	payment, err := repo.createPayment(ctx, data.UserID, totalPrice, data.PaymentMethod)
+	// Handle coupon if provided
+	var coupon *models.Coupon
+	if data.CouponID != nil {
+		couponID, err := data.GetCouponLocalId()
+		if err != nil {
+			return 0, err
+		}
+
+		coupon, err = repo.couponStore.FindOne(ctx, map[string]interface{}{
+			"id":     couponID,
+			"code":   data.CouponCode,
+			"status": common.StatusActive,
+		})
+		if err != nil {
+			if err == common.RecordNotFound {
+				return 0, common.ErrEntityNotFound(models.CouponEntityName, errors.New("coupon not found"))
+			}
+			return 0, common.ErrCannotGetEntity(models.CouponEntityName, err)
+		}
+
+		// Validate coupon
+		if err := coupon.IsValid(totalPrice); err != nil {
+			logger.AppLogger.Error(ctx, "invalid coupon", zap.Error(err), zap.Any("coupon", coupon))
+			return 0, err
+		}
+	}
+
+	// Create booking entity with UTC time
+	booking := &models.Booking{
+		UserID:          data.UserID,
+		ServiceVersions: serviceVersions,
+		ServiceManID:    serviceManID,
+		BookingDate:     data.BookingDate.UTC(),
+		Duration:        totalDuration,
+		Price:           totalPrice,
+		Notes:           data.Notes,
+	}
+
+	// Set coupon if provided
+	if coupon != nil {
+		booking.CouponID = &coupon.Id
+		booking.Coupon = coupon
+	}
+
+	// Calculate discounted price using the model's method
+	if err := booking.CalculateDiscountedPrice(); err != nil {
+		return 0, common.ErrInvalidRequest(err)
+	}
+
+	// Create payment record with final price
+	finalPrice := totalPrice
+	if booking.DiscountedPrice != nil {
+		finalPrice = *booking.DiscountedPrice
+	}
+
+	payment, err := repo.createPayment(ctx, data.UserID, finalPrice, data.PaymentMethod)
 	if err != nil {
 		logger.AppLogger.Error(ctx, "cannot create payment", zap.Error(err), zap.Any("data", data))
 		return 0, err
 	}
 
-	booking := &models.Booking{
-		UserID:          data.UserID,
-		ServiceVersions: serviceVersions,
-		ServiceManID:    serviceManID,
-		BookingDate:     data.BookingDate,
-		Duration:        totalDuration,
-		Price:           totalPrice,
-		Notes:           data.Notes,
-		PaymentID:       &payment.Id,
-		Payment:         payment,
-	}
-
-	booking.DiscountAmount = decimal.NewFromInt(0)
+	booking.PaymentID = &payment.Id
+	booking.Payment = payment
 
 	id, err := repo.bookingStore.Create(ctx, booking)
 	if err != nil {

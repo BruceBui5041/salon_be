@@ -41,8 +41,8 @@ func (biz *createBookingBiz) CreateBooking(ctx context.Context, data *bookingmod
 		return 0, common.ErrInvalidRequest(errors.New("invalid payment method"))
 	}
 
-	// Check if booking date is in the future
-	if data.BookingDate.Before(time.Now().UTC()) {
+	// Check if booking date is in the future using UTC time
+	if data.BookingDate.UTC().Before(time.Now().UTC()) {
 		return 0, common.ErrInvalidRequest(errors.New("booking date must be in the future"))
 	}
 

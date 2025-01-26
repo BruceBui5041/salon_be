@@ -104,7 +104,7 @@ func (c *Coupon) IsValid(originalPrice decimal.Decimal) error {
 		return errors.New("coupon has expired")
 	}
 
-	if c.UsageLimit != nil && c.UsageCount >= *c.UsageLimit {
+	if c.UsageLimit != nil && *c.UsageLimit != 0 && c.UsageCount >= *c.UsageLimit {
 		return errors.New("coupon usage limit exceeded")
 	}
 
