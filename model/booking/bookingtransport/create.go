@@ -84,6 +84,11 @@ func CreateBookingHandler(appCtx component.AppContext) gin.HandlerFunc {
 			logger.AppLogger.Error(c.Request.Context(), "error publishing booking event", zap.Error(err))
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
+		tempBooking := &models.Booking{SQLModel: common.SQLModel{Id: newBookingId}}
+		tempBooking.Mask(false)
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(map[string]string{
+			"id": tempBooking.GetFakeId(),
+		}))
 	}
 }
