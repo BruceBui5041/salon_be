@@ -4,6 +4,7 @@ import (
 	"errors"
 	"salon_be/common"
 	"salon_be/component/genericapi/modelhelper"
+	"salon_be/model/coupon/couponerror"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -61,7 +62,14 @@ func (c *Coupon) AfterFind(tx *gorm.DB) (err error) {
 }
 
 func (c *Coupon) BeforeCreate(tx *gorm.DB) error {
-	c.Status = "inactive"
+	c.Status = common.StatusInactive
+	return nil
+}
+
+func (c *Coupon) BeforeUpdate(tx *gorm.DB) error {
+	if c.Status == common.StatusActive || c.Status == common.StatusSuspended {
+		return couponerror.ErrCouponHasBeenActivated(errors.New("coupon has been activated"))
+	}
 	return nil
 }
 

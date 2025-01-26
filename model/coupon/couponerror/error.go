@@ -7,11 +7,33 @@ import (
 )
 
 const (
-	errCouponInvalid    = "ErrCouponInvalid"
-	errCouponExists     = "ErrCouponExists"
-	errCouponExpired    = "ErrCouponExpired"
-	errCouponUsageLimit = "ErrCouponUsageLimit"
+	errCouponInvalid          = "ErrCouponInvalid"
+	errCouponExists           = "ErrCouponExists"
+	errCouponExpired          = "ErrCouponExpired"
+	errCouponUsageLimit       = "ErrCouponUsageLimit"
+	errCouponHasUsaged        = "ErrCouponHasUsaged"
+	errCouponHasBeenActivated = "ErrCouponHasBeenActivated"
 )
+
+func ErrCouponHasBeenActivated(err error) *common.AppError {
+	return common.NewFullErrorResponse(
+		http.StatusBadRequest,
+		err,
+		err.Error(),
+		err.Error(),
+		errCouponHasBeenActivated,
+	)
+}
+
+func ErrCouponHasUsaged(err error) *common.AppError {
+	return common.NewFullErrorResponse(
+		http.StatusBadRequest,
+		err,
+		err.Error(),
+		err.Error(),
+		errCouponHasUsaged,
+	)
+}
 
 func ErrCouponInvalid(err error) *common.AppError {
 	return common.NewFullErrorResponse(

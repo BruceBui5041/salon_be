@@ -2,10 +2,12 @@ package couponrepo
 
 import (
 	"context"
+	"errors"
 	"mime/multipart"
 	"salon_be/common"
 	"salon_be/component/logger"
 	models "salon_be/model"
+	"salon_be/model/coupon/couponerror"
 	"salon_be/model/coupon/couponmodel"
 
 	"go.uber.org/zap"
@@ -46,6 +48,35 @@ func (repo *updateCouponRepo) FindCoupon(
 }
 
 func (repo *updateCouponRepo) UpdateCoupon(ctx context.Context, id uint32, data *couponmodel.UpdateCoupon) error {
+	existingCoupon, err := repo.store.FindOne(ctx, map[string]interface{}{"id": id})
+	if err != nil {
+		logger.AppLogger.Error(ctx, "Failed to find coupon in database",
+			zap.Error(err),
+			zap.Uint32("id", id))
+		return err
+	}
+
+	if existingCoupon.Status == common.StatusActive || existingCoupon.Status == common.StatusSuspended {
+		return couponerror.ErrCouponHasBeenActivated(errors.New("coupon has been activated"))
+	}
+
+	// only allow to suspend coupon if it is active
+	if *data.Status == common.StatusSuspended && existingCoupon.Status == common.StatusActive {
+		coupon := &models.Coupon{
+			SQLModel: common.SQLModel{Status: common.StatusSuspended, Id: id},
+		}
+
+		if err := repo.store.Update(ctx, id, coupon); err != nil {
+			logger.AppLogger.Error(ctx, "Failed to update coupon",
+				zap.Error(err),
+				zap.Uint32("coupon_id", id),
+				zap.Any("coupon_data", data))
+			return err
+		}
+
+		return nil
+	}
+
 	var status string
 	if data.Status == nil {
 		status = common.StatusActive

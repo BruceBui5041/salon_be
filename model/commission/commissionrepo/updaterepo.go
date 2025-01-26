@@ -7,6 +7,7 @@ import (
 	models "salon_be/model"
 	commissionmodel "salon_be/model/commission/comissionmodel"
 	"salon_be/model/commission/commissionerror"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -37,8 +38,23 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		return err
 	}
 
-	// Check if commission is published
+	// Check if commission is published and only allow to suspend it
 	if existingCommission.PublishedAt != nil {
+		if *data.Status == common.StatusSuspended && existingCommission.Status == common.StatusActive {
+			updateData := &models.Commission{
+				SQLModel: common.SQLModel{Status: common.StatusSuspended, Id: id},
+			}
+
+			if err := repo.store.Update(ctx, id, updateData); err != nil {
+				logger.AppLogger.Error(ctx, "Failed to update commission in database",
+					zap.Error(err),
+					zap.Uint32("id", id),
+					zap.String("code", data.Code))
+				return err
+			}
+
+			return nil
+		}
 		return commissionerror.ErrCommissionPublished()
 	}
 
@@ -59,6 +75,11 @@ func (repo *updateCommissionRepo) UpdateCommission(ctx context.Context, id uint3
 		MinAmount:  data.MinAmount,
 		MaxAmount:  data.MaxAmount,
 		UpdaterID:  &updaterID,
+	}
+
+	if status == common.StatusActive {
+		publishedAt := time.Now().UTC()
+		commission.PublishedAt = &publishedAt
 	}
 
 	if err := repo.store.Update(ctx, id, commission); err != nil {

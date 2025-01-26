@@ -2,7 +2,6 @@ package commissionrepo
 
 import (
 	"context"
-	"salon_be/common"
 	"salon_be/component/logger"
 	models "salon_be/model"
 	commissionmodel "salon_be/model/commission/comissionmodel"
@@ -23,15 +22,7 @@ func NewCreateCommissionRepo(store CreateCommissionStore) *createCommissionRepo 
 }
 
 func (repo *createCommissionRepo) CreateCommission(ctx context.Context, data *commissionmodel.CreateCommission) (uint32, error) {
-	var status string
-	if data.Status == nil {
-		status = common.StatusActive
-	} else {
-		status = common.StatusInactive
-	}
-
 	commission := &models.Commission{
-		SQLModel:   common.SQLModel{Status: status},
 		Code:       data.Code,
 		RoleID:     data.RoleID,
 		Percentage: data.Percentage,

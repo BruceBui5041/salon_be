@@ -1,7 +1,6 @@
 package commissionmodel
 
 type CreateCommission struct {
-	Status     *string  `json:"status"`
 	Code       string   `json:"code" binding:"required"`
 	RoleIDStr  string   `json:"role_id" binding:"required"`
 	RoleID     uint32   `json:"-"`

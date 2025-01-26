@@ -49,6 +49,11 @@ func (c *Commission) AfterFind(tx *gorm.DB) (err error) {
 	return
 }
 
+func (c *Commission) BeforeCreate(tx *gorm.DB) (err error) {
+	c.Status = common.StatusInactive
+	return nil
+}
+
 func (c *Commission) BeforeUpdate(tx *gorm.DB) (err error) {
 	var existingCommission Commission
 	if err := tx.Model(&Commission{}).
