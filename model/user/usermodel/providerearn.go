@@ -11,6 +11,7 @@ type EarningsSummary struct {
 	CancelledBookings int              `json:"cancelled_bookings"`
 	ConfirmedBookings int              `json:"confirmed_bookings"`
 	TotalHours        float64          `json:"total_hours"`
+	TotalCommission   decimal.Decimal  `json:"total_commission"`
 	Period            string           `json:"period"`
 	MonthlyBreakdown  []MonthlyEarning `json:"monthly_breakdown,omitempty"`
 }
@@ -23,6 +24,7 @@ type MonthlyEarning struct {
 	CancelledBookings int             `json:"cancelled_bookings"`
 	ConfirmedBookings int             `json:"confirmed_bookings"`
 	Hours             float64         `json:"hours"`
+	Commission        decimal.Decimal `json:"commission"`
 }
 
 type GetEarningsRequest struct {

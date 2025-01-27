@@ -94,6 +94,7 @@ func (r *providerEarningsRepo) CalculateEarnings(
 			TotalEarnings     decimal.Decimal
 			CompletedBookings int
 			TotalHours        float64
+			TotalCommission   decimal.Decimal
 		}
 
 		err = baseQuery.Select(`
@@ -102,16 +103,23 @@ func (r *providerEarningsRepo) CalculateEarnings(
 				ELSE price 
 			END), 0) as total_earnings,
 			COUNT(*) as completed_bookings,
-			COALESCE(SUM(duration), 0) / 60.0 as total_hours
-		`).Scan(&totalResult).Error
+			COALESCE(SUM(duration), 0) / 60.0 as total_hours,
+			COALESCE(SUM(CASE 
+				WHEN discounted_price IS NOT NULL THEN discounted_price * COALESCE(commission.percentage, 0) / 100 
+				ELSE price * COALESCE(commission.percentage, 0) / 100 
+			END), 0) as total_commission
+		`).
+			Joins("LEFT JOIN commission ON booking.commission_id = commission.id").
+			Scan(&totalResult).Error
 
 		if err != nil {
 			return common.ErrDB(err)
 		}
 
-		summary.TotalEarnings = totalResult.TotalEarnings
+		summary.TotalEarnings = totalResult.TotalEarnings.Sub(totalResult.TotalCommission)
 		summary.CompletedBookings = totalResult.CompletedBookings
 		summary.TotalHours = totalResult.TotalHours
+		summary.TotalCommission = totalResult.TotalCommission
 
 		// Get monthly breakdown with status counts
 		var monthlyResults []struct {
@@ -122,6 +130,7 @@ func (r *providerEarningsRepo) CalculateEarnings(
 			CancelledBookings int
 			ConfirmedBookings int
 			Hours             float64
+			Commission        decimal.Decimal
 		}
 
 		err = tx.Model(&models.Booking{}).
@@ -136,14 +145,21 @@ func (r *providerEarningsRepo) CalculateEarnings(
 				COUNT(CASE WHEN booking_status = ? THEN 1 END) as pending_bookings,
 				COUNT(CASE WHEN booking_status = ? THEN 1 END) as cancelled_bookings,
 				COUNT(CASE WHEN booking_status = ? THEN 1 END) as confirmed_bookings,
-				COALESCE(SUM(CASE WHEN booking_status = ? THEN duration ELSE 0 END), 0) / 60.0 as hours
+				COALESCE(SUM(CASE WHEN booking_status = ? THEN duration ELSE 0 END), 0) / 60.0 as hours,
+				COALESCE(SUM(CASE 
+					WHEN booking_status = ? AND discounted_price IS NOT NULL THEN discounted_price * COALESCE(commission.percentage, 0) / 100 
+					WHEN booking_status = ? THEN price * COALESCE(commission.percentage, 0) / 100 
+					ELSE 0 
+				END), 0) as commission
 			`,
 				models.BookingStatusCompleted, models.BookingStatusCompleted,
 				models.BookingStatusCompleted,
 				models.BookingStatusPending,
 				models.BookingStatusCancelled,
 				models.BookingStatusConfirmed,
-				models.BookingStatusCompleted).
+				models.BookingStatusCompleted,
+				models.BookingStatusCompleted, models.BookingStatusCompleted).
+			Joins("LEFT JOIN commission ON booking.commission_id = commission.id").
 			Where("service_man_id = ?", providerID).
 			Where("booking_date BETWEEN ? AND ?", fromDate, toDate).
 			Group("DATE_FORMAT(booking_date, '%Y-%m')").
@@ -158,12 +174,13 @@ func (r *providerEarningsRepo) CalculateEarnings(
 		for i, result := range monthlyResults {
 			summary.MonthlyBreakdown[i] = usermodel.MonthlyEarning{
 				Month:             result.Month,
-				Earnings:          result.Earnings,
+				Earnings:          result.Earnings.Sub(result.Commission),
 				CompletedBookings: result.CompletedBookings,
 				PendingBookings:   result.PendingBookings,
 				CancelledBookings: result.CancelledBookings,
 				ConfirmedBookings: result.ConfirmedBookings,
 				Hours:             result.Hours,
+				Commission:        result.Commission,
 			}
 		}
 
