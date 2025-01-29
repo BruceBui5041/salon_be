@@ -241,6 +241,7 @@ func (repo *updateServiceRepo) UpdateService(
 			}
 
 			serviceVersion.Status = common.StatusInactive
+			serviceVersion.Id = 0 // new version
 			if err := repo.serviceVersionStore.CreateNewServiceVersion(ctx, serviceVersion); err != nil {
 				return nil, common.ErrDB(err)
 			}
