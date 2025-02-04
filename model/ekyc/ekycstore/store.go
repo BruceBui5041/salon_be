@@ -36,3 +36,10 @@ func (s *sqlStore) CreateFaceVerification(ctx context.Context, data *models.Face
 	}
 	return nil
 }
+
+func (s *sqlStore) CreateKYCImage(ctx context.Context, data *models.KYCImageUpload) error {
+	if err := s.db.Create(data).Error; err != nil {
+		return err
+	}
+	return nil
+}

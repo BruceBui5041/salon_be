@@ -20,6 +20,22 @@ type EKYCClient struct {
 	client *http.Client
 }
 
+type UploadResponse struct {
+	Message string       `json:"message"`
+	Object  UploadObject `json:"object"`
+}
+
+type UploadObject struct {
+	FileName     string `json:"fileName"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Hash         string `json:"hash"`
+	FileType     string `json:"fileType"`
+	UploadedDate string `json:"uploadedDate"`
+	StorageType  string `json:"storageType"`
+	TokenId      string `json:"tokenId"`
+}
+
 func NewEKYCClient() *EKYCClient {
 	ekycConfig := EKYCConfig{
 		BaseURL:     "https://api.idg.vnpt.vn",
@@ -50,24 +66,24 @@ func (c *EKYCClient) makeRequest(method, endpoint string, body io.Reader, conten
 	return c.client.Do(req)
 }
 
-func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (string, error) {
+func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (*UploadResponse, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	// Add file
 	part, err := writer.CreateFormFile("file", file.Filename)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	fileContent, err := file.Open()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer fileContent.Close()
 
 	if _, err = io.Copy(part, fileContent); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Add other form fields
@@ -75,27 +91,21 @@ func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (string, error) {
 	writer.WriteField("description", "eKYC Document")
 
 	if err := writer.Close(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	resp, err := c.makeRequest("POST", "/file-service/v1/addFile", body, writer.FormDataContentType())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var result struct {
-		Message string `json:"message"`
-		Object  struct {
-			Hash string `json:"hash"`
-		} `json:"object"`
-	}
-
+	var result UploadResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return result.Object.Hash, nil
+	return &result, nil
 }
 
 type ClassifyResponse struct {
