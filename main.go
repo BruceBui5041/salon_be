@@ -8,6 +8,7 @@ import (
 	"salon_be/component"
 	"salon_be/component/config"
 	"salon_be/component/db"
+	"salon_be/component/ekycclient"
 	"salon_be/component/logger"
 	"salon_be/component/server"
 	"salon_be/component/sms"
@@ -85,6 +86,7 @@ func main() {
 		nil,
 		config.CreateS3Client(awsSession),
 		sms.NewSMSClient(),
+		ekycclient.NewEKYCClient(),
 	)
 
 	appCache := appContext.GetAppCache()

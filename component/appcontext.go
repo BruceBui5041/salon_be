@@ -3,6 +3,7 @@ package component
 import (
 	"context"
 	"salon_be/component/cache"
+	"salon_be/component/ekycclient"
 	"salon_be/component/sms"
 	"salon_be/component/sms/esms"
 	models "salon_be/model"
@@ -25,6 +26,7 @@ type AppContext interface {
 	GetS3Client() *s3.S3
 	GetCronJob() CronJob
 	GetSMSClient() SMSClient
+	GetEKYCClient() *ekycclient.EKYCClient
 }
 
 type DBInstances interface {
@@ -88,6 +90,7 @@ type appCtx struct {
 	appqueue           AppQueue
 	cron               CronJob
 	smsClient          SMSClient
+	ekycClient         *ekycclient.EKYCClient // Added this
 }
 
 func NewAppContext(
@@ -101,8 +104,8 @@ func NewAppContext(
 	cron CronJob,
 	s3Client *s3.S3,
 	smsClient SMSClient,
+	ekycClient *ekycclient.EKYCClient,
 ) *appCtx {
-
 	return &appCtx{
 		dbInstances:        dbInstances,
 		localPubSub:        localPubSub,
@@ -114,6 +117,7 @@ func NewAppContext(
 		cron:               cron,
 		s3Client:           s3Client,
 		smsClient:          smsClient,
+		ekycClient:         ekycClient,
 	}
 }
 
@@ -151,4 +155,8 @@ func (ctx *appCtx) GetCronJob() CronJob {
 
 func (ctx *appCtx) GetSMSClient() SMSClient {
 	return ctx.smsClient
+}
+
+func (ctx *appCtx) GetEKYCClient() *ekycclient.EKYCClient {
+	return ctx.ekycClient
 }
