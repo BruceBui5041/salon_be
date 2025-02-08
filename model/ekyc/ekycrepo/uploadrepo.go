@@ -52,7 +52,7 @@ func (repo *kycImageUploadRepo) UploadKYCImage(
 	}
 
 	// Upload to VNPT eKYC service
-	ekycRes, err := repo.ekycClient.UploadFile(input.Image)
+	ekycRes, err := repo.ekycClient.UploadFile(ctx, input.Image)
 	if err != nil {
 		return nil, common.ErrInternal(err)
 	}

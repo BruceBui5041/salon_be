@@ -4,8 +4,11 @@ import (
 	"context"
 	"salon_be/common"
 	"salon_be/component/ekycclient"
+	"salon_be/component/logger"
 	models "salon_be/model"
 	"salon_be/model/ekyc/ekycmodel"
+
+	"go.uber.org/zap"
 )
 
 type KYCStore interface {
@@ -33,11 +36,17 @@ func NewCreateKYCRepo(store KYCStore, ekycClient *ekycclient.EKYCClient, uploadR
 }
 
 func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmodel.CreateKYCProfileRequest) error {
+	logger.AppLogger.Info(ctx, "starting KYC profile processing",
+		zap.Uint32("user_id", input.UserID))
+
 	// Upload documents using uploadRepo
 	frontImageRes, err := repo.uploadRepo.UploadKYCImage(ctx, input.UserID, &ekycmodel.UploadRequest{
 		Image: input.FrontDocument,
 	})
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to upload front image",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
 
@@ -45,6 +54,9 @@ func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmod
 		Image: input.BackDocument,
 	})
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to upload back image",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
 
@@ -52,26 +64,47 @@ func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmod
 		Image: input.FaceImage,
 	})
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to upload face image",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
 
-	// Document verification - Reduced to single classify call
-	docType, err := repo.ekycClient.ClassifyDocument(frontImageRes.Object.Hash, input.ClientSession)
+	logger.AppLogger.Info(ctx, "document verification starting",
+		zap.Uint32("user_id", input.UserID))
+
+	// Document verification
+	docType, err := repo.ekycClient.ClassifyDocument(ctx, frontImageRes.Object.Hash, input.ClientSession)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "document classification failed",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
 
-	// Extract information and validate in one call
-	docInfo, err := repo.ekycClient.ExtractDocumentInfo(frontImageRes.Object.Hash, backImageRes.Object.Hash, input.ClientSession)
+	// Extract information and validate
+	docInfo, err := repo.ekycClient.ExtractDocumentInfo(ctx, frontImageRes.Object.Hash, backImageRes.Object.Hash, input.ClientSession)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "document info extraction failed",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
 
-	// Face verification - Combined with liveness
-	faceVerification, err := repo.ekycClient.VerifyFace(frontImageRes.Object.Hash, faceImageRes.Object.Hash, input.ClientSession)
+	logger.AppLogger.Info(ctx, "face verification starting",
+		zap.Uint32("user_id", input.UserID))
+
+	// Face verification
+	faceVerification, err := repo.ekycClient.VerifyFace(ctx, frontImageRes.Object.Hash, faceImageRes.Object.Hash, input.ClientSession)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "face verification failed",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return common.ErrInternal(err)
 	}
+
+	logger.AppLogger.Info(ctx, "creating KYC profile records",
+		zap.Uint32("user_id", input.UserID))
 
 	// Create KYC profile
 	profile := &models.KYCProfile{
@@ -86,6 +119,9 @@ func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmod
 	}
 
 	if err := repo.store.CreateKYCProfile(ctx, profile); err != nil {
+		logger.AppLogger.Error(ctx, "failed to create KYC profile",
+			zap.Uint32("user_id", input.UserID),
+			zap.Error(err))
 		return err
 	}
 
@@ -100,9 +136,18 @@ func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmod
 		IDProbs:      docInfo.Object.IDProbs,
 		BirthDay:     docInfo.Object.BirthDay,
 		BirthDayProb: docInfo.Object.BirthDayProb,
+		Nationality:  docInfo.Object.Nationality,
+		Gender:       docInfo.Object.Gender,
+		ValidDate:    docInfo.Object.ValidDate,
+		IssueDate:    docInfo.Object.IssueDate,
+		IssuePlace:   docInfo.Object.IssuePlace,
 	}
 
 	if err := repo.store.CreateDocument(ctx, document); err != nil {
+		logger.AppLogger.Error(ctx, "failed to create document record",
+			zap.Uint32("user_id", input.UserID),
+			zap.String("doc_id", document.ID),
+			zap.Error(err))
 		return err
 	}
 
@@ -116,8 +161,16 @@ func (repo *createKYCRepo) ProcessKYCProfile(ctx context.Context, input *ekycmod
 	}
 
 	if err := repo.store.CreateFaceVerification(ctx, faceData); err != nil {
+		logger.AppLogger.Error(ctx, "failed to create face verification record",
+			zap.Uint32("user_id", input.UserID),
+			zap.Uint32("profile_id", profile.Id),
+			zap.Error(err))
 		return err
 	}
+
+	logger.AppLogger.Info(ctx, "KYC profile processing completed successfully",
+		zap.Uint32("user_id", input.UserID),
+		zap.Uint32("profile_id", profile.Id))
 
 	return nil
 }

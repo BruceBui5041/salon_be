@@ -2,10 +2,14 @@ package ekycclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"salon_be/component/logger"
+
+	"go.uber.org/zap"
 )
 
 type EKYCConfig struct {
@@ -50,10 +54,14 @@ func NewEKYCClient() *EKYCClient {
 	}
 }
 
-func (c *EKYCClient) makeRequest(method, endpoint string, body io.Reader, contentType string) (*http.Response, error) {
+func (c *EKYCClient) makeRequest(ctx context.Context, method, endpoint string, body io.Reader, contentType string) (*http.Response, error) {
 	url := c.config.BaseURL + endpoint
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to create request",
+			zap.String("method", method),
+			zap.String("endpoint", endpoint),
+			zap.Error(err))
 		return nil, err
 	}
 
@@ -63,26 +71,51 @@ func (c *EKYCClient) makeRequest(method, endpoint string, body io.Reader, conten
 	req.Header.Set("Authorization", "Bearer "+c.config.AccessToken)
 	req.Header.Set("mac-address", "TEST1")
 
-	return c.client.Do(req)
+	resp, err := c.client.Do(req)
+	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to execute request",
+			zap.String("method", method),
+			zap.String("endpoint", endpoint),
+			zap.Error(err))
+		return nil, err
+	}
+
+	if resp.StatusCode >= 400 {
+		logger.AppLogger.Error(ctx, "received error response",
+			zap.String("method", method),
+			zap.String("endpoint", endpoint),
+			zap.Int("status_code", resp.StatusCode))
+	}
+
+	return resp, nil
 }
 
-func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (*UploadResponse, error) {
+func (c *EKYCClient) UploadFile(ctx context.Context, file *multipart.FileHeader) (*UploadResponse, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	// Add file
 	part, err := writer.CreateFormFile("file", file.Filename)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to create form file",
+			zap.String("filename", file.Filename),
+			zap.Error(err))
 		return nil, err
 	}
 
 	fileContent, err := file.Open()
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to open file",
+			zap.String("filename", file.Filename),
+			zap.Error(err))
 		return nil, err
 	}
 	defer fileContent.Close()
 
 	if _, err = io.Copy(part, fileContent); err != nil {
+		logger.AppLogger.Error(ctx, "failed to copy file content",
+			zap.String("filename", file.Filename),
+			zap.Error(err))
 		return nil, err
 	}
 
@@ -91,10 +124,14 @@ func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (*UploadResponse, er
 	writer.WriteField("description", "eKYC Document")
 
 	if err := writer.Close(); err != nil {
+		logger.AppLogger.Error(ctx, "failed to close multipart writer", zap.Error(err))
 		return nil, err
 	}
 
-	resp, err := c.makeRequest("POST", "/file-service/v1/addFile", body, writer.FormDataContentType())
+	logger.AppLogger.Info(ctx, "uploading file to EKYC service",
+		zap.String("filename", file.Filename))
+
+	resp, err := c.makeRequest(ctx, "POST", "/file-service/v1/addFile", body, writer.FormDataContentType())
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +139,7 @@ func (c *EKYCClient) UploadFile(file *multipart.FileHeader) (*UploadResponse, er
 
 	var result UploadResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.AppLogger.Error(ctx, "failed to decode upload response", zap.Error(err))
 		return nil, err
 	}
 
@@ -116,7 +154,7 @@ type ClassifyResponse struct {
 	} `json:"object"`
 }
 
-func (c *EKYCClient) ClassifyDocument(hash, clientSession string) (*ClassifyResponse, error) {
+func (c *EKYCClient) ClassifyDocument(ctx context.Context, hash, clientSession string) (*ClassifyResponse, error) {
 	payload := map[string]string{
 		"img_card":       hash,
 		"client_session": clientSession,
@@ -125,10 +163,12 @@ func (c *EKYCClient) ClassifyDocument(hash, clientSession string) (*ClassifyResp
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to marshal classify request",
+			zap.Error(err))
 		return nil, err
 	}
 
-	resp, err := c.makeRequest("POST", "/ai/v1/classify/id", bytes.NewBuffer(jsonData), "application/json")
+	resp, err := c.makeRequest(ctx, "POST", "/ai/v1/classify/id", bytes.NewBuffer(jsonData), "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -136,6 +176,7 @@ func (c *EKYCClient) ClassifyDocument(hash, clientSession string) (*ClassifyResp
 
 	var result ClassifyResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.AppLogger.Error(ctx, "failed to decode classify response", zap.Error(err))
 		return nil, err
 	}
 
@@ -153,7 +194,7 @@ type LivenessResponse struct {
 	} `json:"object"`
 }
 
-func (c *EKYCClient) ValidateDocument(hash, clientSession string) (*LivenessResponse, error) {
+func (c *EKYCClient) ValidateDocument(ctx context.Context, hash, clientSession string) (*LivenessResponse, error) {
 	payload := map[string]string{
 		"img":            hash,
 		"client_session": clientSession,
@@ -161,10 +202,12 @@ func (c *EKYCClient) ValidateDocument(hash, clientSession string) (*LivenessResp
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to marshal validate document request",
+			zap.Error(err))
 		return nil, err
 	}
 
-	resp, err := c.makeRequest("POST", "/ai/v1/card/liveness", bytes.NewBuffer(jsonData), "application/json")
+	resp, err := c.makeRequest(ctx, "POST", "/ai/v1/card/liveness", bytes.NewBuffer(jsonData), "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -172,6 +215,7 @@ func (c *EKYCClient) ValidateDocument(hash, clientSession string) (*LivenessResp
 
 	var result LivenessResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.AppLogger.Error(ctx, "failed to decode validate document response", zap.Error(err))
 		return nil, err
 	}
 
@@ -199,7 +243,7 @@ type DocumentInfo struct {
 	} `json:"object"`
 }
 
-func (c *EKYCClient) ExtractDocumentInfo(frontHash, backHash string, clientSession string) (*DocumentInfo, error) {
+func (c *EKYCClient) ExtractDocumentInfo(ctx context.Context, frontHash, backHash string, clientSession string) (*DocumentInfo, error) {
 	payload := map[string]interface{}{
 		"img_front":         frontHash,
 		"img_back":          backHash,
@@ -211,10 +255,12 @@ func (c *EKYCClient) ExtractDocumentInfo(frontHash, backHash string, clientSessi
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to marshal extract document info request",
+			zap.Error(err))
 		return nil, err
 	}
 
-	resp, err := c.makeRequest("POST", "/ai/v1/ocr/id", bytes.NewBuffer(jsonData), "application/json")
+	resp, err := c.makeRequest(ctx, "POST", "/ai/v1/ocr/id", bytes.NewBuffer(jsonData), "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -222,6 +268,7 @@ func (c *EKYCClient) ExtractDocumentInfo(frontHash, backHash string, clientSessi
 
 	var result DocumentInfo
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.AppLogger.Error(ctx, "failed to decode document info response", zap.Error(err))
 		return nil, err
 	}
 
@@ -237,7 +284,7 @@ type FaceVerification struct {
 	} `json:"object"`
 }
 
-func (c *EKYCClient) VerifyFace(docHash, faceHash string, clientSession string) (*FaceVerification, error) {
+func (c *EKYCClient) VerifyFace(ctx context.Context, docHash, faceHash string, clientSession string) (*FaceVerification, error) {
 	payload := map[string]string{
 		"img_front":      docHash,
 		"img_face":       faceHash,
@@ -247,10 +294,12 @@ func (c *EKYCClient) VerifyFace(docHash, faceHash string, clientSession string) 
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
+		logger.AppLogger.Error(ctx, "failed to marshal verify face request",
+			zap.Error(err))
 		return nil, err
 	}
 
-	resp, err := c.makeRequest("POST", "/ai/v1/face/compare", bytes.NewBuffer(jsonData), "application/json")
+	resp, err := c.makeRequest(ctx, "POST", "/ai/v1/face/compare", bytes.NewBuffer(jsonData), "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -258,64 +307,7 @@ func (c *EKYCClient) VerifyFace(docHash, faceHash string, clientSession string) 
 
 	var result FaceVerification
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
-type MaskResponse struct {
-	Message string `json:"message"`
-	Object  struct {
-		Masked string `json:"masked"`
-	} `json:"object"`
-}
-
-func (c *EKYCClient) CheckFaceMask(hash string, clientSession string) (*MaskResponse, error) {
-	payload := map[string]string{
-		"img":            hash,
-		"client_session": clientSession,
-	}
-
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.makeRequest("POST", "/ai/v1/face/mask", bytes.NewBuffer(jsonData), "application/json")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var result MaskResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
-func (c *EKYCClient) CheckFaceLiveness(hash string, clientSession string) (*LivenessResponse, error) {
-	payload := map[string]string{
-		"img":            hash,
-		"client_session": clientSession,
-		"token":          "verification",
-	}
-
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.makeRequest("POST", "/ai/v1/face/liveness", bytes.NewBuffer(jsonData), "application/json")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var result LivenessResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.AppLogger.Error(ctx, "failed to decode face verification response", zap.Error(err))
 		return nil, err
 	}
 
