@@ -2,10 +2,15 @@ package models
 
 import (
 	"salon_be/common"
+	"salon_be/component/genericapi/modelhelper"
 	"salon_be/model/payment/paymentconst"
 
 	"gorm.io/gorm"
 )
+
+func init() {
+	modelhelper.RegisterModel(Payment{})
+}
 
 const PaymentEntityName = "Payment"
 
