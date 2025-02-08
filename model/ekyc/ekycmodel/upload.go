@@ -5,10 +5,7 @@ import (
 )
 
 type UploadRequest struct {
-	Image         *multipart.FileHeader `form:"image"`
-	Title         string                `form:"title"`
-	Description   string                `form:"description"`
-	ClientSession string                `form:"client_session"`
+	Image *multipart.FileHeader `form:"image"`
 }
 
 type KYCImageUploadRes struct {

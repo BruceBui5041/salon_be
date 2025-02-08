@@ -28,9 +28,5 @@ func (biz *uploadBiz) UploadImage(
 		return nil, common.ErrInvalidRequest(errors.New("image is required"))
 	}
 
-	if input.ClientSession == "" {
-		return nil, common.ErrInvalidRequest(errors.New("client session is required"))
-	}
-
 	return biz.repo.UploadKYCImage(ctx, userId, input)
 }

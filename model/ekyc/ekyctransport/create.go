@@ -1,4 +1,4 @@
-package ginkyc
+package ekyctransport
 
 import (
 	"errors"
@@ -9,13 +9,15 @@ import (
 	"salon_be/model/ekyc/ekycmodel"
 	"salon_be/model/ekyc/ekycrepo"
 	"salon_be/model/ekyc/ekycstore"
+	"salon_be/model/image/imagerepo"
+	"salon_be/model/image/imagestore"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CreateKYCProfile(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Parse multipart form
 		if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
@@ -25,7 +27,6 @@ func CreateKYCProfile(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		// Get current user
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 		if !requester.IsUser() {
 			panic(common.ErrNoPermission(errors.New("only users can create KYC profiles")))
@@ -33,11 +34,38 @@ func CreateKYCProfile(appCtx component.AppContext) gin.HandlerFunc {
 
 		request.UserID = requester.GetUserId()
 
-		store := ekycstore.NewSQLStore(appCtx.GetMainDBConnection())
-		repo := ekycrepo.NewCreateKYCRepo(store, appCtx.GetEKYCClient())
-		business := ekycbiz.NewCreateKYCBiz(repo)
+		db := appCtx.GetMainDBConnection()
 
-		if err := business.CreateKYCProfile(c.Request.Context(), &request); err != nil {
+		if err := db.Transaction(func(tx *gorm.DB) error {
+			// Initialize stores with transaction
+			imageStore := imagestore.NewSQLStore(tx)
+			imageRepo := imagerepo.NewCreateImageRepo(imageStore, appCtx.GetS3Client())
+
+			store := ekycstore.NewSQLStore(tx)
+
+			// Initialize upload repo
+			uploadRepo := ekycrepo.NewKYCImageUploadRepo(
+				store,
+				appCtx.GetEKYCClient(),
+				imageRepo,
+			)
+
+			// Initialize create repo with upload repo
+			createRepo := ekycrepo.NewCreateKYCRepo(
+				store,
+				appCtx.GetEKYCClient(),
+				uploadRepo,
+			)
+
+			// Initialize business logic
+			business := ekycbiz.NewCreateKYCBiz(createRepo)
+
+			if err := business.CreateKYCProfile(c.Request.Context(), &request); err != nil {
+				return err
+			}
+
+			return nil
+		}); err != nil {
 			panic(err)
 		}
 

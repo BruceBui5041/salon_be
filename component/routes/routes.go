@@ -16,6 +16,7 @@ import (
 	"salon_be/model/comment/commenttransport"
 	"salon_be/model/commission/commissiontransport"
 	"salon_be/model/coupon/coupontransport"
+	"salon_be/model/ekyc/ekyctransport"
 	"salon_be/model/otp/otptransport"
 	"salon_be/model/payment/paymenttransport"
 	"salon_be/model/permission/permissiontransport"
@@ -52,6 +53,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupUserDeviceRoutes(r, appCtx)
 	setupCouponRoutes(r, appCtx)
 	setupCommissionRoutes(r, appCtx)
+	setupKYCRouters(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -217,6 +219,13 @@ func setupAuthRoutes(r *gin.Engine, appCtx component.AppContext) {
 		copier.Copy(&userCached, requester)
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(userCached))
 	})
+}
+
+func setupKYCRouters(r *gin.Engine, appCtx component.AppContext) {
+	eKYCGroup := r.Group("/ekyc", middleware.RequiredAuth(appCtx))
+	{
+		eKYCGroup.POST("", ekyctransport.CreateKYCProfile(appCtx))
+	}
 }
 
 func setupUtilityRoutes(r *gin.Engine, appCtx component.AppContext) {
