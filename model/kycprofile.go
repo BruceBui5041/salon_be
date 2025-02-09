@@ -11,6 +11,7 @@ const KYCProfileEntityName = "KYC Profile"
 type IDDocument struct {
 	common.SQLModel    `json:",inline"`
 	KYCProfileID       uint32          `json:"-" gorm:"column:kyc_profile_id"`
+	KYCProfile         *KYCProfile     `json:"kyc_profile" gorm:"foreignKey:KYCProfileID"`
 	Type               int             `json:"type" gorm:"column:type"`
 	Name               string          `json:"name" gorm:"column:name"`
 	CardType           string          `json:"card_type" gorm:"column:card_type"`
@@ -52,14 +53,15 @@ func (d *IDDocument) IsDocumentValid() bool {
 
 type FaceVerification struct {
 	common.SQLModel `json:",inline"`
-	KYCProfileID    uint32  `json:"-" gorm:"column:kyc_profile_id"`
-	Result          string  `json:"result" gorm:"column:result"`
-	Msg             string  `json:"msg" gorm:"column:msg"`
-	Prob            float64 `json:"prob" gorm:"column:prob"`
-	LivenessStatus  string  `json:"liveness" gorm:"column:liveness"`
-	LivenessMsg     string  `json:"liveness_msg" gorm:"column:liveness_msg"`
-	IsEyeOpen       string  `json:"is_eye_open" gorm:"column:is_eye_open"`
-	Masked          string  `json:"masked" gorm:"column:masked"`
+	KYCProfileID    uint32      `json:"-" gorm:"column:kyc_profile_id"`
+	KYCProfile      *KYCProfile `json:"kyc_profile" gorm:"foreignKey:KYCProfileID"`
+	Result          string      `json:"result" gorm:"column:result"`
+	Msg             string      `json:"msg" gorm:"column:msg"`
+	Prob            float64     `json:"prob" gorm:"column:prob"`
+	LivenessStatus  string      `json:"liveness" gorm:"column:liveness"`
+	LivenessMsg     string      `json:"liveness_msg" gorm:"column:liveness_msg"`
+	IsEyeOpen       string      `json:"is_eye_open" gorm:"column:is_eye_open"`
+	Masked          string      `json:"masked" gorm:"column:masked"`
 }
 
 func (FaceVerification) TableName() string {

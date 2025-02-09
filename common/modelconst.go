@@ -29,6 +29,9 @@ const (
 	DBTypeNotificationDetail = 20
 	DBTypeUserDevice         = 21
 	DBTypeCommission         = 22
+	DBTypeLocation           = 23
+	DBTypeBookingLocation    = 24
+	DBTypeDistanceTracking   = 25
 )
 
 const (
