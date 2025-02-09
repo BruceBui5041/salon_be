@@ -1,0 +1,135 @@
+name: Build and Deploy Backend DEV
+
+on:
+  push:
+    branches: [ deploy-dev ]
+  pull_request:
+    branches: [ deploy-dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+          cache: true
+      
+      - name: Install dependencies
+        run: go mod download
+      
+      - name: Build Go application
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o main
+          
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy_package
+          cp main deploy_package/
+          cp go.mod deploy_package/
+          cp go.sum deploy_package/
+          
+          # If you have any config files or static assets, copy them too
+          # cp -r config deploy_package/
+          # cp -r assets deploy_package/
+          
+          cd deploy_package
+          tar -czf ../project.tar.gz .
+          cd ..
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-build
+          path: project.tar.gz
+          retention-days: 5
+          if-no-files-found: error
+          compression-level: 9
+
+  terraform:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone DevOps repository
+        run: |
+          git clone https://${{ secrets.PAT_TOKEN }}@github.com/BruceBui5041/salon-devops.git devops
+          ls -la devops
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: go-build
+          path: devops/backend/upload-files/
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.7.0'
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+          aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+
+      - name: Terraform Init
+        run: |
+          cd devops/backend
+          terraform init
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.REDIS_PASSWORD }}
+          TF_VAR_otp_sms_api_key: ${{ secrets.OTP_SMS_API_KEY }}
+          TF_VAR_otp_sms_api_secret_key: ${{ secrets.OTP_SMS_API_SECRET_KEY }}
+
+      - name: Terraform Destroy
+        run: |
+          cd devops/backend
+          terraform destroy --auto-approve
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.REDIS_PASSWORD }}
+          TF_VAR_otp_sms_api_key: ${{ secrets.OTP_SMS_API_KEY }}
+          TF_VAR_otp_sms_api_secret_key: ${{ secrets.OTP_SMS_API_SECRET_KEY }}
+      
+      - name: Terraform Plan
+        run: |
+          cd devops/backend
+          terraform plan --out=tfplan
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.REDIS_PASSWORD }}
+          TF_VAR_otp_sms_api_key: ${{ secrets.OTP_SMS_API_KEY }}
+          TF_VAR_otp_sms_api_secret_key: ${{ secrets.OTP_SMS_API_SECRET_KEY }}
+      
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/deploy-dev' && github.event_name == 'push'
+        run: |
+          cd devops/backend
+          terraform apply --auto-approve tfplan
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.REDIS_PASSWORD }}
+          TF_VAR_otp_sms_api_key: ${{ secrets.OTP_SMS_API_KEY }}
+          TF_VAR_otp_sms_api_secret_key: ${{ secrets.OTP_SMS_API_SECRET_KEY }}
