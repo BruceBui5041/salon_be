@@ -23,7 +23,7 @@ jobs:
       
       - name: Build Go application
         run: |
-          GOOS=linux GOARCH=amd64 go build -o main
+          GOOS=linux GOARCH=amd64 go build -o app
           
       - name: Create deployment package
         run: |
