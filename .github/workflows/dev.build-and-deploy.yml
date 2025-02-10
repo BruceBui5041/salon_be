@@ -23,12 +23,12 @@ jobs:
       
       - name: Build Go application
         run: |
-          GOOS=linux GOARCH=amd64 go build -o main
+          GOOS=linux GOARCH=amd64 go build -o app
           
       - name: Create deployment package
         run: |
           mkdir -p deploy_package
-          cp main deploy_package/
+          cp app deploy_package/
           cp go.mod deploy_package/
           cp go.sum deploy_package/
           
