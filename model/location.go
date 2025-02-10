@@ -8,12 +8,10 @@ import (
 
 type Location struct {
 	common.SQLModel `json:",inline"`
-	BookingID       uint32   `json:"booking_id" gorm:"column:booking_id;not null;index"`
-	Booking         *Booking `json:"booking,omitempty" gorm:"foreignKey:BookingID"`
-	UserType        string   `json:"user_type" gorm:"column:user_type;type:ENUM('service_man','customer');not null"`
-	Latitude        float64  `json:"latitude" gorm:"column:latitude;type:decimal(10,8);not null"`
-	Longitude       float64  `json:"longitude" gorm:"column:longitude;type:decimal(11,8);not null"`
-	Accuracy        float32  `json:"accuracy" gorm:"column:accuracy;type:float"`
+	UserType        string  `json:"user_type" gorm:"column:user_type;type:ENUM('service_man','customer');not null"`
+	Latitude        float64 `json:"latitude" gorm:"column:latitude;type:decimal(10,8);not null"`
+	Longitude       float64 `json:"longitude" gorm:"column:longitude;type:decimal(11,8);not null"`
+	Accuracy        float32 `json:"accuracy" gorm:"column:accuracy;type:float"`
 }
 
 func (Location) TableName() string {

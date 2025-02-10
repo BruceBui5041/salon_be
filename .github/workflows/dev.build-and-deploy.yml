@@ -45,7 +45,7 @@ jobs:
         with:
           name: go-build
           path: project.tar.gz
-          retention-days: 5
+          retention-days: 1
           if-no-files-found: error
           compression-level: 9
 
