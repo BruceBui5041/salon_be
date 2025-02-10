@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"salon_be/appconst"
 	"salon_be/component"
 	"salon_be/component/logger"
+	"salon_be/component/tokenprovider/jwt"
 	"salon_be/watermill"
 	"sync"
 
@@ -58,6 +60,26 @@ func (s *WebSocketServer) HandleWebSocket(appCtx component.AppContext) gin.Handl
 			attribute.String("client_ip", c.ClientIP()),
 			attribute.String("user_agent", c.Request.UserAgent()),
 		)
+
+		accessToken, err := c.Cookie(appconst.AccessTokenName)
+		if err != nil {
+			logger.AppLogger.Error(ctx, "Missing access token cookie",
+				zap.Error(err),
+			)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing access token"})
+			span.RecordError(errors.New("missing access token cookie"))
+			return
+		}
+		jwtProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+
+		payload, err := jwtProvider.Validate(accessToken)
+		if err != nil {
+			panic(err)
+		}
+
+		if payload.Challenge != "" {
+			panic(errors.New("have to passed authentication challenges"))
+		}
 
 		userID := c.Query("user_id")
 		if userID == "" {
