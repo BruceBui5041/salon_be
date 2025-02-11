@@ -35,6 +35,9 @@ type User struct {
 	Comments        []*Comment    `json:"comments,omitempty" gorm:"foreignKey:UserID"`
 	OTPs            []*OTP        `json:"otp,omitempty" gorm:"foreignKey:UserID"`
 	UserDevice      *UserDevice   `json:"user_device,omitempty" gorm:"foreignKey:UserID"`
+
+	OwnedCertificates   []*Certificate `json:"owned_certificates" gorm:"foreignKey:OwnerID"`
+	CreatedCertificates []*Certificate `json:"created_certificates" gorm:"foreignKey:CreatorID"`
 }
 
 func (User) TableName() string {

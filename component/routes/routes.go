@@ -13,6 +13,7 @@ import (
 	"salon_be/middleware"
 	"salon_be/model/booking/bookingtransport"
 	"salon_be/model/category/categorytransport"
+	"salon_be/model/certificate/certificatetransport"
 	"salon_be/model/comment/commenttransport"
 	"salon_be/model/commission/commissiontransport"
 	"salon_be/model/coupon/coupontransport"
@@ -54,6 +55,7 @@ func SetupRoutes(r *gin.Engine, appCtx component.AppContext) {
 	setupCouponRoutes(r, appCtx)
 	setupCommissionRoutes(r, appCtx)
 	setupKYCRouters(r, appCtx)
+	setupCertificateRouters(r, appCtx)
 }
 
 func setupGenericRoutes(r *gin.Engine, appCtx component.AppContext) {
@@ -225,6 +227,13 @@ func setupKYCRouters(r *gin.Engine, appCtx component.AppContext) {
 	eKYCGroup := r.Group("/ekyc", middleware.RequiredAuth(appCtx))
 	{
 		eKYCGroup.POST("", ekyctransport.CreateKYCProfile(appCtx))
+	}
+}
+
+func setupCertificateRouters(r *gin.Engine, appCtx component.AppContext) {
+	certGroup := r.Group("/certificate", middleware.RequiredAuth(appCtx))
+	{
+		certGroup.POST("", certificatetransport.CreateCertificate(appCtx))
 	}
 }
 
