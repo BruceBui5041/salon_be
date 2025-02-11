@@ -22,6 +22,14 @@ func PublishReceivedWSMsgEvent(
 
 	// Set the context in the message metadata
 	watermillMsg.Metadata.Set("correlation_id", getCorrelationID(ctx))
+
+	userID, ok := ctx.Value("currentUserID").(string)
+	if !ok {
+		// Handle the case where the value isn't a string
+		return fmt.Errorf("userID not found in context")
+	}
+
+	watermillMsg.Metadata.Set("currentUserID", userID)
 	// Set tracing metadata
 	setTracingMetadata(ctx, watermillMsg)
 

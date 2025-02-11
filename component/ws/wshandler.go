@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"salon_be/appconst"
 	"salon_be/component"
 	"salon_be/component/logger"
-	"salon_be/component/tokenprovider/jwt"
 	"salon_be/watermill"
 	"sync"
 
@@ -20,6 +18,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
+
+type contextKey string
+
+const UserIDKey contextKey = "currentUserID"
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -61,25 +63,7 @@ func (s *WebSocketServer) HandleWebSocket(appCtx component.AppContext) gin.Handl
 			attribute.String("user_agent", c.Request.UserAgent()),
 		)
 
-		accessToken, err := c.Cookie(appconst.AccessTokenName)
-		if err != nil {
-			logger.AppLogger.Error(ctx, "Missing access token cookie",
-				zap.Error(err),
-			)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing access token"})
-			span.RecordError(errors.New("missing access token cookie"))
-			return
-		}
-		jwtProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
-
-		payload, err := jwtProvider.Validate(accessToken)
-		if err != nil {
-			panic(err)
-		}
-
-		if payload.Challenge != "" {
-			panic(errors.New("have to passed authentication challenges"))
-		}
+		cachedUser := wsAuthorize(c, appCtx)
 
 		userID := c.Query("user_id")
 		if userID == "" {
@@ -88,6 +72,15 @@ func (s *WebSocketServer) HandleWebSocket(appCtx component.AppContext) gin.Handl
 			span.RecordError(errors.New("missing user id"))
 			return
 		}
+
+		if cachedUser.GetFakeId() != userID {
+			logger.AppLogger.Error(ctx, "Invalid user ID")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			span.RecordError(errors.New("invalid user id"))
+			return
+		}
+
+		ctx = context.WithValue(ctx, "currentUserID", cachedUser.GetFakeId())
 
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
