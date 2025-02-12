@@ -9,8 +9,8 @@ import (
 	"salon_be/model/certificate/certificateerror"
 	"salon_be/model/certificate/certificatemodel"
 	"strings"
+	"time"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +40,10 @@ func (biz *createBiz) CreateCertificate(ctx context.Context, data *certificatemo
 		return certificateerror.ErrFileTooLarge(fmt.Errorf("file size exceeds 5MB limit"))
 	}
 
-	s3Key := GenerateCertificateS3Key(data.OwnerID, fileHeader.Filename)
+	tempUser := common.SQLModel{Id: data.OwnerID}
+	tempUser.GenUID(common.DbTypeUser)
+
+	s3Key := GenerateCertificateS3KeyWithTimestamp(tempUser.GetFakeId(), fileHeader.Filename)
 
 	certificate := &models.Certificate{
 		URL:       s3Key,
@@ -57,10 +60,12 @@ func (biz *createBiz) CreateCertificate(ctx context.Context, data *certificatemo
 	return nil
 }
 
-func GenerateCertificateS3Key(ownerID uint32, filename string) string {
+func GenerateCertificateS3KeyWithTimestamp(ownerID string, filename string) string {
+	timestamp := time.Now().UTC().Unix()
 	return fmt.Sprintf(
-		"certificates/%d/%s",
+		"certificates/%s/%d_%s",
 		ownerID,
-		fmt.Sprintf("%s_%s", uuid.NewString(), filename),
+		timestamp,
+		filename,
 	)
 }
