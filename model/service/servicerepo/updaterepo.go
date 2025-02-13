@@ -145,8 +145,13 @@ func (repo *updateServiceRepo) UpdateService(
 			"ServiceMen",
 		)
 		if err != nil {
-			logger.AppLogger.Error(ctx, "version not found", zap.Error(err))
+			logger.AppLogger.Error(ctx, "version not found", zap.Error(err), zap.Any("data", input))
 			return nil, err
+		}
+
+		if existingServiceVersion.PublishedDate != nil {
+			logger.AppLogger.Error(ctx, "version not found", zap.Error(err), zap.Any("data", input))
+			return nil, serviceerror.ErrServiceVersionAlreadyPublished(errors.New("cannot update published service version"))
 		}
 
 		serviceVersion := &models.ServiceVersion{
