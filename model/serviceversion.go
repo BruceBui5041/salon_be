@@ -38,7 +38,7 @@ type ServiceVersion struct {
 	MainImage       *Image               `json:"main_image,omitempty" gorm:"foreignKey:MainImageID;references:Id;constraint:OnDelete:SET NULL"`
 	Title           string               `json:"title" gorm:"column:title;not null;size:255"`
 	Description     string               `json:"description" gorm:"column:description;type:text"`
-	ServiceMen      []User               `json:"service_men" gorm:"many2many:user_service;"`
+	ServiceMen      []*UserService       `json:"service_men,omitempty" gorm:"many2many:user_service;"`
 	Thumbnail       string               `json:"thumbnail" gorm:"column:thumbnail;type:text"`
 	Price           decimal.Decimal      `json:"price" gorm:"column:price;type:decimal(10,2);not null"`
 	DiscountedPrice *decimal.NullDecimal `json:"discounted_price" gorm:"column:discounted_price;type:decimal(10,2)"`

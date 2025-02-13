@@ -60,11 +60,17 @@ type UpdateM2MVersionImageStore interface {
 	Update(ctx context.Context, updates *models.M2MServiceVersionImage) error
 }
 
+type UpdateUserServiceStore interface {
+	DeleteByCondition(ctx context.Context, conditions map[string]interface{}) error
+	Create(ctx context.Context, data *models.UserService) error
+}
+
 type updateServiceRepo struct {
 	serviceStore        UpdateServiceStore
 	serviceVersionStore UpdateServiceVersionStore
 	imageRepo           UpdateImageRepo
 	m2mVersionImages    UpdateM2MVersionImageStore
+	userServiceStore    UpdateUserServiceStore
 }
 
 func NewUpdateServiceRepo(
@@ -72,12 +78,14 @@ func NewUpdateServiceRepo(
 	serviceVersionStore UpdateServiceVersionStore,
 	imageRepo UpdateImageRepo,
 	m2mVersionImages UpdateM2MVersionImageStore,
+	userServiceStore UpdateUserServiceStore,
 ) *updateServiceRepo {
 	return &updateServiceRepo{
 		serviceStore:        serviceStore,
 		serviceVersionStore: serviceVersionStore,
 		imageRepo:           imageRepo,
 		m2mVersionImages:    m2mVersionImages,
+		userServiceStore:    userServiceStore,
 	}
 }
 
@@ -134,6 +142,7 @@ func (repo *updateServiceRepo) UpdateService(
 			ctx,
 			map[string]interface{}{"id": serviceVersionId},
 			"Images",
+			"ServiceMen",
 		)
 		if err != nil {
 			logger.AppLogger.Error(ctx, "version not found", zap.Error(err))
@@ -151,6 +160,35 @@ func (repo *updateServiceRepo) UpdateService(
 			Thumbnail:     input.ServiceVersion.Thumbnail,
 			Price:         input.ServiceVersion.Price.GetDecimal(),
 			Duration:      input.ServiceVersion.Duration,
+		}
+
+		if input.ServiceVersion.ServiceMenIds != nil {
+			// Delete existing servicemen associations
+			if err := repo.userServiceStore.DeleteByCondition(ctx, map[string]interface{}{
+				"service_version_id": serviceVersionId,
+			}); err != nil {
+				logger.AppLogger.Error(ctx, "failed to delete existing servicemen", zap.Error(err))
+				return nil, common.ErrDB(err)
+			}
+
+			// Create new servicemen associations
+			for _, serviceManIdStr := range input.ServiceVersion.ServiceMenIds {
+				serviceManUID, err := common.FromBase58(serviceManIdStr)
+				if err != nil {
+					logger.AppLogger.Error(ctx, "invalid service man ID", zap.Error(err))
+					return nil, common.ErrInvalidRequest(errors.New("invalid service man ID"))
+				}
+
+				userService := &models.UserService{
+					UserID:           serviceManUID.GetLocalID(),
+					ServiceVersionID: serviceVersionId,
+				}
+
+				if err := repo.userServiceStore.Create(ctx, userService); err != nil {
+					logger.AppLogger.Error(ctx, "failed to create user service", zap.Error(err))
+					return nil, common.ErrDB(err)
+				}
+			}
 		}
 
 		if input.ServiceVersion.Price != customtypes.DecimalString(decimal.Zero) {

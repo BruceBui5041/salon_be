@@ -61,7 +61,6 @@ type Booking struct {
 	Commission         *Commission       `json:"commission,omitempty" gorm:"foreignKey:CommissionID"`
 
 	// BookingLocation   *BookingLocation    `json:"booking_location,omitempty" gorm:"foreignKey:BookingID"`
-	// Locations         []*Location         `json:"locations,omitempty" gorm:"foreignKey:BookingID"`
 	// DistanceTrackings []*DistanceTracking `json:"distance_trackings,omitempty" gorm:"foreignKey:BookingID"`
 }
 

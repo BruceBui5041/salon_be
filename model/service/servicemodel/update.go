@@ -44,6 +44,7 @@ type UpdateServiceVersion struct {
 	CategoryID      string                         `json:"category_id" form:"category_id"`
 	SubCategoryID   string                         `json:"sub_category_id" form:"sub_category_id"`
 	IntroVideoID    string                         `json:"intro_video_id,omitempty" form:"intro_video_id,omitempty"`
+	ServiceMenIds   []string                       `json:"service_men_ids,omitempty" form:"service_men_ids"`
 	Thumbnail       string                         `json:"thumbnail" form:"thumbnail"`
 	Price           customtypes.DecimalString      `json:"price" form:"price"`
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty" form:"discounted_price,omitempty"`

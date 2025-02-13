@@ -15,6 +15,7 @@ import (
 	"salon_be/model/service/servicerepo"
 	"salon_be/model/service/servicestore"
 	"salon_be/model/serviceversion/serviceversionstore"
+	"salon_be/model/userservice/userservicestore"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -61,6 +62,7 @@ func UpdateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 			serviceVersionStore := serviceversionstore.NewSQLStore(tx)
 			imageStore := imagestore.NewSQLStore(tx)
 			m2mVersionImageStore := m2mserviceversionimagestore.NewSQLStore(tx)
+			userServiceStore := userservicestore.NewSQLStore(tx)
 
 			imageRepo := imagerepo.NewUpdateImageRepo(imageStore, appCtx.GetS3Client())
 			repo := servicerepo.NewUpdateServiceRepo(
@@ -68,6 +70,7 @@ func UpdateServiceHandler(appCtx component.AppContext) gin.HandlerFunc {
 				serviceVersionStore,
 				imageRepo,
 				m2mVersionImageStore,
+				userServiceStore,
 			)
 			business := servicebiz.NewUpdateServiceBiz(repo)
 
