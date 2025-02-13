@@ -3,8 +3,8 @@ name: Build and Deploy Backend DEV
 on:
   push:
     branches: [ deploy-dev ]
-  pull_request:
-    branches: [ deploy-dev ]
+  # pull_request:
+  #   branches: [ deploy-dev ]
 
 jobs:
   build:
