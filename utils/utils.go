@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func RenameFile(originalName, newBaseName string) string {
@@ -26,41 +27,21 @@ func RemoveFileExtension(filename string) string {
 }
 
 func WriteServerJWTTokenCookie(ctx *gin.Context, accessToken string) {
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     appconst.AccessTokenName,
-		Value:    accessToken,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		// SameSite: http.SameSiteStrictMode,
-		Path:    "/",
-		Domain:  "provider.salon-be.com",
-		Expires: time.Now().Add(7 * 24 * time.Hour),
-	})
+	allowOrigins := viper.GetStringSlice("ALLOW_ORIGINS")
 
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     appconst.AccessTokenName,
-		Value:    accessToken,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		// SameSite: http.SameSiteStrictMode,
-		Path:    "/",
-		Domain:  "customer.salon-be.com",
-		Expires: time.Now().Add(7 * 24 * time.Hour),
-	})
-
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     appconst.AccessTokenName,
-		Value:    accessToken,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		// SameSite: http.SameSiteStrictMode,
-		Path:    "/",
-		Domain:  "localhost",
-		Expires: time.Now().Add(7 * 24 * time.Hour),
-	})
+	for _, origin := range allowOrigins {
+		http.SetCookie(ctx.Writer, &http.Cookie{
+			Name:     appconst.AccessTokenName,
+			Value:    accessToken,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			// SameSite: http.SameSiteStrictMode,
+			Path:    "/",
+			Domain:  origin,
+			Expires: time.Now().Add(7 * 24 * time.Hour),
+		})
+	}
 }
 
 func ClearServerJWTTokenCookie(ctx *gin.Context) {
