@@ -99,6 +99,8 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.IDDocument{},
 		&models.FaceVerification{},
 		&models.KYCProfile{},
+
+		&models.Location{},
 	}
 
 	for _, table := range tables {

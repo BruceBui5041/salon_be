@@ -19,6 +19,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type contextKey string
+
+const UserIDKey contextKey = "currentUserID"
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -59,6 +63,8 @@ func (s *WebSocketServer) HandleWebSocket(appCtx component.AppContext) gin.Handl
 			attribute.String("user_agent", c.Request.UserAgent()),
 		)
 
+		cachedUser := wsAuthorize(c, appCtx)
+
 		userID := c.Query("user_id")
 		if userID == "" {
 			logger.AppLogger.Error(ctx, "Missing user ID")
@@ -66,6 +72,15 @@ func (s *WebSocketServer) HandleWebSocket(appCtx component.AppContext) gin.Handl
 			span.RecordError(errors.New("missing user id"))
 			return
 		}
+
+		if cachedUser.GetFakeId() != userID {
+			logger.AppLogger.Error(ctx, "Invalid user ID")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			span.RecordError(errors.New("invalid user id"))
+			return
+		}
+
+		ctx = context.WithValue(ctx, "currentUserID", cachedUser.GetFakeId())
 
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {

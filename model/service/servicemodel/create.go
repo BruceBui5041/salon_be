@@ -27,4 +27,5 @@ type CreateServiceVersion struct {
 	DiscountedPrice *customtypes.NullDecimalString `json:"discounted_price,omitempty" form:"discounted_price"`
 	Duration        uint32                         `json:"duration" form:"duration"`
 	Images          []*multipart.FileHeader        `json:"images" form:"images"`
+	ServiceMenIds   []string                       `json:"service_men_ids,omitempty" form:"service_men_ids"`
 }

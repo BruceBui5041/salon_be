@@ -32,6 +32,7 @@ const (
 	DBTypeLocation           = 23
 	DBTypeBookingLocation    = 24
 	DBTypeDistanceTracking   = 25
+	DBTypeCertificate        = 26
 )
 
 const (

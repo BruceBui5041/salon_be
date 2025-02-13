@@ -16,3 +16,13 @@ func ErrServiceDraftExisting(err error) *common.AppError {
 		errServiceDraftExisting,
 	)
 }
+
+func ErrServiceVersionAlreadyPublished(err error) *common.AppError {
+	return common.NewFullErrorResponse(
+		http.StatusBadRequest,
+		err,
+		"This service version already published",
+		err.Error(),
+		errServiceDraftExisting,
+	)
+}
