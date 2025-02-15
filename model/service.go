@@ -21,6 +21,8 @@ type Service struct {
 	common.SQLModel  `json:",inline"`
 	CreatorID        uint32           `json:"-" gorm:"column:creator_id;index"`
 	Creator          *User            `json:"creator,omitempty" gorm:"constraint:OnDelete:SET NULL;foreignKey:CreatorID"`
+	OwnerID          uint32           `json:"-" gorm:"column:owner_id;index"`
+	Owner            *User            `json:"owner,omitempty" gorm:"constraint:OnDelete:SET NULL;foreignKey:OwnerID"`
 	Versions         []ServiceVersion `json:"versions,omitempty" gorm:"foreignKey:ServiceID"`
 	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ServiceVersionID"`
 	ServiceVersionID *uint32          `json:"-" gorm:"column:service_version_id"`
@@ -30,6 +32,9 @@ type Service struct {
 	ReviewInfo       ReviewInfos      `json:"review_info" gorm:"column:review_info;type:json"`
 	AverageRating    decimal.Decimal  `json:"avg_rating" gorm:"column:avg_rating;type:decimal(3,1)"`
 	Images           []Image          `json:"images,omitempty" gorm:"foreignKey:ServiceID"`
+
+	GroupProviderID uint32         `json:"-" gorm:"column:group_provider_id;index"`
+	GroupProvider   *GroupProvider `json:"group_provider,omitempty" gorm:"foreignKey:GroupProviderID;references:Id;constraint:OnDelete:SET NULL;"`
 }
 
 func (Service) TableName() string {

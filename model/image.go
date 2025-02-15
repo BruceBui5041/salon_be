@@ -24,6 +24,8 @@ type Image struct {
 	URL             string            `json:"url" gorm:"column:url;type:text"`
 	ServiceVersions []*ServiceVersion `json:"service_versions,omitempty" gorm:"many2many:service_version_images;foreignKey:Id;joinForeignKey:ImageID;References:Id;joinReferences:ServiceVersionID;constraint:OnDelete:CASCADE;"`
 	Coupons         []*Coupon         `json:"coupons,omitempty" gorm:"foreignKey:ImageID"`
+
+	GroupProviders []*GroupProvider `json:"group_providers,omitempty" gorm:"many2many:m2m_group_provider_images;foreignKey:Id;joinForeignKey:ImageID;References:Id;joinReferences:GroupProviderID"`
 }
 
 func (Image) TableName() string {

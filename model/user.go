@@ -36,6 +36,10 @@ type User struct {
 	OTPs            []*OTP        `json:"otp,omitempty" gorm:"foreignKey:UserID"`
 	UserDevice      *UserDevice   `json:"user_device,omitempty" gorm:"foreignKey:UserID"`
 
+	GroupProviders []*GroupProvider `json:"group_providers,omitempty" gorm:"many2many:m2m_group_provider_users;foreignKey:Id;joinForeignKey:UserID;References:Id;joinReferences:GroupProviderID"`
+	AdminGroups    []*GroupProvider `json:"admin_groups,omitempty" gorm:"foreignKey:AdminID"`
+	CreatedGroups  []*GroupProvider `json:"created_groups,omitempty" gorm:"foreignKey:CreatorID"`
+
 	OwnedCertificates   []*Certificate `json:"owned_certificates" gorm:"foreignKey:OwnerID"`
 	CreatedCertificates []*Certificate `json:"created_certificates" gorm:"foreignKey:CreatorID"`
 }
@@ -84,6 +88,14 @@ func (u *User) IsUser() bool {
 func (u *User) IsProvider() bool {
 	_, has := lo.Find(u.Roles, func(role *Role) bool {
 		return role.Code == "PROVIDER"
+	})
+
+	return has
+}
+
+func (u *User) IsGroupProviderAdmin() bool {
+	_, has := lo.Find(u.Roles, func(role *Role) bool {
+		return role.Code == "GROUP_PROVIDER_ADMIN"
 	})
 
 	return has
