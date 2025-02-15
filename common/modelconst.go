@@ -56,6 +56,7 @@ type Requester interface {
 	GetFakeId() string
 	Mask(isAdmin bool)
 	IsAdmin() bool
+	IsGroupProviderAdmin() bool
 	IsUser() bool
 	IsSuperAdmin() bool
 	IsProvider() bool

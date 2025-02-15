@@ -101,6 +101,7 @@ func (d *dbInstances) AutoMigrateMySQL() error {
 		&models.KYCProfile{},
 
 		&models.Location{},
+		&models.GroupProvider{},
 	}
 
 	for _, table := range tables {

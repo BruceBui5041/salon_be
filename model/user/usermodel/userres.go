@@ -26,6 +26,7 @@ type GetUserRoleResponse struct {
 	common.SQLModel `json:",inline"`
 	Name            string `json:"name"`
 	Description     string
+	Code            string `json:"code"`
 }
 
 type GetUserEnrollmentResponse struct {

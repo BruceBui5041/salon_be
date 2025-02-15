@@ -32,9 +32,6 @@ type Service struct {
 	ReviewInfo       ReviewInfos      `json:"review_info" gorm:"column:review_info;type:json"`
 	AverageRating    decimal.Decimal  `json:"avg_rating" gorm:"column:avg_rating;type:decimal(3,1)"`
 	Images           []Image          `json:"images,omitempty" gorm:"foreignKey:ServiceID"`
-
-	GroupProviderID uint32         `json:"-" gorm:"column:group_provider_id;index"`
-	GroupProvider   *GroupProvider `json:"group_provider,omitempty" gorm:"foreignKey:GroupProviderID;references:Id;constraint:OnDelete:SET NULL;"`
 }
 
 func (Service) TableName() string {

@@ -28,4 +28,6 @@ type CreateServiceVersion struct {
 	Duration        uint32                         `json:"duration" form:"duration"`
 	Images          []*multipart.FileHeader        `json:"images" form:"images"`
 	ServiceMenIds   []string                       `json:"service_men_ids,omitempty" form:"service_men_ids"`
+	OwnerID         *string                        `json:"owner_id" form:"owner_id"`
+	GroupProviderID *string                        `json:"group_provider,omitempty" form:"group_provider"`
 }

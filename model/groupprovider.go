@@ -22,7 +22,7 @@ type GroupProvider struct {
 	Admin           *User      `json:"admin,omitempty" gorm:"foreignKey:AdminID;references:Id;constraint:OnDelete:SET NULL;"`
 	CreatorID       uint32     `json:"-" gorm:"column:creator_id;index"`
 	Creator         *User      `json:"creator,omitempty" gorm:"foreignKey:CreatorID;references:Id;constraint:OnDelete:SET NULL;"`
-	Users           []*User    `json:"users,omitempty" gorm:"many2many:m2m_group_provider_users;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:UserID;constraint:OnDelete:CASCADE;"`
+	Providers       []*User    `json:"providers,omitempty" gorm:"many2many:m2m_group_provider_users;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:UserID;constraint:OnDelete:CASCADE;"`
 	Services        []*Service `json:"services,omitempty" gorm:"foreignKey:GroupProviderID"`
 	Images          []*Image   `json:"images,omitempty" gorm:"many2many:m2m_group_provider_images;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:ImageID;constraint:OnDelete:CASCADE;"`
 }

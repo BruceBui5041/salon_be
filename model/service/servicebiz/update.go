@@ -68,8 +68,34 @@ func (biz *updateServiceBiz) UpdateService(ctx context.Context, input *servicemo
 			}
 		}
 
-		if input.ServiceVersion.Duration < uint32(900) {
+		if input.ServiceVersion.Duration < uint32(15) {
 			return common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
+		}
+
+		requester, ok := ctx.Value(common.CurrentUser).(common.Requester)
+		if !ok {
+			return common.ErrInvalidRequest(errors.New("requester not found"))
+		}
+
+		if len(input.ServiceVersion.ServiceMenIds) != 0 &&
+			!requester.IsAdmin() &&
+			!requester.IsGroupProviderAdmin() {
+			return common.ErrInvalidRequest(
+				errors.New("only admin and group provider can update service men"),
+			)
+		}
+
+		if input.ServiceVersion.OwnerID != nil && !requester.IsAdmin() {
+			return common.ErrInvalidRequest(
+				errors.New("only admin can assign owner"),
+			)
+		}
+
+		if len(*input.ServiceVersion.GroupProviderID) != 0 &&
+			!requester.IsAdmin() {
+			return common.ErrInvalidRequest(
+				errors.New("only admin can assign group provider"),
+			)
 		}
 	}
 
