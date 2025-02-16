@@ -68,6 +68,7 @@ func (repo *createCategoryRepo) CreateNewCategory(
 	if err != nil {
 		return nil, common.ErrDB(err)
 	}
+	category.Mask(true)
 
 	if input.Image != nil {
 		pictureFile, err := input.Image.Open()
