@@ -18,10 +18,11 @@ type GroupProvider struct {
 	Name            string     `json:"name" gorm:"column:name;type:varchar(255);not null"`
 	Code            string     `json:"code" gorm:"column:code;type:varchar(50);uniqueIndex;not null"`
 	Description     string     `json:"description" gorm:"column:description;type:text"`
-	AdminID         uint32     `json:"-" gorm:"column:admin_id;index"`
-	Admin           *User      `json:"admin,omitempty" gorm:"foreignKey:AdminID;references:Id;constraint:OnDelete:SET NULL;"`
+	OwnerID         uint32     `json:"-" gorm:"column:owner_id;index"`
+	Owner           *User      `json:"owner,omitempty" gorm:"foreignKey:OwnerID;references:Id;constraint:OnDelete:SET NULL;"`
 	CreatorID       uint32     `json:"-" gorm:"column:creator_id;index"`
 	Creator         *User      `json:"creator,omitempty" gorm:"foreignKey:CreatorID;references:Id;constraint:OnDelete:SET NULL;"`
+	Admins          []*User    `json:"admins,omitempty" gorm:"many2many:m2m_group_provider_admins;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:UserID;constraint:OnDelete:CASCADE;"`
 	Providers       []*User    `json:"providers,omitempty" gorm:"many2many:m2m_group_provider_users;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:UserID;constraint:OnDelete:CASCADE;"`
 	Services        []*Service `json:"services,omitempty" gorm:"foreignKey:GroupProviderID"`
 	Images          []*Image   `json:"images,omitempty" gorm:"many2many:m2m_group_provider_images;foreignKey:Id;joinForeignKey:GroupProviderID;References:Id;joinReferences:ImageID;constraint:OnDelete:CASCADE;"`

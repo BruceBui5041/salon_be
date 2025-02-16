@@ -26,6 +26,8 @@ type Service struct {
 	Versions         []ServiceVersion `json:"versions,omitempty" gorm:"foreignKey:ServiceID"`
 	ServiceVersion   *ServiceVersion  `json:"service_version,omitempty" gorm:"foreignKey:ServiceVersionID"`
 	ServiceVersionID *uint32          `json:"-" gorm:"column:service_version_id"`
+	GroupProviderID  *uint32          `json:"-" gorm:"column:group_provider_id"`
+	GroupProvider    *GroupProvider   `json:"group_provider,omitempty" gorm:"constraint:OnDelete:SET NULL;foreignKey:GroupProviderID"`
 	Comments         []*Comment       `json:"comments,omitempty" gorm:"foreignKey:ServiceID"`
 	Slug             string           `json:"slug" gorm:"column:slug;not null;size:255"`
 	RatingCount      uint32           `json:"rating_count" gorm:"column:rating_count"`
