@@ -55,7 +55,7 @@ func (biz *createServiceBiz) CreateNewService(ctx context.Context, input *servic
 			return common.ErrInvalidRequest(fmt.Errorf("discount price must be less than price. Price %s", price.String()))
 		}
 
-		if input.ServiceVersion.Duration < 900 {
+		if input.ServiceVersion.Duration < 15 {
 			return common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
 		}
 
@@ -78,7 +78,7 @@ func (biz *createServiceBiz) CreateNewService(ctx context.Context, input *servic
 			)
 		}
 
-		if len(*input.ServiceVersion.GroupProviderID) != 0 &&
+		if input.ServiceVersion.GroupProviderID != nil &&
 			!requester.IsAdmin() {
 			return common.ErrInvalidRequest(
 				errors.New("only admin can assign group provider"),

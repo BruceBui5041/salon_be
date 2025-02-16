@@ -118,6 +118,25 @@ func (repo *updateServiceRepo) UpdateService(
 		return nil, common.ErrEntityNotFound(models.ServiceEntityName, nil)
 	}
 
+	if input.OwnerID != nil {
+		ownerUID, err := common.FromBase58(*input.OwnerID)
+		if err != nil {
+			return nil, err
+		}
+
+		ownerId := ownerUID.GetLocalID()
+		if ownerId != existingService.OwnerID {
+			updatedDate := &models.Service{
+				SQLModel: common.SQLModel{Id: serviceID},
+				OwnerID:  ownerId,
+			}
+
+			if err := repo.serviceStore.Update(ctx, serviceID, updatedDate); err != nil {
+				return nil, common.ErrDB(err)
+			}
+		}
+	}
+
 	if input.ServiceVersion != nil {
 		categoryID, err := input.ServiceVersion.GetCateogryLocalId(ctx)
 		if err != nil {
@@ -211,7 +230,7 @@ func (repo *updateServiceRepo) UpdateService(
 			serviceVersion.DiscountedPrice = &discounted
 		}
 
-		if input.ServiceVersion.Duration < 900 {
+		if input.ServiceVersion.Duration < 15 {
 			return nil, common.ErrInvalidRequest(errors.New("duration must be at least 15 minutes"))
 		}
 

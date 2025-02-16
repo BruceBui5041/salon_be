@@ -85,13 +85,13 @@ func (biz *updateServiceBiz) UpdateService(ctx context.Context, input *servicemo
 			)
 		}
 
-		if input.ServiceVersion.OwnerID != nil && !requester.IsAdmin() {
+		if input.OwnerID != nil && !requester.IsAdmin() {
 			return common.ErrInvalidRequest(
 				errors.New("only admin can assign owner"),
 			)
 		}
 
-		if len(*input.ServiceVersion.GroupProviderID) != 0 &&
+		if input.ServiceVersion.GroupProviderID != nil &&
 			!requester.IsAdmin() {
 			return common.ErrInvalidRequest(
 				errors.New("only admin can assign group provider"),
