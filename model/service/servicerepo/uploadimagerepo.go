@@ -28,7 +28,7 @@ type M2MServiceVersionImageStore interface {
 }
 
 type ImageUploader interface {
-	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+	CreateServiceImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
 }
 
 type UploadImageServiceVersionStore interface {
@@ -85,7 +85,7 @@ func (repo *uploadImagesRepo) UploadImages(ctx context.Context, data *servicemod
 	return repo.db.Transaction(func(tx *gorm.DB) error {
 		for _, file := range data.Images {
 			// Create image record
-			img, err := repo.imageUploader.CreateImage(ctx, file, serviceID, data.UploadedBy)
+			img, err := repo.imageUploader.CreateServiceImage(ctx, file, serviceID, data.UploadedBy)
 			if err != nil {
 				logger.AppLogger.Error(ctx, "failed to upload service image", zap.Error(err))
 				return common.ErrDB(err)

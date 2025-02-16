@@ -7,19 +7,23 @@ import (
 	"salon_be/component/ekycclient"
 	models "salon_be/model"
 	"salon_be/model/ekyc/ekycmodel"
+	"salon_be/storagehandler"
 )
 
 type ImageRepo interface {
 	CreateImage(
 		ctx context.Context,
 		file *multipart.FileHeader,
-		serviceID uint32,
+		groupProviderID uint32,
 		userID uint32,
+		s3ObjectKey string,
+		refType string,
 	) (*models.Image, error)
 }
 
 type KYCImageStore interface {
 	CreateKYCImage(ctx context.Context, data *models.KYCImageUpload) error
+	UpdateKYCImage(ctx context.Context, kycImageId uint32, data *models.KYCImageUpload) error
 }
 
 type kycImageUploadRepo struct {
@@ -45,12 +49,6 @@ func (repo *kycImageUploadRepo) UploadKYCImage(
 	userId uint32,
 	input *ekycmodel.UploadRequest,
 ) (*ekycmodel.KYCImageUploadRes, error) {
-	// Use image repo interface to handle image upload
-	image, err := repo.imageRepo.CreateImage(ctx, input.Image, 0, userId)
-	if err != nil {
-		return nil, err
-	}
-
 	// Upload to VNPT eKYC service
 	ekycRes, err := repo.ekycClient.UploadFile(ctx, input.Image)
 	if err != nil {
@@ -71,11 +69,28 @@ func (repo *kycImageUploadRepo) UploadKYCImage(
 		UploadedDate: ekycRes.Object.UploadedDate,
 		StorageType:  ekycRes.Object.StorageType,
 		TokenId:      ekycRes.Object.TokenId,
-		ImageID:      &image.Id,
 		Provider:     "vnpt",
 	}
 
 	if err := repo.store.CreateKYCImage(ctx, kycImage); err != nil {
+		return nil, common.ErrDB(err)
+	}
+
+	tempObj := common.SQLModel{Id: kycImage.Id}
+	tempObj.GenUID(common.DBTypeKYCImage)
+
+	s3ObjectKey := storagehandler.GenerateKYCImageS3Key(tempObj.GetFakeId(), input.Image.Filename)
+
+	image, err := repo.imageRepo.CreateImage(ctx, input.Image, 0, userId, s3ObjectKey, "kyc_image")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := repo.store.UpdateKYCImage(
+		ctx,
+		kycImage.Id,
+		&models.KYCImageUpload{ImageID: &image.Id},
+	); err != nil {
 		return nil, common.ErrDB(err)
 	}
 

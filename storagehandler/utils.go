@@ -77,6 +77,20 @@ func GenerateServiceImageS3Key(serviceId string, filename string) string {
 	)
 }
 
+func GenerateGroupProviderImageS3Key(groupProviderId string, filename string) string {
+	return fmt.Sprintf(
+		"group-provider/%s/image/%s",
+		groupProviderId, utils.RenameFile(filename, fmt.Sprintf("%s_%s", groupProviderId, filename)),
+	)
+}
+
+func GenerateKYCImageS3Key(kycImageId string, filename string) string {
+	return fmt.Sprintf(
+		"kyc/%s/image/%s",
+		kycImageId, utils.RenameFile(filename, fmt.Sprintf("%s_%s", kycImageId, filename)),
+	)
+}
+
 func GenerateCouponImageS3Key(couponId string, filename string) string {
 	return fmt.Sprintf(
 		"coupon/image/%s",

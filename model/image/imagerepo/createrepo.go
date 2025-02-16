@@ -40,6 +40,48 @@ func (repo *createImageRepo) CreateImage(
 	file *multipart.FileHeader,
 	serviceID uint32,
 	userID uint32,
+	s3ObjectKey string,
+	refType string,
+) (*models.Image, error) {
+	fileBytes, err := file.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer fileBytes.Close()
+
+	if err := storagehandler.UploadFileToS3(
+		ctx,
+		repo.s3Client,
+		fileBytes,
+		appconst.AWSPublicBucket,
+		s3ObjectKey,
+	); err != nil {
+		return nil, err
+	}
+
+	img := &models.Image{
+		UserID: userID,
+		Type:   refType,
+		URL:    s3ObjectKey,
+	}
+
+	if err := repo.store.Create(ctx, img); err != nil {
+		return nil, err
+	}
+
+	res, err := repo.store.FindOne(ctx, map[string]interface{}{"id": img.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (repo *createImageRepo) CreateServiceImage(
+	ctx context.Context,
+	file *multipart.FileHeader,
+	serviceID uint32,
+	userID uint32,
 ) (*models.Image, error) {
 	fileBytes, err := file.Open()
 	if err != nil {

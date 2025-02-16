@@ -22,7 +22,7 @@ type ServiceVersionStore interface {
 }
 
 type ImageRepo interface {
-	CreateImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
+	CreateServiceImage(ctx context.Context, file *multipart.FileHeader, serviceID uint32, userID uint32) (*models.Image, error)
 }
 
 type createServiceRepo struct {
@@ -106,7 +106,7 @@ func (repo *createServiceRepo) CreateNewService(
 
 		if len(input.ServiceVersion.Images) > 0 {
 			for _, file := range input.ServiceVersion.Images {
-				img, err := repo.imageRepo.CreateImage(ctx, file, service.Id, input.CreatorID)
+				img, err := repo.imageRepo.CreateServiceImage(ctx, file, service.Id, input.CreatorID)
 				if err != nil {
 					logger.AppLogger.Error(ctx, "faild to upload service image", zap.Error(err))
 					return nil, common.ErrDB(err)

@@ -44,7 +44,8 @@ func (repo *updateImageRepo) UpdateServiceImage(
 	userID uint32,
 ) (*models.Image, error) {
 	createImageRepo := NewCreateImageRepo(repo.store, repo.s3Client)
-	image, err := createImageRepo.CreateImage(ctx, file, serviceID, userID)
+
+	image, err := createImageRepo.CreateServiceImage(ctx, file, serviceID, userID)
 	if err != nil {
 		return nil, err
 	}

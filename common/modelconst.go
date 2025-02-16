@@ -34,6 +34,7 @@ const (
 	DBTypeDistanceTracking   = 25
 	DBTypeCertificate        = 26
 	DBTypeGroupProvider      = 27
+	DBTypeKYCImage           = 28
 )
 
 const (

@@ -43,3 +43,10 @@ func (s *sqlStore) CreateKYCImage(ctx context.Context, data *models.KYCImageUplo
 	}
 	return nil
 }
+
+func (s *sqlStore) UpdateKYCImage(ctx context.Context, kycImageId uint32, data *models.KYCImageUpload) error {
+	if err := s.db.Where("id = ?", kycImageId).Updates(data).Error; err != nil {
+		return err
+	}
+	return nil
+}
