@@ -2,6 +2,8 @@ package models
 
 import (
 	"salon_be/common"
+
+	"gorm.io/gorm"
 )
 
 const KYCImageEntityName = "ImageUpload"
@@ -25,4 +27,13 @@ type KYCImageUpload struct {
 
 func (KYCImageUpload) TableName() string {
 	return "kyc_image"
+}
+
+func (kycImg *KYCImageUpload) Mask(isAdmin bool) {
+	kycImg.GenUID(common.DBTypeKYCImage)
+}
+
+func (kycImg *KYCImageUpload) AfterFind(tx *gorm.DB) (err error) {
+	kycImg.Mask(false)
+	return
 }
