@@ -40,3 +40,17 @@ func (s *sqlStore) FindOne(
 
 	return &result, nil
 }
+
+func (s *sqlStore) Update(ctx context.Context, id uint32, data *models.GroupProvider) error {
+	if err := s.db.Where("id = ?", id).Updates(data).Error; err != nil {
+		return err
+	}
+
+	if len(data.Admins) > 0 {
+		if err := s.db.Model(data).Association("Admins").Replace(data.Admins); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

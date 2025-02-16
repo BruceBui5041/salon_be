@@ -61,7 +61,7 @@ func (biz *createBiz) CreateGroupProvider(ctx context.Context, data *groupprovid
 		OwnerID:     owner.Id,
 		CreatorID:   requester.Id,
 		SQLModel:    common.SQLModel{Status: common.StatusInactive},
-		Admins:      []*models.User{requester},
+		Admins:      []*models.User{owner},
 	}
 
 	if err := biz.repo.Create(ctx, groupProvider); err != nil {
