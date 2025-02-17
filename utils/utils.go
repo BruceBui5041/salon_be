@@ -38,7 +38,7 @@ func WriteServerJWTTokenCookie(ctx *gin.Context, accessToken string) {
 			SameSite: http.SameSiteLaxMode,
 			// SameSite: http.SameSiteStrictMode,
 			Path:    "/",
-			Domain:  origin,
+			Domain:  strings.Replace(origin, "http://", "", -1),
 			Expires: time.Now().Add(7 * 24 * time.Hour),
 		})
 	}
