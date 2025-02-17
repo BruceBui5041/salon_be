@@ -3,6 +3,7 @@ package groupproviderbiz
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/groupprovider/groupprovidermodel"
@@ -11,7 +12,7 @@ import (
 type CreateRepository interface {
 	FindUserByID(ctx context.Context, userID uint32) (*models.User, error)
 	FindGroupProviderByOwner(ctx context.Context, ownerID uint32) (*models.GroupProvider, error)
-	Create(ctx context.Context, data *models.GroupProvider) error
+	Create(ctx context.Context, data *models.GroupProvider, images []*multipart.FileHeader, creatorID uint32) error
 	UpdateServicesGroupProvider(ctx context.Context, ownerID uint32, groupProviderID uint32) error
 }
 
@@ -64,7 +65,7 @@ func (biz *createBiz) CreateGroupProvider(ctx context.Context, data *groupprovid
 		Admins:      []*models.User{owner},
 	}
 
-	if err := biz.repo.Create(ctx, groupProvider); err != nil {
+	if err := biz.repo.Create(ctx, groupProvider, data.Images, requester.Id); err != nil {
 		return common.ErrCannotCreateEntity(models.GroupProviderEntityName, err)
 	}
 
