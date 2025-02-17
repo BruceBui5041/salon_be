@@ -7,6 +7,8 @@ import (
 	"salon_be/common"
 	models "salon_be/model"
 	"salon_be/model/groupprovider/groupprovidermodel"
+
+	"gorm.io/gorm"
 )
 
 type CreateRepository interface {
@@ -47,7 +49,7 @@ func (biz *createBiz) CreateGroupProvider(ctx context.Context, data *groupprovid
 
 	// Check if user already has a group provider
 	existingGroupProvider, err := biz.repo.FindGroupProviderByOwner(ctx, owner.Id)
-	if err != nil && err != common.RecordNotFound {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		return common.ErrDB(err)
 	}
 
